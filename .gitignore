@@ -20,12 +20,7 @@ project/plugins/project/
 # Simple Build Tool
 # http://www.scala-sbt.org/release/docs/Getting-Started/Directories.html#configuring-version-control
 
-target/
-lib_managed/
-src_managed/
-project/boot/
-.history
-.cache
+
 ### Example user template template
 ### Example user template
 
@@ -48,5 +43,6 @@ test-result
 server.pid
 *.eml
 /dist/
-.cache
 
+
+/.sbtserver/
