@@ -46,3 +46,4 @@ server.pid
 
 
 /.sbtserver/
+/project/.sbtserver
