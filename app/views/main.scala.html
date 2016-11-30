@@ -23,15 +23,15 @@ Possible values: "overview", "eateries", "friends", "roulette", "contacts", "abo
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="#">@Messages("overview")</a></li>
-        <li><a href="#about">@Messages("eateries")</a></li>
-        <li><a href="#contact">@Messages("friends")</a></li>
-        <li><a href="#contact">@Messages("randomizer")</a></li>
+        <li class="active"><a href="#overview">@Messages("overview")</a></li>
+        <li><a href="#eateries">@Messages("eateries")</a></li>
+        <li><a href="#friends">@Messages("friends")</a></li>
+        <li><a href="#randomize">@Messages("randomizer")</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="#">@Messages("contact")</a></li>
-        <li><a href="#">@Messages("about")</a></li>
-        <li><a href="#">@Messages("help")</a></li>
+        <li><a href="#contact">@Messages("contact")</a></li>
+        <li><a href="#about">@Messages("about")</a></li>
+        <li><a href="#help">@Messages("help")</a></li>
         <li class="dropdown">
           <a style="padding-top: 15; padding-bottom: 15;" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
             <img style="height: 30;" src="@routes.Assets.versioned("images/" + lang.code + ".svg")">

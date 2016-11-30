@@ -3,8 +3,16 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.HomeController.index
-POST    /                           controllers.HomeController.submitForm()
+GET     /                           controllers.DefaultController.index
+GET     /welcome                    controllers.DefaultController.welcome
+GET     /overview                   controllers.OverviewController.index
+GET     /eateries                   controllers.EateriesController.index
+GET     /friends                    controllers.FriendsController.index
+GET     /randomize                  controllers.RandomizeController.index
+GET     /contact                    controllers.ContactController.index
+GET     /about                      controllers.AboutController.index
+GET     /help                       controllers.HelpController.index
+
 POST    /changeLanguage             controllers.LanguageController.changeLanguage()
 # An example controller showing how to use dependency injection
 GET     /count                      controllers.CountController.count
