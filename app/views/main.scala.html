@@ -1,23 +1,61 @@
-@*
- * This template is called from the `index` template. This template
- * handles the rendering of the page header and body tags. It takes
- * two arguments, a `String` for the title of the page and an `Html`
- * object to insert into the body of the page.
- *@
-@(title: String)(content: Html)
+@import b3.inline.fieldConstructor
 
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        @* Here's where we render the page title `String`. *@
-        <title>@title</title>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
-        <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
-        <script src="@routes.Assets.versioned("javascripts/hello.js")" type="text/javascript"></script>
-    </head>
-    <body>
-        @* And here's where we render the `Html` object containing
-         * the page content. *@
-        @content
-    </body>
-</html>
+@* section represents which button on the nav bar should be highlighted.
+Possible values: "overview", "eateries", "friends", "roulette", "contacts", "about", "help". *@
+
+@(title: String)(section: String)(content: Html)(implicit messages: Messages, lang: Lang)
+
+
+@header(title) {
+<link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/navbar-fixed-top.css")">
+} {
+<!-- Fixed navbar -->
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">@messages("toggle.navigation")</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Pusdieno!</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">@Messages("overview")</a></li>
+        <li><a href="#about">@Messages("eateries")</a></li>
+        <li><a href="#contact">@Messages("friends")</a></li>
+        <li><a href="#contact">@Messages("randomizer")</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#">@Messages("contact")</a></li>
+        <li><a href="#">@Messages("about")</a></li>
+        <li><a href="#">@Messages("help")</a></li>
+        <li class="dropdown">
+          <a style="padding-top: 15; padding-bottom: 15;" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            <img style="height: 30;" src="@routes.Assets.versioned("images/" + lang.code + ".svg")">
+            @Messages("language")<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu" style="background: #eb6864;">
+            @b3.form(routes.LanguageController.changeLanguage()) {
+            @for((code, language) <- Languages.supported - lang.code) {
+            <li>
+              @b3.submit('name -> "languageCode", 'value -> code, 'style -> "padding-top: 6px; padding-right: 20px; padding-left: 20px; border: 0; color:#FFFFFF;"){
+              <img style="height:2em;" src="@routes.Assets.versioned("images/"+code+".svg")" alt="@code"></img>
+              @language
+              }
+            </li>
+            }
+            }
+          </ul>
+        </li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div>
+</nav>
+
+  <div class="container">
+
+    @content
+  </div>
+}

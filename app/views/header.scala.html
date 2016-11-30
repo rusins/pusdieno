@@ -1,0 +1,35 @@
+@*
+* This template is called from the `index` template.This template
+  * handles the rendering of the page header and body tags.It takes
+  * two arguments, a `String` for the title of the page and an `Html`
+  *
+
+object to
+
+insert into the body of the page.*@
+
+@(title: String)(extraHeaderContent: Html)(bodyContent: Html)
+
+<! DOCTYPE html >
+  <html lang="en">
+    <head>
+      @* These 3 following lines MUST come first *@
+      <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+            @* Here's where we render the page title `String`. *@
+            <title>@title</title>
+            <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/bootstrap.min.css")">
+            <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
+            @extraHeaderContent
+              </head>
+              <body>
+                @* And here's where we render the `Html` object containing
+                * the page content. *@
+                @bodyContent
+                <!-- Placed at the end of the document so the pages load faster -->
+                <script src="@routes.Assets.versioned("javascripts/jquery-3.1.1.min.js")"></script>
+                <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+                <script src="@routes.Assets.versioned("javascripts/bootstrap.min.js")"></script>
+              </body>
+            </html>
