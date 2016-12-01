@@ -1,7 +1,14 @@
-<div class="jumbotron">
-    <h1>Jumbotron</h1>
-    <p>This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
-    <p><a class="btn btn-primary btn-lg">Learn more</a></p>
-</div>
+@import b3.vertical.fieldConstructor
 
-By <a href="//commons.wikimedia.org/w/index.php?title=User:Deepak_Vallamsetti&amp;action=edit&amp;redlink=1" class="new" title="User:Deepak Vallamsetti (page does not exist)">Deepak Vallamsetti</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="http://creativecommons.org/licenses/by-sa/4.0" title="Creative Commons Attribution-Share Alike 4.0">CC BY-SA 4.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=52197985">Link</a>
+@()(implicit messages: Messages, lang: Lang)
+
+@main("Pusdieno")("welcome"){
+<div style='padding-top: 100px; padding-bottom: 100px; width:100%; height:100%; background:url("@routes.Assets.versioned("images/cover_lowsize.jpg")"); background-size:cover;'>
+<div class="container">
+<div class="jumbotron" style="color: #FFFFFF; background-color:rgba(0, 0, 0, 0.7);">
+    <h1 style="color:#FFFFFF">Pusdieno!</h1>
+    <p>@Messages("welcome.text") @Messages("welcome.extra")</p>
+    <p><a class="btn btn-success btn-lg" href="https://forms.google.com/kaukas">@Messages("welcome.form")</a></p>
+</div>
+</div>
+}(messages, lang)

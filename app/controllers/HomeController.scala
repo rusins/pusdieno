@@ -25,7 +25,7 @@ class HomeController @Inject()(val messagesApi: MessagesApi) extends Controller 
     * a path of `/`.
     */
   val index = Action { implicit request =>
-    Ok(views.html.formTest(form))
+    Ok(/*views.html.formTest(form)*/"lol")
   }
 
   val form = Form(
@@ -37,7 +37,7 @@ class HomeController @Inject()(val messagesApi: MessagesApi) extends Controller 
 
   val submitForm = Action { implicit request =>
   form.bindFromRequest().fold(
-    erroneousForm => {println("Form had errors – returning user to the form");BadRequest(views.html.formTest(erroneousForm))},
+    erroneousForm => {println("Form had errors – returning user to the form");/*BadRequest(views.html.formTest(erroneousForm))*/Ok("lol")},
     validForm =>  {println("Form submitted successfully");Ok("Awesome!!!! :D ")}
   )}
 }

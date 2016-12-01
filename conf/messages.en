@@ -7,3 +7,6 @@ randomizer=Randomizer
 contact=Contact
 about=About
 help=Help
+welcome.text=A social network for finding where to eat with your friends in Riga center.
+welcome.extra=Although the web-site currently isn't functional, we would love it if you took some time to check out the visual design of the site''s sections and left us some feedback at the form below!
+welcome.form=Feedback form
