@@ -22,4 +22,4 @@ import play.api.http.DefaultHttpFilters
 @Singleton
 class Filters @Inject() (csrfFilter: CSRFFilter) (
   env: Environment,
-  exampleFilter: DefaultLanguageFilter) extends DefaultHttpFilters()
+  exampleFilter: DefaultLanguageFilter) extends DefaultHttpFilters(csrfFilter)

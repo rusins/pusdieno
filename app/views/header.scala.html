@@ -8,7 +8,7 @@ object to
 
 insert into the body of the page.*@
 
-@(title: String)(extraHeaderContent: Html)(bodyContent: Html)
+@(title: String)(bodyContent: Html)
 
 <! DOCTYPE html >
   <html lang="en">
@@ -21,9 +21,8 @@ insert into the body of the page.*@
             <title>@title</title>
             <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/bootstrap.min.css")">
             <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
-            @extraHeaderContent
-              </head>
-              <body>
+      <!-- </head>
+      body -->
                 @* And here's where we render the `Html` object containing
                 * the page content. *@
                 @bodyContent

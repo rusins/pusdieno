@@ -1,13 +1,18 @@
+@* For CSRF field in form*@
+@import helper._
 @import b3.inline.fieldConstructor
 
 @* section represents which button on the nav bar should be highlighted.
 Possible values: "overview", "eateries", "friends", "roulette", "contacts", "about", "help". *@
 
-@(title: String)(section: String)(content: Html)(implicit messages: Messages, lang: Lang)
+@(headers: Html)(title: String)(section: String)(content: Html)(implicit messages: Messages, lang: Lang, request: RequestHeader)
 
 
 @header(title) {
-} {
+<link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/navbar-main.css")">
+@headers
+</head>
+<body style="padding-top:60px">
 <!-- Fixed navbar -->
 <nav class="navbar navbar-inverse navbar-fixed-top" style="margin-bottom:0;">
   <div class="container">
@@ -42,6 +47,7 @@ Possible values: "overview", "eateries", "friends", "roulette", "contacts", "abo
             @Messages("language")<span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu" style="background: #eb6864;">
             @b3.form(routes.LanguageController.changeLanguage()) {
+            @CSRF.formField
             @for((code, language) <- Languages.supported - lang.code) {
             <li>
               @b3.submit('name -> "languageCode", 'value -> code, 'style -> "padding-top: 6px; padding-right: 20px; padding-left: 20px; border: 0; color:#FFFFFF;"){
