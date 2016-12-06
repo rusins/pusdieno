@@ -2,11 +2,11 @@
 @()(implicit messages: Messages, lang: Lang, request: RequestHeader)
 
 @display(user: User) = {
-<tr class="contact" >
+<tr class="hover-me">
     <td><a href="#">@if(user.fav){
     <img src="@routes.Assets.versioned("images/ic_star_black_36px.svg")" width="36px" height="36px"></img>
     } else {
-      <img class="favStar" src="@routes.Assets.versioned("images/ic_star_border_black_36px.svg")" width="36px" height="36px"></img>
+      <img class="show-me" src="@routes.Assets.versioned("images/ic_star_border_black_36px.svg")" width="36px" height="36px"></img></>
     }
     </a>
     <img class="img-circle" src="@routes.Assets.versioned("images/"+user.image.getOrElse("ic_account_circle_black_36px.svg"))" width="50" height="50" @if(!user.hungry) {style="opacity:0.4;"}></img></td>
@@ -19,11 +19,8 @@
 
 @main{
 <style type="text/css">
-    .favStar {
-        opacity: 0.2;
-    }
-    .contact:hover + .favStar {
-        opacity: 1;
+    .hover-me:not(:hover) .show-me {
+        opacity: 0;
     }
 </style>
 }(messages("friends") +" – Pusdieno")("friends"){
