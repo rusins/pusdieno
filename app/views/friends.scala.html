@@ -3,14 +3,23 @@
 
 @display(user: User) = {
 <tr class="hover-me">
-    <td><a href="#">@if(user.fav){
-    <img src="@routes.Assets.versioned("images/ic_star_black_36px.svg")" width="36px" height="36px"></img>
+    <td><button data-trigger="focus" data-toggle="popover" data-placement="top" style="border:none;"
+                data-content="@Messages("friends.favAction")" data-original-title="" title=""> @if(user.fav){
+    <img src="@routes.Assets.versioned("images/ic_star_yellow_36px.svg")" width="36px" height="36px"></img>
     } else {
       <img class="show-me" src="@routes.Assets.versioned("images/ic_star_border_black_36px.svg")" width="36px" height="36px"></img></>
     }
-    </a>
-    <img class="img-circle" src="@routes.Assets.versioned("images/"+user.image.getOrElse("ic_account_circle_black_36px.svg"))" width="50" height="50" @if(!user.hungry) {style="opacity:0.4;"}></img></td>
-    <td><!-- hungru or cafe --></td>
+    </button>
+    <script>
+$(document).ready(function(){
+    $('[data-toggle="popover"]').popover();
+});
+</script>
+    <img class="img-circle" src="@routes.Assets.versioned("images/"+user.image.getOrElse("ic_account_circle_black_36px.svg"))" width="50" height="50" style="@if(user.location.length > 1){opacity:0.4;}"></img></td>
+    <td>
+        <img style="@if(!user.hungry){opacity:0;}" src="@routes.Assets.versioned("images/ic_restaurant_black_36px.svg")" width="36px" height="36px">
+        <img style="@if(!user.cafe){opacity:0;}" src="@routes.Assets.versioned("images/ic_local_cafe_black_36px.svg")" width="36px" height="36px">
+    </td>
     <td>@user.name<br>@user.phone</td>
     <td><hr width="100" align="left"></td>
     <td>@user.schedule.map {time => @Messages("friends.time")<br>@time}</td>
@@ -23,7 +32,7 @@
         opacity: 0;
     }
 </style>
-}(messages("friends") +" – Pusdieno")("friends"){
+}(Messages("friends") +" – Pusdieno")("friends"){
 <div class="content" style="padding-top:10px">
 <ul class="nav nav-tabs">
     <li class="active"><a href="#favorites" data-toggle="tab" aria-expanded="true">@Messages("friends.favorites")</a></li>

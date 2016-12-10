@@ -1,10 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+@()(implicit messages: Messages, lang: Lang, request: RequestHeader)
 
-</body>
-</html>
+@main{
+<style type="text/css">
+    .hover-me:not(:hover) .show-me {
+        opacity: 0;
+    }
+</style>
+<style>
+.panel, .flip {
+    text-align: center;
+    color: white;
+}
+
+.panel {
+    display: none;
+    background-color: transparent;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+</style>
+}(messages("eateries") +" – Pusdieno")("eateries"){
+<script>
+$(document).ready(function(){
+    $(".flip").click(function(){
+        $(".panel").slideToggle("fast");
+    });
+});
+</script>
+<div class="container">
+<div class="jumbotron" style='background:url("@routes.Assets.versioned("images/dalai.jpg")"); background-color:rgba(0, 0, 0, 0.9);'>
+    <div class="flip">Ēstuve</div>
+    <div class="panel">
+        <div class="btn-group btn-group-justified">
+        <a href="#" class="btn btn-success">Left</a>
+        <a href="#" class="btn btn-warning">Middle</a>
+        <a href="#" class="btn btn-info">Right</a>
+    </div>
+    </div>
+</div>
+
+    <div class="jumbotron" style='background:url("@routes.Assets.versioned("images/dalai.jpg")"); background-color:rgba(0, 0, 0, 0.9);'>
+        <div class="flip">Ēstuve</div>
+        <div class="panel">
+            <div class="btn-group btn-group-justified">
+                <a href="#" class="btn btn-success">Left</a>
+                <a href="#" class="btn btn-warning">Middle</a>
+                <a href="#" class="btn btn-info">Right</a>
+            </div>
+        </div>
+    </div>
+</div>
+}(messages, lang, request)

@@ -17,6 +17,7 @@ friends.custom=Custom group
 friends.other=Other groups
 friends.all=All friends
 friends.time=Usually eats at
+friends.favAction=In the future this is how you'll be able to add or remove a friend from your favorites.
 randomize.text=When you really can't negotiate where to go, use this to fairly pick an arbitrary place!
 contact.text=Pagaidām nekas cits neatliek, kā vien sūtīt ēpastu uz pusdieno@krikis.org
 about.text=Pusdieno is a web page for helping you decide where to eat with your friends. It was created by Raitis Kriķis, and you can view the source code on {0}. This project is the internal assessment for my IB diploma.

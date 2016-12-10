@@ -27,7 +27,7 @@ Possible values: "overview", "eateries", "friends", "roulette", "contacts", "abo
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li @if(section == "overview") {class="active"}><a href="#overview">@Messages("overview")</a></li>
+        <li @if(section == "overview") {class="active"}><a href="/overview">@Messages("overview")</a></li>
         <li @if(section == "eateries") {class="active"}><a href="/eateries">@Messages("eateries")</a></li>
         <li @if(section == "friends") {class="active"}><a href="/friends">@Messages("friends")</a></li>
         <li @if(section == "randomize") {class="active"}><a href="/randomize">@Messages("randomizer")</a></li>
