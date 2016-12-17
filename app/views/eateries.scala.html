@@ -23,22 +23,14 @@
 </style>
 }(messages("eateries") +" – Pusdieno")("eateries"){
 <script src="http://malsup.github.com/jquery.form.js"></script>
-<script>
-        // wait for the DOM to be loaded
-        $(document).ready(function() {
-            // bind 'myForm' and provide a simple callback function
-            $('.form-inline').ajaxForm(function(response) {
-                alert("Thank you for your comment! " + response);
-            });
-        });
-    </script>
+<script src="@routes.Assets.versioned("javascripts/eateries.js")"></script>
 <div class="container" style="padding-top: 10px;">
 <div class="jumbotron" style='background:url("http://www.colorado.edu/umc/sites/default/files/page/SUBWAY-SHOP.jpg"); background-color:rgba(0, 0, 0, 0.9);'>
-    <h2 style="color: white">Ēstuve</h2>
-    <div align="right" style="max-width:50%;">
+    <h2 style="color: white; float:left;">Ēstuve</h2>
+    <div style="float:right; max-width:50%;">
     @b3.formCSRF(routes.EateriesController.eat()) {
     @b3.hidden("eatery", "subway")
-    <div class="btn-group btn-group-justified">
+    <div id="subway" class="btn-group btn-group-justified">
         @b3.submit('_class -> "btn-group", 'name -> "status", 'value -> "yes",
         'class -> ("btn btn-success yes " + {if (false) "active" else "inactive"})){@Messages("eateries.going")!}
         @b3.submit('_class -> "btn-group", 'name -> "status", 'value -> "maybe",

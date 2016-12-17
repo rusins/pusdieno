@@ -10,6 +10,7 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 GET     /welcome                    controllers.DefaultController.welcome
 GET     /overview                   controllers.OverviewController.index
 GET     /eateries                   controllers.EateriesController.index
+POST    /eateries/eat               controllers.EateriesController.eat
 GET     /friends                    controllers.FriendsController.index
 GET     /randomize                  controllers.RandomizeController.index
 GET     /contact                    controllers.ContactController.index
