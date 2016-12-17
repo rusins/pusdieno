@@ -20,7 +20,7 @@ class LanguageController @Inject()(val messagesApi: MessagesApi) extends Control
       languageCode => Redirect(referer).withLang(languageCode match {
         case "lv" => Lang("lv")
         case "en" => Lang("en")
-        case "ru" => Lang("ru")
+        case "rus" => Lang("rus")
         case _ => Lang("lv")
       })
     )
