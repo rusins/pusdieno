@@ -47,3 +47,5 @@ server.pid
 
 /.sbtserver/
 /project/.sbtserver
+/project/play-fork-run.sbt
+/RUNNING_PID
