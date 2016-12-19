@@ -10,11 +10,6 @@
       <img class="show-me" src="@routes.Assets.versioned("images/ic_star_border_black_36px.svg")" width="36px" height="36px"></img></>
     }
     </button>
-    <script>
-$(document).ready(function(){
-    $('[data-toggle="popover"]').popover();
-});
-</script>
     <img class="img-circle" src="@routes.Assets.versioned("images/"+user.image.getOrElse("ic_account_circle_black_36px.svg"))" width="50" height="50" style="@if(user.location.length > 1){opacity:0.4;}"></img></td>
     <td>
         <img style="@if(!user.hungry){opacity:0;}" src="@routes.Assets.versioned("images/ic_restaurant_black_36px.svg")" width="36px" height="36px">
@@ -32,6 +27,7 @@ $(document).ready(function(){
         opacity: 0;
     }
 </style>
+<script src="@routes.Assets.versioned("javascripts/popup.js")"></script>
 }(Messages("friends") +" – Pusdieno")("friends"){
 <div class="content" style="padding-top:10px">
 <ul class="nav nav-tabs">
