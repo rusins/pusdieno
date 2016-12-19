@@ -1,7 +1,7 @@
 // wait for the DOM to be loaded
         $(document).ready(function() {
         // bind 'myForm' and provide a simple callback function
-            $('.form-inline').ajaxForm(function(response) {
+            $('.eatery-form').ajaxForm(function(response) {
                 var split = response.split(" ");
                 var eatery = split[0];
                 function updateButtons(on, off1, off2) {

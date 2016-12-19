@@ -23,12 +23,12 @@
 </style>
 }(messages("eateries") +" – Pusdieno")("eateries"){
 <script src="http://malsup.github.com/jquery.form.js"></script>
-<script src="@routes.Assets.versioned("javascripts/eateries.js")"></script> // TODO: This breaked language switching!
+<script src="@routes.Assets.versioned("javascripts/eateries.js")"></script>
 <div class="container" style="padding-top: 10px;">
 <div class="jumbotron" style='background:url("http://www.colorado.edu/umc/sites/default/files/page/SUBWAY-SHOP.jpg"); background-color:rgba(0, 0, 0, 0.9);'>
     <h2 style="color: white; float:left;">Ēstuve</h2>
     <div style="float:right; max-width:50%;">
-    @b3.formCSRF(routes.EateriesController.eat()) {
+    @b3.formCSRF(routes.EateriesController.eat(), 'class -> "eatery-form") {
     @b3.hidden("eatery", "subway")
     <div id="subway" class="btn-group btn-group-justified">
         @b3.submit('_class -> "btn-group", 'name -> "status", 'value -> "yes",
