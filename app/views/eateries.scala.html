@@ -1,6 +1,33 @@
+@import Eatery._
+@import WeekPlan._
 @import b3.inline.fieldConstructor
 
 @()(implicit messages: Messages, lang: Lang, request: RequestHeader)
+
+@display(eatery: Eatery) = {
+<div class="jumbotron eatery" style='background:url("@routes.Assets.versioned(eatery.backgroundImage)"); background-size: cover; background-position: center; background-color:rgba(0, 0, 0, 0.9);'>
+    <div class="row">
+    <h2 style="color: white; float:left;">@Messages("eateries." + eatery.id)</h2>
+    <div style="float:right;">People going there</div>
+    </div>
+    <div class="row">
+    <p style="float:left;">@eatery.openTimes.display(1, 2)</p>
+    <div style="float:right; max-width:50%;">
+        @b3.formCSRF(routes.EateriesController.eat(), 'class -> "eatery-form") {
+        @b3.hidden("eatery", eatery.id)
+        <div id=@eatery.id class="btn-group btn-group-justified">
+            @b3.submit('_class -> "btn-group", 'name -> "status", 'value -> "yes",
+            'class -> ("btn btn-success yes " + {if (false) "active" else "inactive"})){@Messages("eateries.going")!}
+            @b3.submit('_class -> "btn-group", 'name -> "status", 'value -> "maybe",
+            'class -> ("btn btn-info maybe " + {if (false) "active" else "inactive"})){@Messages("eateries.undecided")...}
+            @b3.submit('_class -> "btn-group no", 'name -> "status", 'value -> "no",
+            'class -> ("btn btn-primary no "  + {if (true) "active" else "inactive"})){@Messages("eateries.notGoing").}
+        </div>
+        }
+    </div>
+    </div>
+</div>
+}
 
 @main{
 <style>
@@ -20,27 +47,25 @@
     background-color: #E53C37;
     border-color: #E53C37;
 }
+.jumbotron.eatery {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.jumbotron.eatery p {
+    font-size: 15px;
+    color: grey;
+}
+.jumbotron.eatery b {
+    color: white;
+}
 </style>
 }(messages("eateries") +" – Pusdieno")("eateries"){
 <script src="http://malsup.github.com/jquery.form.js"></script>
 <script src="@routes.Assets.versioned("javascripts/eateries.js")"></script>
 <div class="container" style="padding-top: 10px;">
-<div class="jumbotron" style='background:url("http://www.colorado.edu/umc/sites/default/files/page/SUBWAY-SHOP.jpg"); background-color:rgba(0, 0, 0, 0.9);'>
-    <h2 style="color: white; float:left;">Ēstuve</h2>
-    <div style="float:right; max-width:50%;">
-    @b3.formCSRF(routes.EateriesController.eat(), 'class -> "eatery-form") {
-    @b3.hidden("eatery", "subway")
-    <div id="subway" class="btn-group btn-group-justified">
-        @b3.submit('_class -> "btn-group", 'name -> "status", 'value -> "yes",
-        'class -> ("btn btn-success yes " + {if (false) "active" else "inactive"})){@Messages("eateries.going")!}
-        @b3.submit('_class -> "btn-group", 'name -> "status", 'value -> "maybe",
-        'class -> ("btn btn-info maybe " + {if (true) "active" else "inactive"})){@Messages("eateries.undecided")...}
-        @b3.submit('_class -> "btn-group no", 'name -> "status", 'value -> "no",
-        'class -> ("btn btn-primary no "  + {if (false) "active" else "inactive"})){@Messages("eateries.notGoing").}
-    </div>
-    }
-    </div>
-</div>
+@for(eatery <- Eatery.eateries.sortBy(e => Messages("eateries." + e.id))) {
+@display(eatery)
+}
 
 </div>
 }(messages, lang, request)
