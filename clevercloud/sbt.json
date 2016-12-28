@@ -1,5 +1,0 @@
-{
-  "deploy": {
-    "goal": "-Dhttp.port=disabled -Dhttps.port=8080"
-  }
-}
