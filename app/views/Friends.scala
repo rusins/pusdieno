@@ -19,6 +19,8 @@ object Friends {
       "</style>\n" +
       "<script src=\"/assets/javascripts/popup.js\"></script>"))(messages("friends") + " – Pusdieno")("friends")(Html({
 
+      /*
+
       def display(user: User) = {
         tr(`class` := "hover-me")(
           td(
@@ -97,5 +99,8 @@ object Friends {
           )
         )
       )
+
+      */
+
     }.toString))(messages, lang, request)
 }

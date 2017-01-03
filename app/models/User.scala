@@ -41,7 +41,7 @@ class UserTable(tag: Tag) extends Table[User](tag, "USER") {
   }
 
   private val toTuple: User => Option[UserTupleType] =
-    user => Some((user.id, user.name, user.phoneNumber, WeekPlan.unapply(week)))
+    user => Some((user.id, user.name, user.phoneNumber, WeekPlan.unapply(user.eatsAt).get))
 
   def * = userShapedValue <> (toModel, toTuple)
 

@@ -39,7 +39,7 @@ class OpenTimes(data: Array[(Int, Int)]) {
 
   lazy val uniqueCount = data.map((x: (Int, Int)) => (x, 1)).toMap.size
 
-  def open(today: Int) = WeekPlan.open(data(today))
+  def open(today: Int) = OpenTimes.open(data(today))
 
   private def short(x: Int)(implicit messages: Messages): String = x match {
     case 0 => messages("date.short.monday")
@@ -53,7 +53,7 @@ class OpenTimes(data: Array[(Int, Int)]) {
 
   def displayInRows(today: Int, maxLines: Int = 2)(implicit messages: Messages) = Html(
     if (uniqueCount > maxLines)
-      messages("date.today") + "<br>" + WeekPlan.printTime(data(today))
+      messages("date.today") + "<br>" + OpenTimes.printTime(data(today))
     else {
       val used = Array.fill(7)(false)
       val res = StringBuilder.newBuilder
@@ -71,7 +71,7 @@ class OpenTimes(data: Array[(Int, Int)]) {
               res.append(short(j))
           res.append("<br>")
           res.append("<span style=\"color: white;\">")
-          res.append(WeekPlan.printTime(data(i)))
+          res.append(OpenTimes.printTime(data(i)))
           res.append("</span>")
           res.append("<br>")
         }
