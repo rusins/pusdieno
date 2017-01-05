@@ -1,18 +1,18 @@
 # User schema
 
 # --- !Ups
-CREATE TABLE user (
-  id UUID NOT NULL PRIMARY KEY,
-  name TEXT NOT NULL,
-  mobile INT,
-  monday TIME,
-  tuesday TIME,
-  wednesday TIME,
-  thursday TIME,
-  friday TIME,
-  saturday TIME,
-  sunday TIME
+CREATE TABLE "USER" (
+  ID UUID NOT NULL PRIMARY KEY,
+  NAME TEXT NOT NULL,
+  MOBILE INT,
+  MONDAY TIME,
+  TUESDAY TIME,
+  WEDNESDAY TIME,
+  THURSDAY TIME,
+  FRIDAY TIME,
+  SATURDAY TIME,
+  SUNDAY TIME
 )
 
 # --- !Downs
-DROP TABLE user
+DROP TABLE "USER"

@@ -2,36 +2,37 @@ package models
 
 import java.sql.Time
 import java.util.UUID
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.db.slick.DatabaseConfigProvider
+import slick.backend.DatabasePublisher
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 
-case class User(id: UUID = UUID.randomUUID(), name: String, phoneNumber: Option[Int], eatsAt: WeekPlan)
+case class User(id: UUID = UUID.randomUUID(), name: String, phoneNumber: Option[Int] = None, eatsAt: WeekPlan)
 
-class UserTable(tag: Tag) extends Table[User](tag, "user") {
-  def id: Rep[UUID] = column[UUID]("id", O.PrimaryKey)
+class UserTable(tag: Tag) extends Table[User](tag, "USER") {
+  def id: Rep[UUID] = column[UUID]("ID", O.PrimaryKey)
 
-  def name: Rep[String] = column[String]("name")
+  def name: Rep[String] = column[String]("NAME")
 
-  def phoneNumber: Rep[Option[Int]] = column[Option[Int]]("mobile")
+  def phoneNumber: Rep[Option[Int]] = column[Option[Int]]("MOBILE")
 
-  def monday: Rep[Option[Time]] = column[Option[Time]]("monday")
+  def monday: Rep[Option[Time]] = column[Option[Time]]("MONDAY")
 
-  def tuesday: Rep[Option[Time]] = column[Option[Time]]("tuesday")
+  def tuesday: Rep[Option[Time]] = column[Option[Time]]("TUESDAY")
 
-  def wednesday: Rep[Option[Time]] = column[Option[Time]]("wednesday")
+  def wednesday: Rep[Option[Time]] = column[Option[Time]]("WEDNESDAY")
 
-  def thursday: Rep[Option[Time]] = column[Option[Time]]("thursday")
+  def thursday: Rep[Option[Time]] = column[Option[Time]]("THURSDAY")
 
-  def friday: Rep[Option[Time]] = column[Option[Time]]("friday")
+  def friday: Rep[Option[Time]] = column[Option[Time]]("FRIDAY")
 
-  def saturday: Rep[Option[Time]] = column[Option[Time]]("saturday")
+  def saturday: Rep[Option[Time]] = column[Option[Time]]("SATURDAY")
 
-  def sunday: Rep[Option[Time]] = column[Option[Time]]("sunday")
+  def sunday: Rep[Option[Time]] = column[Option[Time]]("SUNDAY")
 
   private type WeekTupleType =
     (Option[Time], Option[Time], Option[Time], Option[Time], Option[Time], Option[Time], Option[Time])
@@ -42,7 +43,7 @@ class UserTable(tag: Tag) extends Table[User](tag, "user") {
   )).shaped[UserTupleType]
 
   private val toModel: UserTupleType => User = {
-    case (id, name, phoneNumber, eatsAt) => User(id, name, phoneNumber, WeekPlan.tupled(eatsAt))
+    case (id, name, phoneNumber, eatsAt) => User(id, name, phoneNumber, (WeekPlan.apply _).tupled(eatsAt))
   }
 
   private val toTuple: User => Option[UserTupleType] =
@@ -52,24 +53,34 @@ class UserTable(tag: Tag) extends Table[User](tag, "user") {
 
 }
 
-object Users {
-
-  @Inject() private val dbConfigProvider: DatabaseConfigProvider = null
+@Singleton
+class Users @Inject()(dbConfigProvider: DatabaseConfigProvider) {
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
   private val users = TableQuery[UserTable]
 
-  def add(user: User): Future[String] = {
+  private val setupAction = DBIO.seq(
+    //users.schema.create,
+    users += User(name = "Jānis Pupiņš", eatsAt = WeekPlan.empty)
+  )
+
+   val setupFuture: Future[Unit] = db.run(setupAction)
+
+  def add(user: User): Future[String] = setupFuture.flatMap(_ =>
     db.run(users += user).map(res => "User successfully added!").recover {
       case ex: Exception => ex.getCause.getMessage
-    }
-  }
+    })
 
-  def del(id: UUID): Future[Int] = db.run(users.filter(_.id === id).delete)
+  def del(id: UUID): Future[Int] = setupFuture.flatMap(_ =>
+    db.run(users.filter(_.id === id).delete)
+  )
 
-  def get(id: UUID): Future[Option[User]] = db.run(users.filter(_.id === id).result.headOption)
+  def get(id: UUID): Future[Option[User]] = setupFuture.flatMap(_ =>
+    db.run(users.filter(_.id === id).result.headOption)
+  )
 
-  def listAll(): Future[Seq[User]] = db.run(users.result)
-
+  def getAll(): Future[Seq[User]] = setupFuture.flatMap(_ =>
+    db.run(users.result)
+  )
 }
