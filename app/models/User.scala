@@ -13,26 +13,26 @@ import slick.driver.PostgresDriver.api._
 
 case class User(id: UUID = UUID.randomUUID(), name: String, phoneNumber: Option[Int] = None, eatsAt: WeekPlan)
 
-class UserTable(tag: Tag) extends Table[User](tag, "USER") {
-  def id: Rep[UUID] = column[UUID]("ID", O.PrimaryKey)
+class UserTable(tag: Tag) extends Table[User](tag, "users") {
+  def id: Rep[UUID] = column[UUID]("id", O.PrimaryKey)
 
-  def name: Rep[String] = column[String]("NAME")
+  def name: Rep[String] = column[String]("name")
 
-  def phoneNumber: Rep[Option[Int]] = column[Option[Int]]("MOBILE")
+  def phoneNumber: Rep[Option[Int]] = column[Option[Int]]("mobile")
 
-  def monday: Rep[Option[Time]] = column[Option[Time]]("MONDAY")
+  def monday: Rep[Option[Time]] = column[Option[Time]]("monday")
 
-  def tuesday: Rep[Option[Time]] = column[Option[Time]]("TUESDAY")
+  def tuesday: Rep[Option[Time]] = column[Option[Time]]("tuesday")
 
-  def wednesday: Rep[Option[Time]] = column[Option[Time]]("WEDNESDAY")
+  def wednesday: Rep[Option[Time]] = column[Option[Time]]("wednesday")
 
-  def thursday: Rep[Option[Time]] = column[Option[Time]]("THURSDAY")
+  def thursday: Rep[Option[Time]] = column[Option[Time]]("thursday")
 
-  def friday: Rep[Option[Time]] = column[Option[Time]]("FRIDAY")
+  def friday: Rep[Option[Time]] = column[Option[Time]]("friday")
 
-  def saturday: Rep[Option[Time]] = column[Option[Time]]("SATURDAY")
+  def saturday: Rep[Option[Time]] = column[Option[Time]]("saturday")
 
-  def sunday: Rep[Option[Time]] = column[Option[Time]]("SUNDAY")
+  def sunday: Rep[Option[Time]] = column[Option[Time]]("sunday")
 
   private type WeekTupleType =
     (Option[Time], Option[Time], Option[Time], Option[Time], Option[Time], Option[Time], Option[Time])
@@ -65,7 +65,7 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider) {
     users += User(name = "Jānis Pupiņš", eatsAt = WeekPlan.empty)
   )
 
-   val setupFuture: Future[Unit] = db.run(setupAction)
+  val setupFuture: Future[Unit] = db.run(setupAction)
 
   def add(user: User): Future[String] = setupFuture.flatMap(_ =>
     db.run(users += user).map(res => "User successfully added!").recover {

@@ -65,7 +65,7 @@
 <script src="http://malsup.github.com/jquery.form.js"></script>
 <script src="@routes.Assets.versioned("javascripts/eateries.js")"></script>
 <div class="container" style="padding-top: 10px;">
-@for(eatery <- Eatery.eateries.sortBy(e => Messages("eateries." + e.id))) {
+@for(eatery <- EateryList.eateries.sortBy(e => Messages("eateries." + e.id))) {
 @display(eatery)
 }
 
