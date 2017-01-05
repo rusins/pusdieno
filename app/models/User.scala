@@ -76,11 +76,11 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider) {
     db.run(users.filter(_.id === id).delete)
   )
 
-  def get(id: UUID): Future[Option[User]] = setupFuture.flatMap(_ =>
+  def retrieve(id: UUID): Future[Option[User]] = setupFuture.flatMap(_ =>
     db.run(users.filter(_.id === id).result.headOption)
   )
 
-  def getAll(): Future[Seq[User]] = setupFuture.flatMap(_ =>
+  def retrieveAll(): Future[Seq[User]] = setupFuture.flatMap(_ =>
     db.run(users.result)
   )
 }

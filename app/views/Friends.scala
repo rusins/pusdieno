@@ -84,7 +84,7 @@ class Friends @Inject()(users: Users) {
         div(`class` := "tab-pane active in", id := "favorites")(
           table(`class` := "table table-striped table-hover") {
             //Await.result(Users().add(User(name="Raitis", phoneNumber = None, eatsAt = WeekPlan(None, None, None, None, None, None, None))), Duration.Inf)
-            Await.result(users.getAll(), 5 seconds).map(display)
+            Await.result(users.retrieveAll(), 5 seconds).map(display)
           }
         ))
       /*,
