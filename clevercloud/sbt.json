@@ -1,5 +1,5 @@
 {
   "deploy": {
-    "goal": "-Dconfig.resource=production.conf -Dplay.evolutions.db.default.autoApply=true"
+    "goal": "-Dconfig.resource=production.conf -Dplay.evolutions.db.default.autoApply=true -DapplyEvolutions.default=true"
   }
 }
