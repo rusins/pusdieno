@@ -3,10 +3,10 @@ package views
 import javax.inject.Inject
 
 import controllers.routes
-import models.{User, Users, WeekPlan}
+import models.WeekPlan
 
 import scalatags.Text.all._
-import models.User._
+import models.db.{User, Users}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n._
 import play.api.mvc.RequestHeader
@@ -51,7 +51,7 @@ class Friends @Inject()(users: Users) {
             }, src := "/assets/images/ic_local_cafe_black_36px.svg",
               width := 36, height := 36)
           ),
-          td(user.name, br, user.phoneNumber),
+          td(user.name, br, user.mobile),
           td(hr(width := 100, float.left))
         )
       }

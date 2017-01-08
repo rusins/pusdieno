@@ -25,7 +25,6 @@ class UserTable(tag: Tag) extends Table[User](tag, "users") {
 
   def email: Rep[Option[String]] = column[Option[String]]("email")
 
-
   implicit object WeekPlanShape extends CaseClassShape(LiftedWeekPlan.tupled, (WeekPlan.apply _).tupled)
 
   implicit object UserShape extends CaseClassShape(LiftedUser.tupled, User.tupled)

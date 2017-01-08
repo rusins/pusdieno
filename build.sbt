@@ -6,6 +6,11 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.11.7"
 
+scalacOptions ++= Seq(
+  "-feature",
+  "-language:implicitConversions",
+  "-language:postfixOps")
+
 libraryDependencies ++= Seq(
   filters,
   cache,
