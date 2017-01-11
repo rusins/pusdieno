@@ -18,7 +18,7 @@ case class Contact(id: UUID = UUID.randomUUID(), ownerID: UUID, contactID: Optio
 
 class ContactTable(tag: Tag) extends Table[Contact](tag, "contacts") {
 
-  def id: Rep[UUID] = column[UUID]("uuid", O.PrimaryKey)
+  def id: Rep[UUID] = column[UUID]("id", O.PrimaryKey)
 
   def ownerID: Rep[UUID] = column[UUID]("owner_id")
 
@@ -27,6 +27,7 @@ class ContactTable(tag: Tag) extends Table[Contact](tag, "contacts") {
   def contactPhone: Rep[Option[Int]] = column[Option[Int]]("contact_phone")
 
   def contactEmail: Rep[Option[String]] = column[Option[String]]("contact_email")
+
 
   def * : ProvenShape[Contact] = (id, ownerID, contactID, contactPhone, contactEmail) <> (Contact.tupled, Contact.unapply)
 

@@ -8,7 +8,7 @@ import models.WeekPlan
 import scalatags.Text.all._
 import models.db.{User, Users}
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.i18n._
+import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
 import play.twirl.api.Html
 import views.html.main
@@ -16,14 +16,16 @@ import views.html.main
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 
-class Friends @Inject()(users: Users) {
+class FriendsView @Inject()(users: Users) {
+
+  // TODO: Seperate tabs into individual web pages in order to support more users with faster load times
 
   def index()(implicit messages: Messages, lang: Lang, request: RequestHeader, ec: ExecutionContext): Future[_root_.play.twirl.api.Html] = Future(
     main(Html("<style type=\"text/css\">\n" +
       ".hover-me:not(:hover) .show-me\n" +
       "{opacity: 0;}\n" +
       "</style>\n" +
-      "<script src=\"/assets/javascripts/popup.js\"></script>"))(messages("friends") + " – Pusdieno")("friends")(Html({
+      "<script src=\"/assets/javascripts/popup.js\"></script>"))(messages("friends"))("friends")(Html({
 
       def display(user: User) = {
         tr(`class` := "hover-me")(

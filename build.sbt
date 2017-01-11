@@ -20,7 +20,9 @@ libraryDependencies ++= Seq(
   "com.lihaoyi" %% "scalatags" % "0.6.1",
   "org.postgresql" % "postgresql" % "9.4-1206-jdbc42",
   "com.typesafe.play" %% "play-slick" % "2.0.0",
-  "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0"
+  "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0",
+  "com.github.japgolly.scalacss" %% "core" % "0.5.1",
+  "com.github.japgolly.scalacss" %% "ext-scalatags" % "0.5.1"
 )
 
 

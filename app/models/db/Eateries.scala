@@ -2,10 +2,15 @@ package models.db
 
 import java.sql.Time
 import java.util.UUID
+import javax.inject.{Inject, Singleton}
 
 import models.OpenTimes
+import play.api.db.slick.DatabaseConfigProvider
+import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 import slick.lifted.ShapedValue
+
+import scala.concurrent.Future
 
 case class Eatery(id: UUID = UUID.randomUUID, chain: String, streetAddress: String, openTimes: Option[OpenTimes])
 
@@ -91,3 +96,19 @@ class EateryTable(tag: Tag) extends Table[Eatery](tag, "eateries") {
   def * = eateryShapedValue <> (toModel, toTuple)
 }
 
+@Singleton
+class Eateries @Inject()(dbConfigprovider: DatabaseConfigProvider) {
+
+  private val eateries = TableQuery[EateryTable]
+
+  private val db = dbConfigprovider.get[JdbcProfile].db
+
+  val _ = db run DBIO.seq(
+    eateries.delete,
+    eateries += Eatery(chain = "subway", streetAddress = "Raiņa Bulvāris 7", openTimes = None),
+    eateries += Eatery(chain = "pancakes", streetAddress = "9/11 memorial site, NY, USA", openTimes = None),
+    eateries += Eatery(chain = "kfc", streetAddress = "Ķekava", openTimes = None)
+  )
+
+  def retrieveAll(): Future[Seq[Eatery]] = db.run(eateries.result)
+}
