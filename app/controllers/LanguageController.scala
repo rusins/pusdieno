@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
+import models.Languages
 import play.api.data._
 import play.api.data.Forms._
 import play.api.mvc.{Action, Controller}
@@ -17,12 +18,11 @@ class LanguageController @Inject()(val messagesApi: MessagesApi) extends Control
     // Populate the form with the data from the request
     form.bindFromRequest.fold(
       erroneousForm => Redirect(referer),
-      languageCode => Redirect(referer).withLang(languageCode match {
-        case "lv" => Lang("lv")
-        case "en" => Lang("en")
-        case "rus" => Lang("rus")
-        case _ => Lang("lv")
-      })
+      languageCode => Redirect(referer).withLang(if (Languages.supported.contains(languageCode))
+        Lang(languageCode)
+      else
+        Lang("lv")
+      )
     )
   }
 

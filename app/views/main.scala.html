@@ -41,14 +41,14 @@ Possible values: "overview", "eateries", "friends", "roulette", "contacts", "abo
         <li @if(section == "help") {class="active"}><a href="/help">@Messages("help")</a></li>
         <li class="dropdown">
           <a style="padding-top: 15; padding-bottom: 15;" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-            <img style="height: 30;" src="@routes.Assets.versioned("images/" + lang.code + ".svg")">
+            <img style="width: 30;" src="@routes.Assets.versioned("images/flags/" + lang.code + ".png")">
             @Messages("language")<span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu" style="background: #eb6864;">
             @b3.formCSRF(routes.LanguageController.changeLanguage()) {
             @for((code, language) <- Languages.supported - lang.code) {
             <li>
               @b3.submit('name -> "languageCode", 'value -> code, 'style -> "padding-top: 6px; padding-right: 20px; padding-left: 20px; border: 0; color:#FFFFFF;"){
-              <img style="height:2em;" src="@routes.Assets.versioned("images/"+code+".svg")" alt="@code"></img>
+              <img style="width:2em;" src="@routes.Assets.versioned("images/flags/"+code+".png")" alt="@code"></img>
               @language
               }
             </li>

@@ -106,8 +106,10 @@ class Eateries @Inject()(dbConfigprovider: DatabaseConfigProvider) {
   val _ = db run DBIO.seq(
     eateries.delete,
     eateries += Eatery(chain = "subway", streetAddress = "Raiņa Bulvāris 7", openTimes = None),
-    eateries += Eatery(chain = "pancakes", streetAddress = "9/11 memorial site, NY, USA", openTimes = None),
-    eateries += Eatery(chain = "kfc", streetAddress = "Ķekava", openTimes = None)
+    eateries += Eatery(chain = "pankukas", streetAddress = "9/11 memorial site, NY, USA", openTimes = None),
+    eateries += Eatery(chain = "kfc", streetAddress = "Ķekava", openTimes = None),
+    eateries += Eatery(chain = "pelmeni", streetAddress = "Vecrīgā, Kalķu 7, Rīga", openTimes = None),
+    eateries += Eatery(chain = "pelmeni", streetAddress = "Stacijas laukums 2, ORIGO CENTRS, (starp tuneļiem A un B)", openTimes = None)
   )
 
   def retrieveAll(): Future[Seq[Eatery]] = db.run(eateries.result)

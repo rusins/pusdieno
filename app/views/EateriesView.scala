@@ -1,22 +1,27 @@
 package views
 
+import scalacss.ScalatagsCss._
 import javax.inject.Inject
 
 import controllers.routes
 
 import scalatags.Text.all._
 import models.db.{Eateries, Eatery}
+import org.w3c.dom.html.HTMLStyleElement
 import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
 import play.twirl.api.{Html, HtmlFormat}
 import views.html.main
 import views.html.b3.inline.fieldConstructor
 import views.html.b3._
+import views.styles.eateries.EateriesStyleSheet
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scalatags.Text
 import scalatags.Text.TypedTag
 import scala.concurrent.duration._
+import scalacss.ScalatagsCss._
+import scalacss.DevDefaults._
 
 class EateriesView @Inject()(eateries: Eateries) {
 
@@ -63,18 +68,33 @@ class EateriesView @Inject()(eateries: Eateries) {
     )
 
   def eaterySelection()(implicit messages: Messages, lang: Lang,
-                      request: RequestHeader, ec: ExecutionContext): Future[Html] = Future(
+                        request: RequestHeader, ec: ExecutionContext): Future[Html] = Future(
+    main(
+      Html(
+        SeqFrag(Seq(
+          script(src := "http://malsup.github.com/jquery.form.js"),
+          script(src := "/assets/javascripts/eateries.js"),
+          EateriesStyleSheet.render[scalatags.Text.TypedTag[String]]
+        )).render
+      )
+    )(messages(messages("eateries")))("eateries")(Html(
+      div(`class` := "container", style := "padding-top: 10px;")(
+        Await.result(eateries.retrieveAll(), 5 seconds).map(display)
+      ).render
+    ))(messages, lang, request)
+
+  )
+
+  def cafeSelection()(implicit messages: Messages, lang: Lang, request: RequestHeader, ec: ExecutionContext) = Future(
     main(
       Html(
         script(src := "http://malsup.github.com/jquery.form.js") +
           script(src := "/assets/javascripts/eateries.js")
-
       )
-    )(messages("eateries"))("eateries")(Html(
-      div(`class` := "container", style := "padding-top: 10px;")(
-        Await.result(eateries.retrieveAll(), 5 seconds).map(display)
-      )
-    ))(messages, lang, request))
+    )(messages("cafes"))("eateries")(Html(
+      ""
+    ))
+  )
 
   def test()(implicit ec: ExecutionContext) = Future(
     Html(div(raw("<h1>Ayy, lmao!</h1>")))
