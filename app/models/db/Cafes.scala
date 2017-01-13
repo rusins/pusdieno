@@ -8,16 +8,17 @@ import models.OpenTimes
 import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
+import slick.lifted.ForeignKeyQuery
 
 import scala.concurrent.Future
 
-case class Cafe(id: UUID = UUID.randomUUID(), chain: String, streetAddress: String, openTimes: Option[OpenTimes])
+case class Cafe(id: UUID = UUID.randomUUID(), chainID: String, streetAddress: String, openTimes: Option[OpenTimes])
 
 class CafeTable(tag: Tag) extends Table[Cafe](tag, "cafes") {
   
   def id: Rep[UUID] = column[UUID]("id", O.PrimaryKey)
 
-  def chain: Rep[String] = column[String]("chain")
+  def chainID: Rep[String] = column[String]("chain")
 
   def streetAddress: Rep[String] = column[String]("address")
 
@@ -53,7 +54,7 @@ class CafeTable(tag: Tag) extends Table[Cafe](tag, "cafes") {
     Option[Time], Option[Time], Option[Time], Option[Time], Option[Time], Option[Time], Option[Time], Option[Time])
   private type CafeTupleType = (UUID, String, String, OpenTimesTupleType)
 
-  private val cafeShapedValue = (id, chain, streetAddress, (
+  private val cafeShapedValue = (id, chainID, streetAddress, (
     mondayOpen, mondayClose,
     tuesdayOpen, tuesdayClose,
     wednesdayOpen, wednesdayClose,
@@ -65,8 +66,8 @@ class CafeTable(tag: Tag) extends Table[Cafe](tag, "cafes") {
   ).shaped[CafeTupleType]
 
   private def toModel: CafeTupleType => Cafe = {
-    case (id, chain, address, (a, b, c, d, e, f, g, h, i, j, k, l, m, n)) =>
-      Cafe(id, chain, address, for {
+    case (id, chainID, address, (a, b, c, d, e, f, g, h, i, j, k, l, m, n)) =>
+      Cafe(id, chainID, address, for {
         mo <- a
         mc <- b
         tuo <- c
@@ -85,7 +86,7 @@ class CafeTable(tag: Tag) extends Table[Cafe](tag, "cafes") {
   }
 
   private def toTuple: Cafe => Option[CafeTupleType] =
-    cafe => Some(cafe.id, cafe.chain, cafe.streetAddress, cafe.openTimes match {
+    cafe => Some(cafe.id, cafe.chainID, cafe.streetAddress, cafe.openTimes match {
       case Some(OpenTimes((a, b), (c, d), (e, f), (g, h), (i, j), (k, l), (m, n))) =>
         (Some(a), Some(b), Some(c), Some(d), Some(e), Some(f), Some(g), Some(h), Some(i), Some(j), Some(k), Some(l), Some(m), Some(n))
       case None => (None, None, None, None, None, None, None, None, None, None, None, None, None, None)
@@ -93,6 +94,13 @@ class CafeTable(tag: Tag) extends Table[Cafe](tag, "cafes") {
     )
 
   def * = cafeShapedValue <> (toModel, toTuple)
+
+  def chain: ForeignKeyQuery[ChainTable, Chain] =
+    foreignKey("id", chainID, TableQuery[ChainTable])(
+      (chainT: ChainTable) => chainT.id,
+      // We want to delete an eatery once the whole chain has been deleted
+      onDelete = ForeignKeyAction.Cascade
+    )
 }
 
 @Singleton

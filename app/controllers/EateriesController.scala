@@ -16,9 +16,14 @@ case class EateryForm(eatery: String, status: String)
 
 class EateriesController @Inject()(val messagesApi: MessagesApi, eateries: EateriesView) extends Controller with I18nSupport {
 
-  def index: Action[AnyContent] = Action.async {
+  def eaterySelection: Action[AnyContent] = Action.async {
     implicit request =>
-    eateries.eaterySelection().map(Ok(_))
+      eateries.eaterySelection().map(Ok(_))
+  }
+
+  def cafeSelection: Action[AnyContent] = Action.async {
+    implicit reqest =>
+      eateries.cafeSelection().map(Ok(_))
   }
 
   def eat() = Action { implicit request =>

@@ -34,7 +34,7 @@ class ContactTable(tag: Tag) extends Table[Contact](tag, "contacts") {
   def belongsTo: ForeignKeyQuery[UserTable, User] =
     foreignKey("id", ownerID, TableQuery[UserTable])(
       (userT: UserTable) => userT.id,
-      // We want to delete a user's contacts once the user had been deleted
+      // We want to delete a user's .contacts once the user had been deleted
       onDelete = ForeignKeyAction.Cascade
     )
 

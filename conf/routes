@@ -6,16 +6,18 @@
 GET     /                           controllers.DefaultController.index
 
 # Temporary links to images online
-GET     /assets/images/eateries/kfc.jpg             controllers.Default.redirect(to="http://www.vieglicelot.lv/uimg/91954897224710.jpg")
-GET     /assets/images/eateries/pankukas.jpg        controllers.Default.redirect(to="https://irs0.4sqi.net/img/general/width960/SRPXNNFX5V3HWSN15EMHWVOQT5JEJ2FXRCND43NRGA5RTNEW.jpg")
-GET     /assets/images/eateries/pelmeni.jpg        controllers.Default.redirect(to="http://www.vieglicelot.lv/uimg/8689276696447.jpg")
+GET     /assets/images/eateries/kfc.jpg             controllers.Default.redirect(to="https://www.kfc.com/assets/products/G15022_KFC_07-OR-plate-8-piece-Enviro_0208-c85bfde6b7d5e6d01ca46f407002b95e51b46c958722521b8c81a08ebccc818a.jpg")
+GET     /assets/images/eateries/pankukas.jpg        controllers.Default.redirect(to="http://irs2.4sqi.net/img/general/1024/b8RBeL_Up48uP_oFcAVo9ouwSrBGwDWnJV2GSjBOWSM.jpg")
+GET     /assets/images/eateries/pelmeni.jpg        controllers.Default.redirect(to="http://2.bp.blogspot.com/-eugp-fFDiH8/UOELgO557oI/AAAAAAAAES4/5MSTzx-jv_w/s1600/Russian+Siberian+Pelmeni+(15).jpg")
+GET     /assets/images/eateries/subway.jpg        controllers.Default.redirect(to="http://ww2.hdnux.com/photos/35/21/43/7674049/3/rawImage.jpg")
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
 GET     /welcome                    controllers.DefaultController.welcome
 GET     /overview                   controllers.OverviewController.index
-GET     /eateries                   controllers.EateriesController.index
+GET     /eateries                   controllers.EateriesController.eaterySelection
+GET     /cafes                      controllers.EateriesController.cafeSelection
 POST    /eateries/eat               controllers.EateriesController.eat
 GET     /friends                    controllers.FriendsController.index
 GET     /randomize                  controllers.RandomizeController.index

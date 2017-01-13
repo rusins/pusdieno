@@ -8,17 +8,17 @@ import models.OpenTimes
 import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
-import slick.lifted.ShapedValue
+import slick.lifted.{ForeignKeyQuery, ShapedValue}
 
 import scala.concurrent.Future
 
-case class Eatery(id: UUID = UUID.randomUUID, chain: String, streetAddress: String, openTimes: Option[OpenTimes])
+case class Eatery(id: UUID = UUID.randomUUID, chainID: String, streetAddress: String, openTimes: Option[OpenTimes])
 
 class EateryTable(tag: Tag) extends Table[Eatery](tag, "eateries") {
 
   def id: Rep[UUID] = column[UUID]("id", O.PrimaryKey)
 
-  def chain: Rep[String] = column[String]("chain")
+  def chainID: Rep[String] = column[String]("chain")
 
   def streetAddress: Rep[String] = column[String]("address")
 
@@ -54,7 +54,7 @@ class EateryTable(tag: Tag) extends Table[Eatery](tag, "eateries") {
     Option[Time], Option[Time], Option[Time], Option[Time], Option[Time], Option[Time], Option[Time], Option[Time])
   private type EateryTupleType = (UUID, String, String, OpenTimesTupleType)
 
-  private val eateryShapedValue = (id, chain, streetAddress, (
+  private val eateryShapedValue = (id, chainID, streetAddress, (
     mondayOpen, mondayClose,
     tuesdayOpen, tuesdayClose,
     wednesdayOpen, wednesdayClose,
@@ -66,8 +66,8 @@ class EateryTable(tag: Tag) extends Table[Eatery](tag, "eateries") {
   ).shaped[EateryTupleType]
 
   private def toModel: EateryTupleType => Eatery = {
-    case (id, chain, address, (a, b, c, d, e, f, g, h, i, j, k, l, m, n)) =>
-      Eatery(id, chain, address, for {
+    case (id, chainID, address, (a, b, c, d, e, f, g, h, i, j, k, l, m, n)) =>
+      Eatery(id, chainID, address, for {
         mo <- a
         mc <- b
         tuo <- c
@@ -86,7 +86,7 @@ class EateryTable(tag: Tag) extends Table[Eatery](tag, "eateries") {
   }
 
   private def toTuple: Eatery => Option[EateryTupleType] =
-    eatery => Some(eatery.id, eatery.chain, eatery.streetAddress, eatery.openTimes match {
+    eatery => Some(eatery.id, eatery.chainID, eatery.streetAddress, eatery.openTimes match {
       case Some(OpenTimes((a, b), (c, d), (e, f), (g, h), (i, j), (k, l), (m, n))) =>
         (Some(a), Some(b), Some(c), Some(d), Some(e), Some(f), Some(g), Some(h), Some(i), Some(j), Some(k), Some(l), Some(m), Some(n))
       case None => (None, None, None, None, None, None, None, None, None, None, None, None, None, None)
@@ -94,22 +94,35 @@ class EateryTable(tag: Tag) extends Table[Eatery](tag, "eateries") {
     )
 
   def * = eateryShapedValue <> (toModel, toTuple)
+
+  def chain: ForeignKeyQuery[ChainTable, Chain] =
+    foreignKey("id", chainID, TableQuery[ChainTable])(
+      (chainT: ChainTable) => chainT.id,
+      // We want to delete an eatery once the whole chain has been deleted
+      onDelete = ForeignKeyAction.Cascade
+    )
 }
 
 @Singleton
 class Eateries @Inject()(dbConfigprovider: DatabaseConfigProvider) {
 
   private val eateries = TableQuery[EateryTable]
+  private val chains = TableQuery[ChainTable]
 
   private val db = dbConfigprovider.get[JdbcProfile].db
 
   val _ = db run DBIO.seq(
     eateries.delete,
-    eateries += Eatery(chain = "subway", streetAddress = "Raiņa Bulvāris 7", openTimes = None),
-    eateries += Eatery(chain = "pankukas", streetAddress = "9/11 memorial site, NY, USA", openTimes = None),
-    eateries += Eatery(chain = "kfc", streetAddress = "Ķekava", openTimes = None),
-    eateries += Eatery(chain = "pelmeni", streetAddress = "Vecrīgā, Kalķu 7, Rīga", openTimes = None),
-    eateries += Eatery(chain = "pelmeni", streetAddress = "Stacijas laukums 2, ORIGO CENTRS, (starp tuneļiem A un B)", openTimes = None)
+    chains.delete,
+    chains += Chain(id = "subway"),
+    chains += Chain(id = "pankukas"),
+    chains += Chain(id = "kfc"),
+    chains += Chain(id = "pelmeni"),
+    eateries += Eatery(chainID = "subway", streetAddress = "Raiņa Bulvāris 7", openTimes = None),
+    eateries += Eatery(chainID = "pankukas", streetAddress = "9/11 memorial site, NY, USA", openTimes = None),
+    eateries += Eatery(chainID = "kfc", streetAddress = "Ķekava", openTimes = None),
+    eateries += Eatery(chainID = "pelmeni", streetAddress = "Vecrīgā, Kalķu 7, Rīga", openTimes = None),
+    eateries += Eatery(chainID = "pelmeni", streetAddress = "Stacijas laukums 2, ORIGO CENTRS, (starp tuneļiem A un B)", openTimes = None)
   )
 
   def retrieveAll(): Future[Seq[Eatery]] = db.run(eateries.result)
