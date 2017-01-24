@@ -10,6 +10,8 @@ GET     /assets/images/eateries/kfc.jpg             controllers.Default.redirect
 GET     /assets/images/eateries/pankukas.jpg        controllers.Default.redirect(to="http://irs2.4sqi.net/img/general/1024/b8RBeL_Up48uP_oFcAVo9ouwSrBGwDWnJV2GSjBOWSM.jpg")
 GET     /assets/images/eateries/pelmeni.jpg        controllers.Default.redirect(to="http://2.bp.blogspot.com/-eugp-fFDiH8/UOELgO557oI/AAAAAAAAES4/5MSTzx-jv_w/s1600/Russian+Siberian+Pelmeni+(15).jpg")
 GET     /assets/images/eateries/subway.jpg        controllers.Default.redirect(to="http://ww2.hdnux.com/photos/35/21/43/7674049/3/rawImage.jpg")
+GET     /assets/images/eateries/mcdonalds.jpg        controllers.Default.redirect(to="http://static2.businessinsider.com/image/5720c91b52bcd029008bf3a2-1190-625/mcdonalds-is-making-a-major-change-to-its-chicken-mcnuggets.jpg")
+GET     /assets/images/eateries/himalaji.jpg        controllers.Default.redirect(to="https://static1.squarespace.com/static/570011e4859fd052a93dea78/5736fb8ad210b8ad8488b6cb/5736fb8f4d088e9a0cc0dcdf/1463221139542/REKHima5.jpg")
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

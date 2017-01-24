@@ -1,20 +1,25 @@
 package views
 
+import java.util.UUID
+
 import scalacss.ScalatagsCss._
 import javax.inject.Inject
 
 import controllers.routes
 
 import scalatags.Text.all._
-import models.db.{Eateries, Eatery}
+import models.db._
 import org.w3c.dom.html.HTMLStyleElement
+import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
 import play.twirl.api.{Html, HtmlFormat}
+import slick.driver.JdbcProfile
+import slick.driver.PostgresDriver.api._
 import views.html.main
 import views.html.b3.inline.fieldConstructor
 import views.html.b3._
-import views.styles.eateries.EateriesStyleSheet
+import views.styles.EateriesStyleSheet
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scalatags.Text
@@ -23,7 +28,11 @@ import scala.concurrent.duration._
 import scalacss.ScalatagsCss._
 import scalacss.DevDefaults._
 
-class EateriesView @Inject()(eateries: Eateries) {
+class EateriesView @Inject()(dbConfigProvider: DatabaseConfigProvider, eateries: Eateries, cafes: Cafes, contacts: Contacts) {
+
+  private val db = dbConfigProvider.get[JdbcProfile].db
+
+  private val choicesT = TableQuery[EateryChoiceTable]
 
   implicit def StringToHtml(s: String): Html = Html(s)
 
@@ -33,27 +42,32 @@ class EateriesView @Inject()(eateries: Eateries) {
 
   implicit def TypeTagToString(t: TypedTag[String]): String = t.render
 
-  def display(eatery: Eatery)(implicit messages: Messages, request: RequestHeader): TypedTag[String] =
+  // TODO: click on eatery to show information
+
+  def displayEatery(chain: (String, Seq[Eatery]), friends: Seq[User])(implicit messages: Messages, request: RequestHeader): TypedTag[String] = {
+    val (chainID, eateries) = chain
     div(`class` := "jumbotron eatery", style :=
-      s"background-image: linear-gradient(to right, #333333, transparent, transparent), url(/assets/images/eateries/${eatery.chainID}.jpg);" +
-      //"background-image: url(https://mdn.mozillademos.org/files/11305/firefox.png), linear-gradient(to right, rgba(30, 75, 115, 1), rgba(255, 255, 255, 0));" +
-      "box-shadow: 0 0 10px gray; background-size: cover; background-position: center;")(
-      div(`class` := "row", style := "padding-top: 10.5px;")(
-        div(`class` := "col-md-6")(
-          div(
-            h2(`class` := "col-xs-12 col-sm-6 col-md-12 col-lg-6", style := "margin-top: 0px; color: white;" +
-              "text-shadow: 0 0 5px black; float:left;")(
-              messages("eateries." + eatery.chainID)
-            ),
-            div(`class` := "col-xs-12 col-sm-6 col-md-12 col-lg-6")(
-              "People going there"
+      s"background-image: linear-gradient(to right, #333333, transparent, transparent), url(/assets/images/eateries/$chainID.jpg);" +
+        "box-shadow: 0 0 10px gray; background-size: cover; background-position: center;")(
+      div(`class` := "row")(
+        div(`class` := "col-sm-12 col-md-6 vcenter row")(
+          h2(`class` := "name col-xs-12 col-sm-6 col-md-12 col-lg-6", style := "margin-top: 0px; color: white;" +
+            "text-shadow: 0 0 5px black; float:left;")(
+            messages("eateries." + chainID)
+          ),
+          div(`class` := "col-xs-12 col-sm-6 col-md-12 col-lg-6")(
+            friends.map(user =>
+              img(`class` := "img-circle", src := "/assets/images/" + user.id, width := 50, height := 50,
+                onerror := "javascript:this.src='assets/images/icons/ic_account_circle_black_36px.svg'",
+              data.toggle := "tooltip", data.placement := "top", title := user.name,
+                style := "margin-left: 2px; margin-right: 2px;, margin-bottom: 2px; margin-top: 2px;")
             )
           )
         ),
-        div(`class` := "col-md-6")(raw(
-          formCSRF(routes.EateriesController.eat(), 'class -> "eatery-form")(
-            views.html.b3.hidden("eatery", eatery.chainID) + Html(
-              div(id := eatery.chainID, `class` := "btn-group btn-group-justified")(raw(
+        div(`class` := "col-sm-12 col-md-6 vcenter")(raw(
+          formCSRF(routes.EateriesController.eat(), 'class -> "eatery-form", 'style -> "margin-bottom: 0px;")(
+            views.html.b3.hidden("eatery", chainID) + Html(
+              div(id := chainID, `class` := "btn-group btn-group-justified")(raw(
                 submit('_class -> "btn-group", 'name -> "status", 'value -> "yes", 'class -> "btn btn-success yes inactive")(
                   messages("eateries.going")
                 ) +
@@ -69,51 +83,80 @@ class EateriesView @Inject()(eateries: Eateries) {
         ))
       )
     )
+  }
 
-  def eaterySelection()(implicit messages: Messages, lang: Lang,
-                        request: RequestHeader, ec: ExecutionContext): Future[Html] = Future(
+  def displayCafe(chain: (String, Seq[Cafe])): TypedTag[String] = {
+    div()
+  }
+
+  def index(section: String, user: User)(implicit messages: Messages, lang: Lang,
+                                         request: RequestHeader, ec: ExecutionContext): Future[Html] = Future(
     main(
       Html(
         SeqFrag(Seq(
-          script(src := "http://malsup.github.com/jquery.form.js"),
+          //script(src := "http://malsup.github.com/jquery.form.js"),
+          script(src := "/assets/javascripts/jquery.form.js"),
           script(src := "/assets/javascripts/eateries.js"),
+          script(src := "/assets/javascripts/list.min.js"),
+          script(src := "/assets/javascripts/list.fuzzysearch.min.js"),
+          script(src := "/assets/javascripts/popup.js"),
           EateriesStyleSheet.render[scalatags.Text.TypedTag[String]]
         )).render
       )
-    )(messages(messages("eateries")))("eateries")(Html(
+    )(messages(section))("eateries")(Html(
       div(`class` := "container", style := "padding-top: 10px;")(
-        div(`class` := "row")(
-          ul(`class` := "nav nav-pills")(
-            li(`class` := "active col-xs-6")(
-              messages("eateries")
-            ),
-            li(`class` := "col-xs-6")(
-              a(href := "/cafes")
+        div(id := "eatery-list")(
+          div(`class` := "panel panel-default panel-body", style := "padding-top: 0px;")(
+            ol(`class` := "nav nav-pills" /*,style := "display: table; margin-left: auto; margin-right: auto;"*/)(
+              li(style := "margin-top: 15px;")(`class` := {
+                if (section == "eateries") "active" else ""
+              })(
+                a(href := "/eateries")(messages("eateries"))
+              ),
+              li(style := "margin-top: 15px;")(`class` := {
+                if (section == "cafes") "active" else ""
+              })(
+                a(href := "/cafes")(
+                  messages("cafes")
+                )
+              ),
+              li(style := "margin-top: 15px; float: right;")(
+                input(`class` := "fuzzy-search form-control", `type` := "text", placeholder := messages("search"))
+              )
             )
+
+          ),
+          ol(`class` := "list", style := "list-style-type: none; padding-left: 0px;")(
+            if (section == "eateries") {
+              //db.run(TableQuery[EateryChoiceTable] += Choice(user = user.id, eatery = UUID.fromString("00000000-0000-0000-0000-000000000000")))
+              val friendChoices = Await.result(db.run(
+                (for {
+                  f <- contacts.friendsOfUserAction(user.id)
+                  c <- choicesT.filter(_.user === f.id)
+                  u <- c.belongsTo
+                  e <- c.pointsTo
+                } yield (e.chainID, u)).result), 5 seconds).groupBy(_._1).mapValues(_.map(_._2))
+
+              Await.result(eateries.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
+                sortBy(chain => messages("eateries." + chain._1)).map(chain =>
+                displayEatery(chain, friendChoices.getOrElse(chain._1, Seq())))
+            }
+            else
+              Await.result(cafes.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
+                sortBy(chain => messages("cafes." + chain._1)).map(displayCafe)
           )
         ),
-        Await.result(eateries.retrieveAll(), 5 seconds).map(display)
+        script(raw(
+          """
+            |var options = {
+            |  valueNames: [ 'name', 'address' ],
+            |  plugins: [ ListFuzzySearch() ]
+            |};
+            |
+            |var eateryList = new List('eatery-list', options);
+          """.stripMargin))
       ).render
     ))(messages, lang, request)
 
-  )
-
-  def cafeSelection()(implicit messages: Messages, lang: Lang, request: RequestHeader, ec: ExecutionContext) = Future(
-    main(
-      Html(
-        SeqFrag(Seq(
-          script(src := "http://malsup.github.com/jquery.form.js"),
-          script(src := "/assets/javascripts/eateries.js"),
-          EateriesStyleSheet.render[scalatags.Text.TypedTag[String]]
-        )).render
-      )
-    )(messages("cafes"))("eateries")(Html(
-      ""
-    ))
-
-  )
-
-  def test()(implicit ec: ExecutionContext) = Future(
-    Html(div(raw("<h1>Ayy, lmao!</h1>")))
   )
 }

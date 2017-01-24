@@ -1,4 +1,4 @@
-package views.styles.eateries
+package views.styles
 
 import scalacss.Defaults._
 
@@ -65,5 +65,11 @@ object EateriesStyleSheet extends StyleSheet.Standalone {
     &("b") -
       color(white)
 
+  )
+
+  ".vcenter" - (
+    display.inlineBlock,
+    verticalAlign.middle,
+    float.none
   )
 }

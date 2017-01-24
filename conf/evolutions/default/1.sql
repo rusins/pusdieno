@@ -1,4 +1,4 @@
-# User schema
+-- User schema
 
 # --- !Ups
 CREATE TABLE users (

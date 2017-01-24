@@ -1,4 +1,4 @@
-# User, Contact, Eatery schema
+-- User, Contact, Eatery schema
 
 # --- !Ups
 ALTER TABLE users ADD COLUMN email TEXT;

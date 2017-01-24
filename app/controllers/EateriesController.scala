@@ -1,8 +1,11 @@
 package controllers
 
+import java.util.UUID
 import javax.inject.Inject
 
 import com.sun.imageio.plugins.common.I18N
+import models.WeekPlan
+import models.db.User
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, Lang, MessagesApi}
@@ -16,14 +19,16 @@ case class EateryForm(eatery: String, status: String)
 
 class EateriesController @Inject()(val messagesApi: MessagesApi, eateries: EateriesView) extends Controller with I18nSupport {
 
+  val user = User(id = UUID.fromString("00000000-0000-0000-0000-000000000000"), name = "Public", eatsAt = WeekPlan.empty)
+
   def eaterySelection: Action[AnyContent] = Action.async {
     implicit request =>
-      eateries.eaterySelection().map(Ok(_))
+      eateries.index("eateries", user).map(Ok(_))
   }
 
   def cafeSelection: Action[AnyContent] = Action.async {
-    implicit reqest =>
-      eateries.cafeSelection().map(Ok(_))
+    implicit request =>
+      eateries.index("cafes", user).map(Ok(_))
   }
 
   def eat() = Action { implicit request =>

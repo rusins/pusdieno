@@ -6,110 +6,126 @@ import controllers.routes
 import models.WeekPlan
 
 import scalatags.Text.all._
-import models.db.{User, Users}
+import models.db._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
 import play.twirl.api.Html
+import slick.driver.JdbcProfile
+import slick.lifted.TableQuery
+import slick.driver.PostgresDriver.api._
 import views.html.main
+import views.styles.FriendsStyleSheet
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
+import scalacss.ScalatagsCss._
+import scalacss.DevDefaults._
+import scalatags.Text.TypedTag
 
-class FriendsView @Inject()(users: Users) {
+class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfigProvider) {
 
-  // TODO: Seperate tabs into individual web pages in order to support more users with faster load times
+  // TODO: Separate tabs into individual web pages in order to support more users with faster load times
 
-  def index()(implicit messages: Messages, lang: Lang, request: RequestHeader, ec: ExecutionContext): Future[_root_.play.twirl.api.Html] = Future(
-    main(Html("<style type=\"text/css\">\n" +
-      ".hover-me:not(:hover) .show-me\n" +
-      "{opacity: 0;}\n" +
-      "</style>\n" +
-      "<script src=\"/assets/javascripts/popup.js\"></script>"))(messages("friends"))("friends")(Html({
+  private val db = dbConfigProvider.get[JdbcProfile].db
 
-      def display(user: User) = {
+  private val eateryChoices = TableQuery[EateryChoiceTable]
+
+  private val cafeChoices = TableQuery[CafeChoiceTable]
+
+  def index(user: User)(implicit messages: Messages, lang: Lang, request: RequestHeader, ec: ExecutionContext): Future[_root_.play.twirl.api.Html] = Future(
+    main(Html(SeqFrag(Seq(
+      script(src := "/assets/javascripts/popup.js"),
+      FriendsStyleSheet.render[scalatags.Text.TypedTag[String]]
+    )).render
+    ))(messages("friends"))("friends")(Html({
+
+      def display(friend: User, eat: Boolean, coffee: Boolean): TypedTag[String] = {
         tr(`class` := "hover-me")(
           td(
             button(data.trigger := "focus", data.toggle := "popover", data.placement := "top", style := "border:none;",
               data.content := messages("friends.favAction"))(
               if (true)
-                img(src := "/assets/images/ic_star_yellow_36px.svg", width := 36, height := 36)
+                img(src := "/assets/images/icons/ic_star_yellow_36px.svg", width := 36, height := 36)
               else
-                img(`class` := "show-me", src := "/assets/images/ic_star_border_black_36px.svg", width := 36, height := 36)
+                img(`class` := "show-me", src := "/assets/images/icons/ic_star_border_black_36px.svg", width := 36, height := 36)
             ),
             img(`class` := "img-circle",
-              src := "/assets/images/" + user.id,
-              width := 50, height := 50, style := {
+              src := "/assets/images/" + friend.id, width := 50, height := 50, style := {
                 if (false) "opacity:0.4;" else ""
-              })
+              }, onerror := "javascript:this.src='assets/images/icons/ic_account_circle_black_36px.svg'")
           ),
           td(
             img(style := {
-              if (false) "opacity:0;" else ""
-            }, src := "/assets/images/ic_restaurant_black_36px.svg",
+              if (!eat) "opacity:0;" else ""
+            }, src := "/assets/images/icons/ic_restaurant_black_36px.svg",
               width := 36, height := 36),
             img(style := {
-              if (false) "opacity:0;" else ""
-            }, src := "/assets/images/ic_local_cafe_black_36px.svg",
+              if (!coffee) "opacity:0;" else ""
+            }, src := "/assets/images/icons/ic_local_cafe_black_36px.svg",
               width := 36, height := 36)
           ),
-          td(user.name, br, user.mobile),
+          td(friend.name, br, friend.mobile),
           td(hr(width := 100, float.left))
         )
       }
 
-      /*
-            div(`class` := "content", paddingTop := 10)(
-              ul(`class` := "nav nav-tabs")(
-                li(`class` := "active")(a(href := "#favorites", data.toggle := "tab", aria.expanded := "true")(messages("friends.favorite"))),
-                li(a(href := "#hungry", data.toggle := "tab", aria.expanded := "false")(messages("friends.hungry"))),
-                li(a(href := "#cafe", data.toggle := "tab", aria.expanded := "false")(messages("friends.cafe"))),
-                li(`class` := "disabled")(a(href := "#", data.toggle := "tab", aria.expanded := "false")(messages("friends.custom") + "#1")),
-                li(`class` := "disabled")(a(href := "#", data.toggle := "tab", aria.expanded := "false")(messages("friends.custom") + "#2")),
-                li(`class` := "disabled")(a(href := "#", data.toggle := "tab", aria.expanded := "false")(messages("friends.custom") + "#3")),
-                li(`class` := "dropdown")(
-                  a(`class` := "dropdown-toggle", data.toggle := "dropdown", href := "#", aria.expanded := "false")(
-                    messages("friends.other"),
-                    span(`class` := "caret")
-                  ),
-                  ul(`class` := "dropdown-menu")(
-                    li(`class` := "disabled")(a(href := "#", data.toggle := "tab")(messages("friends.custom") + "#4")),
-                    li(`class` := "disabled")(a(href := "#", data.toggle := "tab")(messages("friends.custom") + "#5")),
-                    li(`class` := "disabled")(a(href := "#", data.toggle := "tab")(messages("friends.custom") + "#6")),
-                    li(`class` := "divider"),
-                    li(`class` := "disabled")(a(href := "#all", data.toggle := "tab")(messages("friends.all")))
-                  )
-                )
-              ),
-              */
-      div(id := "myTabContent", `class` := "tab-content")(
-        div(`class` := "tab-pane active in", id := "favorites")(
-          table(`class` := "table table-striped table-hover") {
-            //Await.result(Users().add(User(name="Raitis", phoneNumber = None, eatsAt = WeekPlan(None, None, None, None, None, None, None))), Duration.Inf)
-            Await.result(users.retrieveAll(), 5 seconds).map(display)
-          }
-        ))
-      /*,
-                div(`class` := "tab-pane", id := "hungry")(
-                  table(`class` := "table table-striped table-hover")(
-                    users.filter(_.hungry).map(display)
-                  )
-                ),
-                div(`class` := "tab-pane", id := "cafe")(
-                  table(`class` := "table table-striped table-hover")(
-                    users.filter(_.cafe).map(display)
-                  )
 
-                ),
-                div(`class` := "tab-pane", id := "all")(
-                  table(`class` := "table table-striped table-hover")(
-                    users.map(display)
-                  )
-                )
+      div(`class` := "content", paddingTop := 10)(
+        ul(`class` := "nav nav-tabs")(
+          li(`class` := "active")(a(href := "#favorites", data.toggle := "tab", aria.expanded := "true")(messages("friends.favorite"))),
+          li(a(href := "#hungry", data.toggle := "tab", aria.expanded := "false")(messages("friends.hungry"))),
+          li(a(href := "#cafe", data.toggle := "tab", aria.expanded := "false")(messages("friends.cafe"))),
+          li(`class` := "disabled")(a(href := "#", data.toggle := "tab", aria.expanded := "false")(messages("friends.custom") + "#1")),
+          li(`class` := "disabled")(a(href := "#", data.toggle := "tab", aria.expanded := "false")(messages("friends.custom") + "#2")),
+          li(`class` := "disabled")(a(href := "#", data.toggle := "tab", aria.expanded := "false")(messages("friends.custom") + "#3")),
+          li(`class` := "dropdown")(
+            a(`class` := "dropdown-toggle", data.toggle := "dropdown", href := "#", aria.expanded := "false")(
+              messages("friends.other"),
+              scalatags.Text.all.span(`class` := "caret")
+            ),
+            ul(`class` := "dropdown-menu")(
+              li(`class` := "disabled")(a(href := "#", data.toggle := "tab")(messages("friends.custom") + "#4")),
+              li(`class` := "disabled")(a(href := "#", data.toggle := "tab")(messages("friends.custom") + "#5")),
+              li(`class` := "disabled")(a(href := "#", data.toggle := "tab")(messages("friends.custom") + "#6")),
+              li(`class` := "divider"),
+              li(`class` := "disabled")(a(href := "#all", data.toggle := "tab")(messages("friends.all")))
+            )
+          )
+        ),
+        div(id := "myTabContent", `class` := "tab-content") {
+
+          val friends: Seq[(User, Boolean, Boolean)] = Await.result(db.run(
+            (for {
+              f <- contacts.friendsOfUserAction(user.id)
+            } yield (f, eateryChoices.filter(_.user === f.id).exists, cafeChoices.filter(_.user === f.id).exists)).result
+          ), 5 seconds)
+
+          SeqFrag(Seq(
+            div(`class` := "tab-pane active in", id := "favorites")(
+              table(`class` := "table table-striped table-hover")(
+                SeqFrag(friends.map { case (f, e, c) => display(f, e, c) })
+              )
+            ),
+            div(`class` := "tab-pane", id := "hungry")(
+              table(`class` := "table table-striped table-hover")(
+                friends.filter { case (f: User, e: Boolean, c: Boolean) => e  }.map { case (f, e, c) => display(f, e, c) }
+              ))
+            ,
+            div(`class` := "tab-pane", id := "cafe")(
+              table(`class` := "table table-striped table-hover")(
+                friends.filter({ case (f, e, c) => c }).map { case (f, e, c) => display(f, e, c) }
+              )
+            ),
+            div(`class` := "tab-pane", id := "all")(
+              table(`class` := "table table-striped table-hover")(
+                //users.map(display)
+                friends.map { case (f, e, c) => display(f, e, c) }
               )
             )
-
-            */
+          ))
+        }
+      )
 
     }.toString))(messages, lang, request))
 }

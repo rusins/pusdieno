@@ -12,7 +12,8 @@ import slick.lifted.{ForeignKeyQuery, ShapedValue}
 
 import scala.concurrent.Future
 
-case class Eatery(id: UUID = UUID.randomUUID, chainID: String, streetAddress: String, openTimes: Option[OpenTimes])
+case class Eatery(
+                   id: UUID = UUID.randomUUID, chainID: String, streetAddress: String, openTimes: Option[OpenTimes])
 
 class EateryTable(tag: Tag) extends Table[Eatery](tag, "eateries") {
 
@@ -96,7 +97,7 @@ class EateryTable(tag: Tag) extends Table[Eatery](tag, "eateries") {
   def * = eateryShapedValue <> (toModel, toTuple)
 
   def chain: ForeignKeyQuery[ChainTable, Chain] =
-    foreignKey("id", chainID, TableQuery[ChainTable])(
+    foreignKey("chain_fk", chainID, TableQuery[ChainTable])(
       (chainT: ChainTable) => chainT.id,
       // We want to delete an eatery once the whole chain has been deleted
       onDelete = ForeignKeyAction.Cascade
@@ -104,26 +105,12 @@ class EateryTable(tag: Tag) extends Table[Eatery](tag, "eateries") {
 }
 
 @Singleton
-class Eateries @Inject()(dbConfigprovider: DatabaseConfigProvider) {
+class Eateries @Inject()(dbConfigProvider: DatabaseConfigProvider) {
 
   private val eateries = TableQuery[EateryTable]
-  private val chains = TableQuery[ChainTable]
 
-  private val db = dbConfigprovider.get[JdbcProfile].db
 
-  val _ = db run DBIO.seq(
-    eateries.delete,
-    chains.delete,
-    chains += Chain(id = "subway"),
-    chains += Chain(id = "pankukas"),
-    chains += Chain(id = "kfc"),
-    chains += Chain(id = "pelmeni"),
-    eateries += Eatery(chainID = "subway", streetAddress = "Raiņa Bulvāris 7", openTimes = None),
-    eateries += Eatery(chainID = "pankukas", streetAddress = "9/11 memorial site, NY, USA", openTimes = None),
-    eateries += Eatery(chainID = "kfc", streetAddress = "Ķekava", openTimes = None),
-    eateries += Eatery(chainID = "pelmeni", streetAddress = "Vecrīgā, Kalķu 7, Rīga", openTimes = None),
-    eateries += Eatery(chainID = "pelmeni", streetAddress = "Stacijas laukums 2, ORIGO CENTRS, (starp tuneļiem A un B)", openTimes = None)
-  )
+  private val db = dbConfigProvider.get[JdbcProfile].db
 
   def retrieveAll(): Future[Seq[Eatery]] = db.run(eateries.result)
 }

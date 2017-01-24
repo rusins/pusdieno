@@ -1,4 +1,4 @@
-# User, Contact, Eatery, Cafe, Chain schema
+-- User, Contact, Eatery, Cafe, Chain schema
 
 # --- !Ups
 ALTER TABLE users ADD COLUMN email TEXT;
@@ -34,3 +34,13 @@ ALTER TABLE eateries DROP COLUMN chain;
 ALTER TABLE eateries ADD COLUMN chain TEXT NOT NULL REFERENCES chains ON DELETE CASCADE;
 
 # --- !Downs
+
+ALTER TABLE users DROP COLUMN email;
+
+DROP TABLE chains;
+
+DROP TABLE cafes;
+
+ALTER TABLE eateries DROP COLUMN chain;
+
+ALTER TABLE eateries ADD COLUMN chain TEXT NOT NULL;

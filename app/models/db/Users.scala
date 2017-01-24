@@ -41,18 +41,11 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider) {
 
   private val users = TableQuery[UserTable]
 
-  val _ = db run DBIO.seq(
-    users.delete,
-    users += User(name = "Jānis Pupiņš", eatsAt = WeekPlan.empty),
-    users += User(name = "Kārlis Logins", eatsAt = WeekPlan.empty),
-    users += User(name = "Kiler Klauns", eatsAt = WeekPlan.empty)
-  )
-
   def add(user: User): Future[Int] = db.run(users += user)
 
   def del(id: UUID): Future[Int] = db.run(users.filter(_.id === id).delete)
 
-  def retrieve(id: UUID): Future[Option[User]] = db.run (users.filter(_.id === id).result.headOption)
+  def retrieve(id: UUID): Future[Option[User]] = db.run(users.filter(_.id === id).result.headOption)
 
   def retrieveAll(): Future[Seq[User]] = db.run(users.result)
 }
