@@ -40,12 +40,12 @@ class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfig
     )).render
     ))(messages("friends"))("friends")(Html({
 
-      def display(friend: User, eat: Boolean, coffee: Boolean): TypedTag[String] = {
+      def display(friend: User, fav: Boolean, eat: Boolean, coffee: Boolean): TypedTag[String] = {
         tr(`class` := "hover-me")(
           td(
             button(data.trigger := "focus", data.toggle := "popover", data.placement := "top", style := "border:none;",
               data.content := messages("friends.favAction"))(
-              if (true)
+              if (fav)
                 img(src := "/assets/images/icons/ic_star_yellow_36px.svg", width := 36, height := 36)
               else
                 img(`class` := "show-me", src := "/assets/images/icons/ic_star_border_black_36px.svg", width := 36, height := 36)
@@ -70,10 +70,9 @@ class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfig
         )
       }
 
-
       div(`class` := "content", paddingTop := 10)(
         ul(`class` := "nav nav-tabs")(
-          li(`class` := "active")(a(href := "#favorites", data.toggle := "tab", aria.expanded := "true")(messages("friends.favorite"))),
+          li(`class` := "active")(a(href := "#favorites", data.toggle := "tab", aria.expanded := "true")(messages("friends.favorites"))),
           li(a(href := "#hungry", data.toggle := "tab", aria.expanded := "false")(messages("friends.hungry"))),
           li(a(href := "#cafe", data.toggle := "tab", aria.expanded := "false")(messages("friends.cafe"))),
           li(`class` := "disabled")(a(href := "#", data.toggle := "tab", aria.expanded := "false")(messages("friends.custom") + "#1")),
@@ -89,38 +88,37 @@ class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfig
               li(`class` := "disabled")(a(href := "#", data.toggle := "tab")(messages("friends.custom") + "#5")),
               li(`class` := "disabled")(a(href := "#", data.toggle := "tab")(messages("friends.custom") + "#6")),
               li(`class` := "divider"),
-              li(`class` := "disabled")(a(href := "#all", data.toggle := "tab")(messages("friends.all")))
+              li(a(href := "#all", data.toggle := "tab")(messages("friends.all")))
             )
           )
         ),
         div(id := "myTabContent", `class` := "tab-content") {
 
-          val friends: Seq[(User, Boolean, Boolean)] = Await.result(db.run(
+          val friends: Seq[(User, Boolean, Boolean, Boolean)] = Await.result(db.run(
             (for {
-              f <- contacts.friendsOfUserAction(user.id)
-            } yield (f, eateryChoices.filter(_.user === f.id).exists, cafeChoices.filter(_.user === f.id).exists)).result
+              (c: ContactTable, f: UserTable) <- contacts.friendsOfUserAction(user.id)
+            } yield (f, c.favorite, eateryChoices.filter(_.user === f.id).exists, cafeChoices.filter(_.user === f.id).exists)).result
           ), 5 seconds)
 
           SeqFrag(Seq(
             div(`class` := "tab-pane active in", id := "favorites")(
               table(`class` := "table table-striped table-hover")(
-                SeqFrag(friends.map { case (f, e, c) => display(f, e, c) })
+                friends.filter { case (f, fav, e, c) => fav}.map { case (f, fav, e, c) => display(f, fav, e, c) }
               )
             ),
             div(`class` := "tab-pane", id := "hungry")(
               table(`class` := "table table-striped table-hover")(
-                friends.filter { case (f: User, e: Boolean, c: Boolean) => e  }.map { case (f, e, c) => display(f, e, c) }
-              ))
-            ,
+                friends.filter { case (f, fav, e, c) => e  }.map { case (f, fav, e, c) => display(f, fav, e, c) }
+              )
+            ),
             div(`class` := "tab-pane", id := "cafe")(
               table(`class` := "table table-striped table-hover")(
-                friends.filter({ case (f, e, c) => c }).map { case (f, e, c) => display(f, e, c) }
+                friends.filter({ case (f, fav, e, c) => c }).map { case (f, fav, e, c) => display(f,fav, e, c) }
               )
             ),
             div(`class` := "tab-pane", id := "all")(
               table(`class` := "table table-striped table-hover")(
-                //users.map(display)
-                friends.map { case (f, e, c) => display(f, e, c) }
+                friends.map { case (f, fav, e, c) => display(f, fav, e, c) }
               )
             )
           ))

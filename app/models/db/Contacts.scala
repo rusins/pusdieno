@@ -12,7 +12,7 @@ import slick.model.Column
 import scala.concurrent.Future
 
 case class Contact(id: UUID = UUID.randomUUID(), ownerID: UUID, contactID: Option[UUID], contactPhone: Option[Int] = None,
-                   contactEmail: Option[String] = None)
+                   contactEmail: Option[String] = None, favorite: Boolean = false)
 
 // TODO: Update with info if necessary when adding google and facebook APIs
 
@@ -28,8 +28,9 @@ class ContactTable(tag: Tag) extends Table[Contact](tag, "contacts") {
 
   def contactEmail: Rep[Option[String]] = column[Option[String]]("contact_email")
 
+  def favorite: Rep[Boolean] = column[Boolean]("favorite")
 
-  def * : ProvenShape[Contact] = (id, ownerID, contactID, contactPhone, contactEmail) <> (Contact.tupled, Contact.unapply)
+  def * : ProvenShape[Contact] = (id, ownerID, contactID, contactPhone, contactEmail, favorite) <> (Contact.tupled, Contact.unapply)
 
   def belongsTo: ForeignKeyQuery[UserTable, User] =
     foreignKey("owner_fk", ownerID, TableQuery[UserTable])(
@@ -61,11 +62,14 @@ class Contacts @Inject()(dbConfigProvider: DatabaseConfigProvider) {
   )
 
 
-  def friendsOfUser(userID: UUID): Future[Seq[User]] = db.run(friendsOfUserAction(userID).result)
+  def friendsOfUser(userID: UUID): Future[Seq[User]] = db.run(
+    (for {
+      (_, u) <- friendsOfUserAction(userID)
+    } yield u).result)
 
-  def friendsOfUserAction(userID: UUID): Query[UserTable, User, Seq] = for {
-    a <- contacts.filter(_.ownerID === userID)
-    b <- a.pointsTo if contacts.filter(friend => friend.ownerID === a.contactID && friend.contactID === a.ownerID).exists
-  } yield b
+  def friendsOfUserAction(userID: UUID): Query[(ContactTable, UserTable), (Contact, User), Seq] = for {
+    c <- contacts.filter(_.ownerID === userID)
+    u <- c.pointsTo if contacts.filter(friend => friend.ownerID === c.contactID && friend.contactID === c.ownerID).exists
+  } yield (c, u)
 
 }

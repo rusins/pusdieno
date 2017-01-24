@@ -60,7 +60,7 @@ class EateriesView @Inject()(dbConfigProvider: DatabaseConfigProvider, eateries:
               img(`class` := "img-circle", src := "/assets/images/" + user.id, width := 50, height := 50,
                 onerror := "javascript:this.src='assets/images/icons/ic_account_circle_black_36px.svg'",
               data.toggle := "tooltip", data.placement := "top", title := user.name,
-                style := "margin-left: 2px; margin-right: 2px;, margin-bottom: 2px; margin-top: 2px;")
+                style := "margin-left: 2px; margin-right: 2px; margin-bottom: 2px; margin-top: 2px;")
             )
           )
         ),
@@ -131,7 +131,7 @@ class EateriesView @Inject()(dbConfigProvider: DatabaseConfigProvider, eateries:
               //db.run(TableQuery[EateryChoiceTable] += Choice(user = user.id, eatery = UUID.fromString("00000000-0000-0000-0000-000000000000")))
               val friendChoices = Await.result(db.run(
                 (for {
-                  f <- contacts.friendsOfUserAction(user.id)
+                  (_, f) <- contacts.friendsOfUserAction(user.id)
                   c <- choicesT.filter(_.user === f.id)
                   u <- c.belongsTo
                   e <- c.pointsTo
