@@ -28,4 +28,18 @@
                 default: alert("Script error: " + response);
                 }
             });
+            $(".phone-popover").each(function() {
+                var phone = $(this).attr("data-phone-number");
+                var text = $(this).attr("data-phone");
+                var display;
+                if (phone)
+                    display = "<a href=\"tel:" + phone + "\">" + text + "</a>";
+                else
+                    display = text;
+                $(this).popover({
+                    html: true,
+                    placement: 'bottom',
+                    content: display
+                });
+            });
         });
