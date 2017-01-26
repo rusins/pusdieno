@@ -33,7 +33,7 @@ class DatabasePopulator @Inject()(dbConfigProvider: DatabaseConfigProvider) {
   private val himalaji = Eatery(chainID = "himalaji", streetAddress = "Blaumaņa iela", openTimes = None)
 
   private val public = User(UUID.fromString("00000000-0000-0000-0000-000000000000"), "Public", Some(25576439), Some("pusdieno@krikis.org"), WeekPlan.empty)
-  private val dalai = User(id = UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "Dalai Lama", eatsAt = WeekPlan.empty)
+  private val dalai = User(id = UUID.fromString("00000000-0000-0000-0000-000000000001"), mobile = Some(42042069), name = "Dalai Lama", eatsAt = WeekPlan.empty)
   private val vaira = User(id = UUID.fromString("00000000-0000-0000-0000-000000000002"), name = "Vaira Vīķe Freiberga", eatsAt = WeekPlan.empty)
   private val tyrion = User(id = UUID.fromString("00000000-0000-0000-0000-000000000003"), name = "Tyrion Lannister", eatsAt = WeekPlan.empty)
   private val martins = User(id = UUID.fromString("00000000-0000-0000-0000-000000000004"), name = "Mārtiņš Rītiņš", eatsAt = WeekPlan.empty)

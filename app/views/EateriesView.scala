@@ -61,10 +61,19 @@ class EateriesView @Inject()(dbConfigProvider: DatabaseConfigProvider, eateries:
           ),
           div(`class` := "col-xs-12 col-sm-6 col-md-12 col-lg-6")(
             friends.map(user =>
-              img(`class` := "img-circle", src := "/assets/images/" + user.id, width := 50, height := 50,
-                onerror := "javascript:this.src='assets/images/icons/ic_account_circle_black_36px.svg'",
-                data.toggle := "tooltip", data.placement := "top", title := user.name,
-                style := "margin-left: 2px; margin-right: 2px; margin-bottom: 2px; margin-top: 2px;")
+              scalatags.Text.all.button(data.trigger := "focus", data.toggle := "popover", data.placement := "bottom",
+                style := "border:none; padding-left: 0px; padding-right: 0px;",
+                attr("data-content") := (
+                  user.mobile match {
+                    case Some(phone) => a(href := "tel:" + phone)(phone).render
+                    case None => messages("error.phone")
+                  }
+                ), onclick := "event.stopPropagation();")(
+                img(`class` := "img-circle", src := "/assets/images/" + user.id, width := 50, height := 50,
+                  onerror := "javascript:this.src='assets/images/icons/ic_account_circle_black_36px.svg'",
+                  data.toggle := "tooltip", data.placement := "top", title := user.name,
+                  style := "margin-left: 2px; margin-right: 2px; margin-bottom: 2px; margin-top: 2px;")
+              )
             )
           )
         ),

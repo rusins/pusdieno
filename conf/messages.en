@@ -48,3 +48,4 @@ date.short.saturday=Sa.
 date.short.sunday=Su.
 date.today=Today
 search=Search
+error.phone=User does not have a phone number
