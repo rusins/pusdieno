@@ -46,9 +46,13 @@ class EateriesView @Inject()(dbConfigProvider: DatabaseConfigProvider, eateries:
 
   def displayEatery(chain: (String, Seq[Eatery]), friends: Seq[User])(implicit messages: Messages, request: RequestHeader): TypedTag[String] = {
     val (chainID, eateries) = chain
-    div(`class` := "jumbotron eatery", style :=
-      s"background-image: linear-gradient(to right, #333333, transparent, transparent), url(/assets/images/eateries/$chainID.jpg);" +
-        "box-shadow: 0 0 10px gray; background-size: cover; background-position: center;")(
+    div(`class` := "jumbotron eatery flip", id := chainID, onclick :=
+      """
+        |$("#" + this.id + " .panel").slideToggle("fast");
+      """.stripMargin,
+      style :=
+        s"background-image: linear-gradient(to right, #333333, transparent, transparent), url(/assets/images/eateries/$chainID.jpg);" +
+          "box-shadow: 0 0 10px gray; background-size: cover; background-position: center;")(
       div(`class` := "row")(
         div(`class` := "col-sm-12 col-md-6 vcenter row")(
           h2(`class` := "name col-xs-12 col-sm-6 col-md-12 col-lg-6", style := "margin-top: 0px; color: white;" +
@@ -59,13 +63,14 @@ class EateriesView @Inject()(dbConfigProvider: DatabaseConfigProvider, eateries:
             friends.map(user =>
               img(`class` := "img-circle", src := "/assets/images/" + user.id, width := 50, height := 50,
                 onerror := "javascript:this.src='assets/images/icons/ic_account_circle_black_36px.svg'",
-              data.toggle := "tooltip", data.placement := "top", title := user.name,
+                data.toggle := "tooltip", data.placement := "top", title := user.name,
                 style := "margin-left: 2px; margin-right: 2px; margin-bottom: 2px; margin-top: 2px;")
             )
           )
         ),
         div(`class` := "col-sm-12 col-md-6 vcenter")(raw(
-          formCSRF(routes.EateriesController.eat(), 'class -> "eatery-form", 'style -> "margin-bottom: 0px;")(
+          formCSRF(routes.EateriesController.eat(), 'class -> "eatery-form", 'style -> "margin-bottom: 0px;",
+            'onclick -> "event.stopPropagation();")(
             views.html.b3.hidden("eatery", chainID) + Html(
               div(id := chainID, `class` := "btn-group btn-group-justified")(raw(
                 submit('_class -> "btn-group", 'name -> "status", 'value -> "yes", 'class -> "btn btn-success yes inactive")(
@@ -81,6 +86,9 @@ class EateriesView @Inject()(dbConfigProvider: DatabaseConfigProvider, eateries:
             )
           )
         ))
+      ),
+      div(`class` := "panel")(
+        h1("Wassup, dudes?")
       )
     )
   }

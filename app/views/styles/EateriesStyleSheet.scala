@@ -6,11 +6,11 @@ object EateriesStyleSheet extends StyleSheet.Standalone {
 
   import dsl._
 
-/*
-  "body" -(
-    backgroundColor(c"#669966")
-  )
-*/
+  /*
+    "body" -(
+      backgroundColor(c"#669966")
+    )
+  */
 
   ".yes.inactive, .maybe.inactive, .no.inactive" - (
     backgroundColor(c"#999999"),
@@ -25,7 +25,7 @@ object EateriesStyleSheet extends StyleSheet.Standalone {
       backgroundColor(c"#1A873A"),
       borderColor(c"#1A873A")
     )
-    )
+  )
 
   ".maybe.inactive" - (
     //color(black),
@@ -35,7 +35,7 @@ object EateriesStyleSheet extends StyleSheet.Standalone {
       backgroundColor(c"#264C73"),
       borderColor(c"#264C73")
     )
-    )
+  )
 
   ".no.inactive" - (
     //color(black),
@@ -45,7 +45,7 @@ object EateriesStyleSheet extends StyleSheet.Standalone {
       backgroundColor(c"#E53C37"),
       borderColor(c"#E53C37")
     )
-    )
+  )
 
   ".jumbotron.eatery" - (
     paddingTop(5.px),
@@ -71,5 +71,11 @@ object EateriesStyleSheet extends StyleSheet.Standalone {
     display.inlineBlock,
     verticalAlign.middle,
     float.none
+  )
+
+  ".panel" - (
+    display.none,
+    backgroundColor.transparent,
+    boxShadow := none
   )
 }
