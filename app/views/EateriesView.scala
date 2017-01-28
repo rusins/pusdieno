@@ -16,7 +16,6 @@ import play.api.mvc.RequestHeader
 import play.twirl.api.{Html, HtmlFormat}
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
-import views.html.main
 import views.html.b3.inline.fieldConstructor
 import views.html.b3._
 import views.styles.EateriesStyleSheet
@@ -101,7 +100,7 @@ class EateriesView @Inject()(dbConfigProvider: DatabaseConfigProvider, eateries:
   }
 
   def index(section: String, user: User)(implicit messages: Messages, lang: Lang,
-                                         request: RequestHeader, ec: ExecutionContext): Future[Html] = Future(StringToHtml(
+                                         request: RequestHeader, ec: ExecutionContext): Future[Html] =
     MainTemplate(messages("eateries"), "eateries", SeqFrag(Seq(
       //script(src := "http://malsup.github.com/jquery.form.js"),
       script(src := "/assets/javascripts/jquery.form.js"),
@@ -163,5 +162,4 @@ class EateriesView @Inject()(dbConfigProvider: DatabaseConfigProvider, eateries:
           """.stripMargin))
       ))
     ))
-  ))
 }

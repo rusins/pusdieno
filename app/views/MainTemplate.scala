@@ -3,8 +3,10 @@ package views
 import models.Languages
 import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
+import play.twirl.api.Html
 import views.html.helper.CSRF
 
+import scala.concurrent.{ExecutionContext, Future}
 import scalatags.Text._
 import scalatags.Text.all._
 
@@ -18,7 +20,8 @@ object MainTemplate {
 
 
   def apply(pageTitle: String, section: String, headContent: Frag, bodyContent: Frag)(
-    implicit request: RequestHeader, messages: Messages, lang: Lang): String = all.html(
+    implicit request: RequestHeader, messages: Messages, lang: Lang, ec: ExecutionContext): Future[Html] = Future(
+    Html(all.html(
     head(
       meta(charset := "utf-8"),
       meta(name := "viewport", content := "width=device-width, initial-scale=1"),
@@ -84,5 +87,6 @@ object MainTemplate {
       ),
       bodyContent
     )
-  ).render
+  ).render)
+  )
 }
