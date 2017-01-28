@@ -73,7 +73,7 @@ object EateriesStyleSheet extends StyleSheet.Standalone {
     float.none
   )
 
-  ".panel" - (
+  ".hidden-panel" - (
     display.none,
     backgroundColor.transparent,
     boxShadow := none
