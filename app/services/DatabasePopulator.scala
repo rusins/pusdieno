@@ -78,16 +78,16 @@ class DatabasePopulator @Inject()(dbConfigProvider: DatabaseConfigProvider) {
       eateryChoices += Choice(user = tyrion.id, eatery = mcdonalds.id),
       eateryChoices += Choice(user = ziedonis.id, eatery = mcdonalds.id),
       contacts.delete,
-      contacts += Contact(ownerID = public.id, contactID = Some(dalai.id)),
+      contacts += Contact(ownerID = public.id, contactID = Some(dalai.id), favorite = true),
       contacts += Contact(ownerID = dalai.id, contactID = Some(public.id)),
       contacts += Contact(ownerID = public.id, contactID = Some(vaira.id)),
       contacts += Contact(ownerID = public.id, contactID = Some(twisty.id)),
       contacts += Contact(ownerID = twisty.id, contactID = Some(public.id)),
       contacts += Contact(ownerID = public.id, contactID = Some(tyrion.id)),
       contacts += Contact(ownerID = tyrion.id, contactID = Some(public.id)),
-      contacts += Contact(ownerID = public.id, contactID = Some(ziedonis.id)),
+      contacts += Contact(ownerID = public.id, contactID = Some(ziedonis.id), favorite = true),
       contacts += Contact(ownerID = ziedonis.id, contactID = Some(public.id)),
-      contacts += Contact(ownerID = public.id, contactID = Some(margaret.id)),
+      contacts += Contact(ownerID = public.id, contactID = Some(margaret.id), favorite = true),
       contacts += Contact(ownerID = margaret.id, contactID = Some(public.id))
     )
   }
