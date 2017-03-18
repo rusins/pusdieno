@@ -11,6 +11,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
 import play.twirl.api.Html
+import services.daos.Contacts
 import slick.driver.JdbcProfile
 import slick.lifted.TableQuery
 import slick.driver.PostgresDriver.api._

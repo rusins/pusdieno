@@ -8,14 +8,15 @@ import models.OpenTimes
 import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
-import slick.lifted.ForeignKeyQuery
+import slick.lifted.{ForeignKeyQuery, ShapedValue}
 
 import scala.concurrent.Future
 
-case class Cafe(id: UUID = UUID.randomUUID(), chainID: String, streetAddress: String, openTimes: Option[OpenTimes])
+case class Eatery(
+                   id: UUID = UUID.randomUUID, chainID: String, streetAddress: String, openTimes: Option[OpenTimes])
 
-class CafeTable(tag: Tag) extends Table[Cafe](tag, "cafes") {
-  
+class EateryTable(tag: Tag) extends Table[Eatery](tag, "eateries") {
+
   def id: Rep[UUID] = column[UUID]("id", O.PrimaryKey)
 
   def chainID: Rep[String] = column[String]("chain")
@@ -52,9 +53,9 @@ class CafeTable(tag: Tag) extends Table[Cafe](tag, "cafes") {
 
   private type OpenTimesTupleType = (Option[Time], Option[Time], Option[Time], Option[Time], Option[Time], Option[Time],
     Option[Time], Option[Time], Option[Time], Option[Time], Option[Time], Option[Time], Option[Time], Option[Time])
-  private type CafeTupleType = (UUID, String, String, OpenTimesTupleType)
+  private type EateryTupleType = (UUID, String, String, OpenTimesTupleType)
 
-  private val cafeShapedValue = (id, chainID, streetAddress, (
+  private val eateryShapedValue = (id, chainID, streetAddress, (
     mondayOpen, mondayClose,
     tuesdayOpen, tuesdayClose,
     wednesdayOpen, wednesdayClose,
@@ -63,11 +64,11 @@ class CafeTable(tag: Tag) extends Table[Cafe](tag, "cafes") {
     saturdayOpen, saturdayClose,
     sundayOpen, sundayClose
   )
-  ).shaped[CafeTupleType]
+  ).shaped[EateryTupleType]
 
-  private def toModel: CafeTupleType => Cafe = {
+  private def toModel: EateryTupleType => Eatery = {
     case (id, chainID, address, (a, b, c, d, e, f, g, h, i, j, k, l, m, n)) =>
-      Cafe(id, chainID, address, for {
+      Eatery(id, chainID, address, for {
         mo <- a
         mc <- b
         tuo <- c
@@ -85,34 +86,20 @@ class CafeTable(tag: Tag) extends Table[Cafe](tag, "cafes") {
       } yield OpenTimes((mo, mc), (tuo, tuc), (wo, wc), (tho, thc), (fo, fc), (sao, sac), (suo, suc)))
   }
 
-  private def toTuple: Cafe => Option[CafeTupleType] =
-    cafe => Some(cafe.id, cafe.chainID, cafe.streetAddress, cafe.openTimes match {
+  private def toTuple: Eatery => Option[EateryTupleType] =
+    eatery => Some(eatery.id, eatery.chainID, eatery.streetAddress, eatery.openTimes match {
       case Some(OpenTimes((a, b), (c, d), (e, f), (g, h), (i, j), (k, l), (m, n))) =>
         (Some(a), Some(b), Some(c), Some(d), Some(e), Some(f), Some(g), Some(h), Some(i), Some(j), Some(k), Some(l), Some(m), Some(n))
       case None => (None, None, None, None, None, None, None, None, None, None, None, None, None, None)
     }
     )
 
-  def * = cafeShapedValue <> (toModel, toTuple)
+  def * = eateryShapedValue <> (toModel, toTuple)
 
   def chain: ForeignKeyQuery[ChainTable, Chain] =
-    foreignKey("id", chainID, TableQuery[ChainTable])(
+    foreignKey("chain_fk", chainID, TableQuery[ChainTable])(
       (chainT: ChainTable) => chainT.id,
       // We want to delete an eatery once the whole chain has been deleted
       onDelete = ForeignKeyAction.Cascade
     )
-}
-
-@Singleton
-class Cafes @Inject()(dbConfigprovider: DatabaseConfigProvider) {
-
-  private val cafes = TableQuery[CafeTable]
-
-  private val db = dbConfigprovider.get[JdbcProfile].db
-
-  val _ = db run DBIO.seq(
-    cafes.delete
-  )
-
-  def retrieveAll(): Future[Seq[Cafe]] = db.run(cafes.result)
 }

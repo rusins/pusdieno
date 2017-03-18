@@ -6,6 +6,7 @@ import scalacss.ScalatagsCss._
 import javax.inject.Inject
 
 import controllers.routes
+import models.WeekPlan
 
 import scalatags.Text.all._
 import models.db._
@@ -14,24 +15,82 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
 import play.twirl.api.{Html, HtmlFormat}
+import services.daos.{Cafes, Choices, Contacts, Eateries}
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 import views.html.b3.inline.fieldConstructor
 import views.html.b3._
-import views.styles.EateriesStyleSheet
+import views.styles.{CommonStyleSheet, EateriesStyleSheet}
 
+import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scalatags.Text
 import scalatags.Text.TypedTag
-import scala.concurrent.duration._
 import scalacss.ScalatagsCss._
 import scalacss.DevDefaults._
 
-class EateriesView @Inject()(dbConfigProvider: DatabaseConfigProvider, eateries: Eateries, cafes: Cafes, contacts: Contacts) {
+class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes, contacts: Contacts) {
 
-  private val db = dbConfigProvider.get[JdbcProfile].db
+  def index(section: String, userO: Option[User])(implicit messages: Messages, lang: Lang,
+                                         request: RequestHeader, ec: ExecutionContext): Future[Html] =
+    MainTemplate(messages("eateries"), "eateries", SeqFrag(Seq(
+      //script(src := "http://malsup.github.com/jquery.form.js"),
+      script(src := "/assets/javascripts/jquery.form.js"),
+      script(src := "/assets/javascripts/eateries.js"),
+      script(src := "/assets/javascripts/list.min.js"),
+      script(src := "/assets/javascripts/list.fuzzysearch.min.js"),
+      script(src := "/assets/javascripts/popup.js"),
+      EateriesStyleSheet.render[scalatags.Text.TypedTag[String]],
+      CommonStyleSheet.render[scalatags.Text.TypedTag[String]]
+    )), SeqFrag(Seq(
+      div(cls := "container", style := "padding-top: 10px;")(
+        div(id := "eatery-list")(
+          div(cls := "panel  panel-default panel-body", style := "padding-top: 0px;")(
+            ol(cls := "nav nav-pills" /*,style := "display: table; margin-left: auto; margin-right: auto;"*/)(
+              li(style := "margin-top: 15px;", cls := {
+                if (section == "eateries") "active" else ""
+              })(
+                a(href := "/eateries")(messages("eateries"))
+              ),
+              li(style := "margin-top: 15px;", cls := {
+                if (section == "cafes") "active" else ""
+              })(
+                a(href := "/cafes")(
+                  messages("cafes")
+                )
+              ),
+              li(style := "margin-top: 15px; float: right;")(
+                input(cls := "fuzzy-search form-control", `type` := "text", placeholder := messages("search"))
+              )
+            )
+          ),
+          ol(cls := "list", style := "list-style-type: none; padding-left: 0px;")(
+            if (section == "eateries") {
+              //db.run(TableQuery[EateryChoiceTable] += Choice(user = user.id, eatery = UUID.fromString("00000000-0000-0000-0000-000000000000")))
+              val user = userO.getOrElse(User(UUID.fromString("00000000-0000-0000-0000-000000000000"), "Public",
+                Some(25576439), Some("pusdieno@krikis.org"), WeekPlan.empty))
+              val friendChoices = Await.result(choices.friendChoiceMap(user), 5 seconds)
 
-  private val choicesT = TableQuery[EateryChoiceTable]
+              Await.result(eateries.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
+                sortBy(chain => messages("eateries." + chain._1)).map(chain =>
+                displayEatery(chain, friendChoices.getOrElse(chain._1, Seq())))
+            }
+            else
+              Await.result(cafes.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
+                sortBy(chain => messages("cafes." + chain._1)).map(displayCafe)
+          )
+        ),
+        script(raw(
+          """
+            |var options = {
+            |  valueNames: [ 'name', 'address' ],
+            |  plugins: [ ListFuzzySearch() ]
+            |};
+            |
+            |var eateryList = new List('eatery-list', options);
+          """.stripMargin))
+      ))
+    ))
 
   implicit def StringToHtml(s: String): Html = Html(s)
 
@@ -99,67 +158,5 @@ class EateriesView @Inject()(dbConfigProvider: DatabaseConfigProvider, eateries:
     div()
   }
 
-  def index(section: String, user: User)(implicit messages: Messages, lang: Lang,
-                                         request: RequestHeader, ec: ExecutionContext): Future[Html] =
-    MainTemplate(messages("eateries"), "eateries", SeqFrag(Seq(
-      //script(src := "http://malsup.github.com/jquery.form.js"),
-      script(src := "/assets/javascripts/jquery.form.js"),
-      script(src := "/assets/javascripts/eateries.js"),
-      script(src := "/assets/javascripts/list.min.js"),
-      script(src := "/assets/javascripts/list.fuzzysearch.min.js"),
-      script(src := "/assets/javascripts/popup.js"),
-      EateriesStyleSheet.render[scalatags.Text.TypedTag[String]]
-    )), SeqFrag(Seq(
-      div(cls := "container", style := "padding-top: 10px;")(
-        div(id := "eatery-list")(
-          div(cls := "panel  panel-default panel-body", style := "padding-top: 0px;")(
-            ol(cls := "nav nav-pills" /*,style := "display: table; margin-left: auto; margin-right: auto;"*/)(
-              li(style := "margin-top: 15px;", cls := {
-                if (section == "eateries") "active" else ""
-              })(
-                a(href := "/eateries")(messages("eateries"))
-              ),
-              li(style := "margin-top: 15px;", cls := {
-                if (section == "cafes") "active" else ""
-              })(
-                a(href := "/cafes")(
-                  messages("cafes")
-                )
-              ),
-              li(style := "margin-top: 15px; float: right;")(
-                input(cls := "fuzzy-search form-control", `type` := "text", placeholder := messages("search"))
-              )
-            )
-          ),
-          ol(cls := "list", style := "list-style-type: none; padding-left: 0px;")(
-            if (section == "eateries") {
-              //db.run(TableQuery[EateryChoiceTable] += Choice(user = user.id, eatery = UUID.fromString("00000000-0000-0000-0000-000000000000")))
-              val friendChoices = Await.result(db.run(
-                (for {
-                  (_, f) <- contacts.friendsOfUserAction(user.id)
-                  c <- choicesT.filter(_.user === f.id)
-                  u <- c.belongsTo
-                  e <- c.pointsTo
-                } yield (e.chainID, u)).result), 5 seconds).groupBy(_._1).mapValues(_.map(_._2))
-
-              Await.result(eateries.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
-                sortBy(chain => messages("eateries." + chain._1)).map(chain =>
-                displayEatery(chain, friendChoices.getOrElse(chain._1, Seq())))
-            }
-            else
-              Await.result(cafes.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
-                sortBy(chain => messages("cafes." + chain._1)).map(displayCafe)
-          )
-        ),
-        script(raw(
-          """
-            |var options = {
-            |  valueNames: [ 'name', 'address' ],
-            |  plugins: [ ListFuzzySearch() ]
-            |};
-            |
-            |var eateryList = new List('eatery-list', options);
-          """.stripMargin))
-      ))
-    ))
 }
+// TODO: clickable phone number

@@ -22,6 +22,8 @@ GET     /eateries                   controllers.EateriesController.eaterySelecti
 GET     /cafes                      controllers.EateriesController.cafeSelection
 POST    /eateries/eat               controllers.EateriesController.eat
 GET     /friends                    controllers.FriendsController.index
+GET     /signIn                     controllers.SignInController.index
+GET     /auth/:provider             controllers.SocialAuthController.authenticate(provider)
 GET     /randomize                  controllers.RandomizeController.index
 GET     /contact                    controllers.ContactController.index
 GET     /about                      controllers.AboutController.index

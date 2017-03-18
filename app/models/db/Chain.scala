@@ -20,13 +20,3 @@ class ChainTable(tag: Tag) extends Table[Chain](tag, "chains") {
 
   def * = (id, website, menu) <> (Chain.tupled, Chain.unapply)
 }
-
-@Singleton
-class Chains @Inject()(dbConfigProvider: DatabaseConfigProvider) {
-
-  private val db = dbConfigProvider.get[JdbcProfile].db
-
-  private val chains = TableQuery[ChainTable]
-
-  def retrieveChain(id: String): Future[Option[Chain]] = db.run(chains.filter(_.id === id).result.headOption)
-}

@@ -46,30 +46,3 @@ class ContactTable(tag: Tag) extends Table[Contact](tag, "contacts") {
       onDelete = ForeignKeyAction.SetNull
     )
 }
-
-@Singleton
-class Contacts @Inject()(dbConfigProvider: DatabaseConfigProvider) {
-
-  private val db = dbConfigProvider.get[JdbcProfile].db
-
-  private val contacts = TableQuery[ContactTable]
-
-  def contactsOfUser(userID: UUID): Future[Seq[User]] = db.run(
-    (for {
-      c <- contacts.filter(_.ownerID === userID)
-      u <- c.pointsTo
-    } yield u).result
-  )
-
-
-  def friendsOfUser(userID: UUID): Future[Seq[User]] = db.run(
-    (for {
-      (_, u) <- friendsOfUserAction(userID)
-    } yield u).result)
-
-  def friendsOfUserAction(userID: UUID): Query[(ContactTable, UserTable), (Contact, User), Seq] = for {
-    c <- contacts.filter(_.ownerID === userID)
-    u <- c.pointsTo if contacts.filter(friend => friend.ownerID === c.contactID && friend.contactID === c.ownerID).exists
-  } yield (c, u)
-
-}

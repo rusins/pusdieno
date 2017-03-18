@@ -11,7 +11,7 @@ object WelcomeView {
 
   def index()(implicit messages: Messages, lang: Lang,
               request: RequestHeader, ec: ExecutionContext): Future[Html] = {
-    val theHead: Frag = UnitFrag()
+    val theHead: Frag = UnitFrag(Unit)
     val theBody: Frag = SeqFrag(Seq(
       div(width := 100.pct, height := 100.pct, paddingTop := 100,
         backgroundImage := "url(\"/assets/images/cover_lowsize.jpg\")", backgroundSize := "cover")(
@@ -24,7 +24,7 @@ object WelcomeView {
         )
       )
     ))
-    MainTemplate("Pusdieno", "weclome", theHead, theBody)
+    MainTemplate("Pusdieno", "welcome", theHead, theBody)
   }
 
 }

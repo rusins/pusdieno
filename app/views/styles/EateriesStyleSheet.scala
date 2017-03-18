@@ -67,12 +67,6 @@ object EateriesStyleSheet extends StyleSheet.Standalone {
 
   )
 
-  ".vcenter" - (
-    display.inlineBlock,
-    verticalAlign.middle,
-    float.none
-  )
-
   ".hidden-panel" - (
     display.none,
     backgroundColor.transparent,
