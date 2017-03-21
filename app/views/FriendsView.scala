@@ -10,7 +10,6 @@ import play.api.mvc.RequestHeader
 import play.twirl.api.Html
 import services.daos.Contacts
 import slick.driver.JdbcProfile
-import slick.driver.PostgresDriver.api._
 import slick.lifted.TableQuery
 import views.styles.FriendsStyleSheet
 
@@ -91,31 +90,32 @@ class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfig
       ),
       div(id := "myTabContent", cls := "tab-content") {
 
-        val friends: Seq[(User, Boolean, Boolean, Boolean)] = Await.result(db.run(
-          (for {
-            (c: ContactTable, f: DBUserTable) <- contacts.friendsOfUserAction(user.id)
-          } yield (f, c.favorite, eateryChoices.filter(_.user === f.id).exists, cafeChoices.filter(_.user === f.id).exists)).result
-        ), 5 seconds)
+        val friends: Seq[(Contact, User, Boolean, Boolean)] =
+          Await.result(contacts.friendsWithStatusInfo(user.id), 5 seconds)
+        val sortableFriends = friends.map {
+          case (contact, friend, wantsFood, wantsCoffee) => (friend, contact.favorite, wantsFood, wantsCoffee)
+        }
+
 
         SeqFrag(Seq(
           div(cls := "tab-pane active in", id := "favorites")(
             table(cls := "table table-striped table-hover")(
-              friends.filter { case (f, fav, e, c) => fav }.map { case (f, fav, e, c) => display(f, fav, e, c) }
+              sortableFriends.filter { case (f, fav, e, c) => fav }.map((display _).tupled)
             )
           ),
           div(cls := "tab-pane", id := "hungry")(
             table(cls := "table table-striped table-hover")(
-              friends.filter { case (f, fav, e, c) => e }.map { case (f, fav, e, c) => display(f, fav, e, c) }
+              sortableFriends.filter { case (f, fav, e, c) => e }.map((display _).tupled)
             )
           ),
           div(cls := "tab-pane", id := "cafe")(
             table(cls := "table table-striped table-hover")(
-              friends.filter({ case (f, fav, e, c) => c }).map { case (f, fav, e, c) => display(f, fav, e, c) }
+              sortableFriends.filter { case (f, fav, e, c) => c }.map((display _).tupled)
             )
           ),
           div(cls := "tab-pane", id := "all")(
             table(cls := "table table-striped table-hover")(
-              friends.map { case (f, fav, e, c) => display(f, fav, e, c) }
+              sortableFriends.map((display _).tupled)
             )
           )
         ))

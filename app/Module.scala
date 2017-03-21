@@ -1,26 +1,26 @@
+import auth.CookieEnv
 import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
-import auth.CookieEnv
 import com.mohiva.play.silhouette.api.crypto.{CookieSigner, Crypter, CrypterAuthenticatorEncoder}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AuthenticatorService
 import com.mohiva.play.silhouette.api.util._
 import com.mohiva.play.silhouette.api.{Environment, EventBus, Silhouette, SilhouetteProvider}
-import com.mohiva.play.silhouette.impl.authenticators.{CookieAuthenticator, CookieAuthenticatorService, CookieAuthenticatorSettings}
-import com.mohiva.play.silhouette.impl.providers.{OAuth2Info, OAuth2Settings, OAuth2StateProvider, SocialProviderRegistry}
-import com.mohiva.play.silhouette.impl.providers.oauth2.{FacebookProvider, GoogleProvider}
 import com.mohiva.play.silhouette.crypto.{JcaCookieSigner, JcaCookieSignerSettings, JcaCrypter, JcaCrypterSettings}
+import com.mohiva.play.silhouette.impl.authenticators.{CookieAuthenticator, CookieAuthenticatorService, CookieAuthenticatorSettings}
 import com.mohiva.play.silhouette.impl.providers.oauth2.state.{CookieStateProvider, CookieStateSettings}
+import com.mohiva.play.silhouette.impl.providers.oauth2.{FacebookProvider, GoogleProvider}
+import com.mohiva.play.silhouette.impl.providers.{OAuth2Info, OAuth2Settings, OAuth2StateProvider, SocialProviderRegistry}
 import com.mohiva.play.silhouette.impl.util.{DefaultFingerprintGenerator, SecureRandomIDGenerator}
 import com.mohiva.play.silhouette.persistence.daos.{DelegableAuthInfoDAO, InMemoryAuthInfoDAO}
 import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepository
-import net.codingwell.scalaguice.ScalaModule
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
+import net.codingwell.scalaguice.ScalaModule
 import play.api.Configuration
-import services._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.WSClient
+import services._
 import services.daos.Users
 
 /**
@@ -45,7 +45,6 @@ class Module extends AbstractModule with ScalaModule {
 
     // Silhouette
     bind[Silhouette[CookieEnv]].to[SilhouetteProvider[CookieEnv]]
-    bind[Users].to[Users]
 
     bind[Clock].toInstance(Clock())
     bind[FingerprintGenerator].toInstance(new DefaultFingerprintGenerator(false))

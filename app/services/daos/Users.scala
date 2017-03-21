@@ -10,7 +10,7 @@ import models.db._
 import models.{EatsAt, User}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import slick.dbio.Effect.Read
+import services.daos.Users._
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 import slick.lifted.TableQuery
@@ -23,19 +23,6 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider, socialProviderRe
   extends IdentityService[User] with Logger {
 
   private val db = dbConfigProvider.get[JdbcProfile].db
-
-  private val users = TableQuery[DBUserTable]
-  private val logins = TableQuery[DBLoginInfoTable]
-  private val weekTimes = TableQuery[DBWeekTimesTable]
-
-  def getFromId(id: Rep[UUID]):
-  Query[(DBUserTable, Rep[Option[DBWeekTimesTable]], Rep[Option[DBWeekTimesTable]], Rep[Option[DBWeekTimesTable]]),
-    (DBUser, Option[DBWeekTimes], Option[DBWeekTimes], Option[DBWeekTimes]), Seq] = for {
-    dbUser <- users.filter(_.id === id)
-    breakfast <- users.joinLeft(weekTimes).on(_.breakfastFK === _.id).map { case (u, t) => t}
-    lunch <- users.joinLeft(weekTimes).on(_.lunchFK === _.id).map { case (u, t) => t}
-    dinner <- users.joinLeft(weekTimes).on(_.dinnerFK === _.id).map { case (u, t) => t}
-  } yield (dbUser, breakfast, lunch, dinner)
 
   def retrieve(id: UUID): Future[Option[User]] = db.run(getFromId(id).result.headOption).map(
     _.map((User.fromDB _).tupled))
@@ -60,9 +47,26 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider, socialProviderRe
 
   override def retrieve(loginInfo: LoginInfo): Future[Option[User]] = db.run(
     (for {
-    id <- logins.filter(l => l.providerKey === loginInfo.providerKey &&
-      l.providerID === loginInfo.providerID).map(_.userID)
-    userInfo <- getFromId(id)
-  } yield userInfo).result.headOption).map(_.map((User.fromDB _).tupled))
+      id <- logins.filter(l => l.providerKey === loginInfo.providerKey &&
+        l.providerID === loginInfo.providerID).map(_.userID)
+      userInfo <- getFromId(id)
+    } yield userInfo).result.headOption).map(_.map((User.fromDB _).tupled))
+
+}
+
+object Users {
+
+  private val users = TableQuery[DBUserTable]
+  private val logins = TableQuery[DBLoginInfoTable]
+  private val weekTimes = TableQuery[DBWeekTimesTable]
+
+  def getFromId(id: Rep[UUID]):
+  Query[(DBUserTable, Rep[Option[DBWeekTimesTable]], Rep[Option[DBWeekTimesTable]], Rep[Option[DBWeekTimesTable]]),
+    (DBUser, Option[DBWeekTimes], Option[DBWeekTimes], Option[DBWeekTimes]), Seq] = for {
+    dbUser <- users.filter(_.id === id)
+    breakfast <- users.joinLeft(weekTimes).on(_.breakfastFK === _.id).map { case (u, t) => t }
+    lunch <- users.joinLeft(weekTimes).on(_.lunchFK === _.id).map { case (u, t) => t }
+    dinner <- users.joinLeft(weekTimes).on(_.dinnerFK === _.id).map { case (u, t) => t }
+  } yield (dbUser, breakfast, lunch, dinner)
 
 }

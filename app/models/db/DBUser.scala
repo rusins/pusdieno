@@ -38,19 +38,19 @@ class DBUserTable(tag: Tag) extends Table[DBUser](tag, "users") {
   private val weekTimes = TableQuery[DBWeekTimesTable]
 
   def breakfastTimes: ForeignKeyQuery[DBWeekTimesTable, DBWeekTimes] = foreignKey("breakfast_fk", breakfastFK, weekTimes)(
-    (weekTT: DBWeekTimesTable) => weekTT.id,
+    (weekTT: DBWeekTimesTable) => weekTT.id.?,
     // We want to delete a user's week times if he/she deletes his account
     onDelete = ForeignKeyAction.Cascade
   )
 
   def lunchTimes: ForeignKeyQuery[DBWeekTimesTable, DBWeekTimes] = foreignKey("lunch_fk", lunchFK, weekTimes)(
-    (weekTT: DBWeekTimesTable) => weekTT.id,
+    (weekTT: DBWeekTimesTable) => weekTT.id.?,
     // We want to delete a user's week times if he/she deletes his account
     onDelete = ForeignKeyAction.Cascade
   )
 
   def dinnerTimes: ForeignKeyQuery[DBWeekTimesTable, DBWeekTimes] = foreignKey("dinner_fk", dinnerFK, weekTimes)(
-    (weekTT: DBWeekTimesTable) => weekTT.id,
+    (weekTT: DBWeekTimesTable) => weekTT.id.?,
     // We want to delete a user's week times if he/she deletes his account
     onDelete = ForeignKeyAction.Cascade
   )

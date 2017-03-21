@@ -1,6 +1,5 @@
 package controllers
 
-import java.util.UUID
 import javax.inject.Inject
 
 import auth.CookieEnv
@@ -10,10 +9,15 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
 import views.FriendsView
 
+import scala.concurrent.Future
+
 class FriendsController @Inject()(val messagesApi: MessagesApi, friends: FriendsView, silhouette: Silhouette[CookieEnv])
   extends Controller with I18nSupport {
 
-  def index: Action[AnyContent] = silhouette.SecuredAction.async {
-    implicit request => friends.index(request.identity).map(Ok(_))
+  def index: Action[AnyContent] = silhouette.UserAwareAction.async {
+    implicit request => request.identity match {
+      case Some(user) => friends.index(user).map(Ok(_))
+      case None => Future.successful(Redirect(routes.SignInController.index()))
+    }
   }
 }

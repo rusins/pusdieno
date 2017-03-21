@@ -1,10 +1,9 @@
 package views
 
-import java.util.UUID
 import javax.inject.Inject
 
 import controllers.routes
-import models.User
+import models.{Cafe, Eatery, User}
 import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
 import play.twirl.api.{Html, HtmlFormat}
@@ -58,10 +57,10 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
           ),
           ol(cls := "list", style := "list-style-type: none; padding-left: 0px;")(
             if (section == "eateries") {
-              //db.run(TableQuery[EateryChoiceTable] += Choice(user = user.id, eatery = UUID.fromString("00000000-0000-0000-0000-000000000000")))
-              val user = userO.getOrElse(User(UUID.fromString("00000000-0000-0000-0000-000000000000"), "Public",
-                Some(25576439), Some("pusdieno@krikis.org"), WeekPlan.empty))
-              val friendChoices = Await.result(choices.friendChoiceMap(user), 5 seconds)
+              val friendChoices = userO match {
+                case Some(user) => Await.result(choices.friendEateryChoiceMap(user), 5 seconds)
+                case None => Map[String,Seq[User]]()
+              }
 
               Await.result(eateries.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
                 sortBy(chain => messages("eateries." + chain._1)).map(chain =>

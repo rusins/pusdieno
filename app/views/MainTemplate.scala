@@ -52,9 +52,9 @@ object MainTemplate {
             li(cls := (section == "friends").?("active", ""))(a(href := "/friends")(messages("friends"))),
             li(cls := (section == "randomizer").?("active", ""))(a(href := "randomizer")(messages("randomizer")))
           ),
-          SeqFrag(if (showSignInButton) Seq() else
+          SeqFrag(if (!showSignInButton) Seq() else
             Seq(form(cls := "navbar-form navbar-left", action := "https://forms.google.com/kaukas")(
-              button(`type` := "submit", cls := "btn btn-success")(messages("welcome.form"))
+              button(`type` := "submit", cls := "btn btn-success")(messages("signin"))
             ))
           ),
           ul(cls := "nav navbar-nav navbar-right")(

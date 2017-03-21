@@ -5,28 +5,17 @@ import javax.inject.{Inject, Singleton}
 import models.Eatery
 import models.db._
 import play.api.db.slick.DatabaseConfigProvider
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import services.daos.Eateries._
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
 
 @Singleton
 class Eateries @Inject()(dbConfigProvider: DatabaseConfigProvider) {
 
-  private val eateries = TableQuery[DBEateryTable]
-  private val times = TableQuery[DBWeekTimesTable]
   private val db = dbConfigProvider.get[JdbcProfile].db
-
-  private def toEatery(dbEatery: DBEatery, opens: DBWeekTimes, closes: DBWeekTimes) =
-    Eatery(dbEatery.id, dbEatery.chainID, dbEatery.address, (opens.toWeekTimes, closes.toWeekTimes))
-
-  private def toDBEatery(eatery: Eatery): (DBEatery, DBWeekTimes, DBWeekTimes) = (
-    DBEatery(eatery.id, eatery.chainID, eatery.address, eatery.openHours._1.id, eatery.openHours._2.id),
-    eatery.openHours._1.toDB,
-    eatery.openHours._2.toDB
-  )
-
 
   def retrieveAll(): Future[Seq[Eatery]] = db.run(
     (for {
@@ -44,4 +33,18 @@ class Eateries @Inject()(dbConfigProvider: DatabaseConfigProvider) {
         times.insertOrUpdate(closes)
       )
   })
+}
+
+object Eateries {
+  private val eateries = TableQuery[DBEateryTable]
+  private val times = TableQuery[DBWeekTimesTable]
+
+  private def toEatery(dbEatery: DBEatery, opens: DBWeekTimes, closes: DBWeekTimes) =
+    Eatery(dbEatery.id, dbEatery.chainID, dbEatery.address, (WeekTimes.fromDB(opens), WeekTimes.fromDB(closes)))
+
+  private def toDBEatery(eatery: Eatery): (DBEatery, DBWeekTimes, DBWeekTimes) = (
+    DBEatery(eatery.id, eatery.chainID, eatery.address, eatery.openHours._1.id, eatery.openHours._2.id),
+    eatery.openHours._1.toDB,
+    eatery.openHours._2.toDB
+  )
 }

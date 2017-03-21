@@ -9,7 +9,12 @@ scalaVersion := "2.11.7"
 scalacOptions ++= Seq(
   "-feature",
   "-language:implicitConversions",
-  "-language:postfixOps")
+  "-language:postfixOps",
+  "-unchecked",
+  "-deprecation",
+  "-Yno-adapted-args",
+  "-Ywarn-dead-code"
+)
 
 resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
 
@@ -36,5 +41,5 @@ libraryDependencies ++= Seq(
 
 fork in run := true
 
-sources in (Compile, doc) := Seq.empty // These 2 lines disable including API documentation in the production build´
-publishArtifact in (Compile, packageDoc) := false
+sources in(Compile, doc) := Seq.empty // These 2 lines disable including API documentation in the production build´
+publishArtifact in(Compile, packageDoc) := false

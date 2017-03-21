@@ -1,23 +1,26 @@
 package controllers
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
+import auth.CookieEnv
+import com.mohiva.play.silhouette.api.Silhouette
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
 import views.WelcomeView
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-@Singleton
-class DefaultController @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport {
+import scala.concurrent.Future
+
+class DefaultController @Inject()(val messagesApi: MessagesApi, silhouette: Silhouette[CookieEnv]) extends Controller with I18nSupport {
   def welcome: Action[AnyContent] = Action.async {
     implicit request =>
       WelcomeView.index().map(Ok(_))
   }
 
-  def index = Action { implicit request =>
-    if (false) // TODO: User logged in
-      Redirect(routes.OverviewController.index())
-    else
-      Redirect(routes.DefaultController.welcome())
+  def index: Action[AnyContent] = silhouette.UserAwareAction.async {
+    implicit request => request.identity match {
+        case Some(user) => Future.successful(Redirect("/overview"))
+        case None => Future.successful(Redirect("/welcome"))
+      }
   }
 }
