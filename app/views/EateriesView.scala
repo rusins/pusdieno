@@ -1,33 +1,25 @@
 package views
 
 import java.util.UUID
-
-import scalacss.ScalatagsCss._
 import javax.inject.Inject
 
 import controllers.routes
-import models.WeekPlan
-
-import scalatags.Text.all._
-import models.db._
-import org.w3c.dom.html.HTMLStyleElement
-import play.api.db.slick.DatabaseConfigProvider
+import models.User
 import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
 import play.twirl.api.{Html, HtmlFormat}
 import services.daos.{Cafes, Choices, Contacts, Eateries}
-import slick.driver.JdbcProfile
-import slick.driver.PostgresDriver.api._
-import views.html.b3.inline.fieldConstructor
 import views.html.b3._
+import views.html.b3.inline.fieldConstructor
 import views.styles.{CommonStyleSheet, EateriesStyleSheet}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
+import scalacss.DevDefaults._
+import scalacss.ScalatagsCss._
 import scalatags.Text
 import scalatags.Text.TypedTag
-import scalacss.ScalatagsCss._
-import scalacss.DevDefaults._
+import scalatags.Text.all._
 
 class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes, contacts: Contacts) {
 

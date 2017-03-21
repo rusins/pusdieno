@@ -1,30 +1,55 @@
 package models.db
 
+import java.util.UUID
+
 import slick.driver.PostgresDriver.api._
+import slick.lifted.{ForeignKeyQuery, PrimaryKey, ProvenShape}
 
-trait AuthTables {
+case class DBLoginInfo(id: UUID = UUID.randomUUID(),
+                       providerID: String,
+                       providerKey: String,
+                       userID: UUID)
 
-  case class DBOAuth2Info(id: Option[Long],
-                           accessToken: String,
-                           tokenType: Option[String],
-                           expiresIn: Option[Int],
-                           refreshToken: Option[String],
-                           loginInfoId: Long)
+class DBLoginInfoTable(tag: Tag) extends Table[DBLoginInfo](tag, "login_info") {
+  def id: Rep[UUID] = column[UUID]("id", O.PrimaryKey)
 
-  class OAuth2Infos(tag: Tag) extends Table[DBOAuth2Info](tag, "oauth2info") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+  def providerID: Rep[String] = column[String]("provider_id")
 
-    def accessToken = column[String]("accesstoken")
+  def providerKey: Rep[String] = column[String]("provider_key")
 
-    def tokenType = column[Option[String]]("tokentype")
+  def userID: Rep[UUID] = column[UUID]("user_id")
 
-    def expiresIn = column[Option[Int]]("expiresin")
+  def * : ProvenShape[DBLoginInfo] = (id, providerID, providerKey, userID) <> (DBLoginInfo.tupled, DBLoginInfo.unapply)
+}
 
-    def refreshToken = column[Option[String]]("refreshtoken")
+case class DBOAuth2Info(id: UUID,
+                        loginInfoFK: UUID,
+                        accessToken: String,
+                        tokenType: Option[String],
+                        expiresIn: Option[Int],
+                        refreshToken: Option[String])
 
-    def loginInfoId = column[Long]("logininfoid")
+class DBOAuth2InfoTable(tag: Tag) extends Table[DBOAuth2Info](tag, "oauth2info") {
+  def id: Rep[UUID] = column[UUID]("id", O.PrimaryKey)
 
-    def * = (id.?, accessToken, tokenType, expiresIn, refreshToken, loginInfoId) <> (DBOAuth2Info.tupled, DBOAuth2Info.unapply)
-  }
+  def loginInfoFK: Rep[UUID] = column[UUID]("login_info_fk")
 
+  def accessToken: Rep[String] = column[String]("access_token")
+
+  def tokenType: Rep[Option[String]] = column[Option[String]]("token_type")
+
+  def expiresIn: Rep[Option[Int]] = column[Option[Int]]("expires_in")
+
+  def refreshToken: Rep[Option[String]] = column[Option[String]]("refresh_token")
+
+  def * : ProvenShape[DBOAuth2Info] = (id, loginInfoFK, accessToken, tokenType, expiresIn, refreshToken) <>
+    (DBOAuth2Info.tupled, DBOAuth2Info.unapply)
+
+  def loginInfo: ForeignKeyQuery[DBLoginInfoTable, DBLoginInfo] =
+    foreignKey("login_info_fk", loginInfoFK, TableQuery[DBLoginInfoTable])(
+      (loginIT: DBLoginInfoTable) => loginIT.id,
+      // We want to delete the auth info if the login info gets deleted or changed
+      onDelete = ForeignKeyAction.Cascade,
+      onUpdate = ForeignKeyAction.Cascade
+    )
 }

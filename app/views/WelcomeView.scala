@@ -1,10 +1,11 @@
 package views
 
+import controllers.routes
 import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
 import play.twirl.api.Html
-import scalatags.Text.all._
 
+import scalatags.Text.all._
 import scala.concurrent.{ExecutionContext, Future}
 
 object WelcomeView {
@@ -19,7 +20,7 @@ object WelcomeView {
           div(cls := "jumbotron", color := "#FFFFFF", backgroundColor := "rgba(0, 0, 0, 0.7)")(
             h1(color := "#FFFFFF")("Pusdieno!"),
             p(messages("welcome.text") + messages("welcome.extra")),
-            p(a(cls := "btn btn-success btn-lg", href := "https://forms.google.com/kaukas")(messages("welcome.form")))
+            p(a(cls := "btn btn-success btn-lg", href := routes.SignInController.index().url)(messages("signin")))
           )
         )
       )

@@ -2,7 +2,8 @@ package services.daos
 
 import javax.inject.{Inject, Singleton}
 
-import models.db.{Cafe, CafeTable}
+import models.Cafe
+import models.db.{DBCafe, DBCafeTable, DBWeekTimes, WeekTimes}
 import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
@@ -13,10 +14,18 @@ import scala.concurrent.Future
 @Singleton
 class Cafes @Inject()(dbConfigProvider: DatabaseConfigProvider) {
 
-  private val cafes = TableQuery[CafeTable]
-
+  private val cafes = TableQuery[DBCafeTable]
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
-  def retrieveAll(): Future[Seq[Cafe]] = db.run(cafes.result)
+  def fromDB(dbCafe: DBCafe, opens: DBWeekTimes, closes: DBWeekTimes): Cafe =
+    Cafe(dbCafe.id, dbCafe.chainID, dbCafe.address, (opens.toWeekTimes, closes.toWeekTimes))
+
+  def retrieveAll(): Future[Seq[Cafe]] = db.run(
+    (for {
+      cafe <- cafes
+      opens <- cafe.openTimes
+      closes <- cafe.closeTimes
+    } yield (cafe, opens, closes)).result
+  ).map(_.map((fromDB _).tupled))
 }

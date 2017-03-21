@@ -21,6 +21,7 @@ import play.api.Configuration
 import services._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.WSClient
+import services.daos.Users
 
 /**
   * This class is a Guice module that tells Guice how to bind several
@@ -44,7 +45,7 @@ class Module extends AbstractModule with ScalaModule {
 
     // Silhouette
     bind[Silhouette[CookieEnv]].to[SilhouetteProvider[CookieEnv]]
-    bind[UserService].to[UserServiceImpl]
+    bind[Users].to[Users]
 
     bind[Clock].toInstance(Clock())
     bind[FingerprintGenerator].toInstance(new DefaultFingerprintGenerator(false))
@@ -53,7 +54,7 @@ class Module extends AbstractModule with ScalaModule {
   }
 
   @Provides
-  def provideEnvironment(userService: UserService,
+  def provideEnvironment(userService: Users,
                          authenticatorService: AuthenticatorService[CookieAuthenticator],
                          eventBus: EventBus): Environment[CookieEnv] = {
 

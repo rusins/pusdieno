@@ -11,10 +11,9 @@ import slick.model.Column
 
 import scala.concurrent.Future
 
-case class Contact(id: UUID = UUID.randomUUID(), ownerID: UUID, contactID: Option[UUID], contactPhone: Option[Int] = None,
+case class
+Contact(id: UUID = UUID.randomUUID(), ownerID: UUID, contactID: Option[UUID], contactPhone: Option[Int] = None,
                    contactEmail: Option[String] = None, favorite: Boolean = false)
-
-// TODO: Update with info if necessary when adding google and facebook APIs
 
 class ContactTable(tag: Tag) extends Table[Contact](tag, "contacts") {
 
@@ -30,18 +29,19 @@ class ContactTable(tag: Tag) extends Table[Contact](tag, "contacts") {
 
   def favorite: Rep[Boolean] = column[Boolean]("favorite")
 
-  def * : ProvenShape[Contact] = (id, ownerID, contactID, contactPhone, contactEmail, favorite) <> (Contact.tupled, Contact.unapply)
+  def * : ProvenShape[Contact] = (id, ownerID, contactID, contactPhone, contactEmail, favorite) <>
+    (Contact.tupled, Contact.unapply)
 
-  def belongsTo: ForeignKeyQuery[UserTable, User] =
-    foreignKey("owner_fk", ownerID, TableQuery[UserTable])(
-      (userT: UserTable) => userT.id,
+  def belongsTo: ForeignKeyQuery[DBUserTable, DBUser] =
+    foreignKey("owner_fk", ownerID, TableQuery[DBUserTable])(
+      (userT: DBUserTable) => userT.id,
       // We want to delete a user's .contacts once the user had been deleted
       onDelete = ForeignKeyAction.Cascade
     )
 
-  def pointsTo: ForeignKeyQuery[UserTable, User] =
-    foreignKey("contact_fk", contactID, TableQuery[UserTable])(
-      (userT: UserTable) => userT.id.?,
+  def pointsTo: ForeignKeyQuery[DBUserTable, DBUser] =
+    foreignKey("contact_fk", contactID, TableQuery[DBUserTable])(
+      (userT: DBUserTable) => userT.id.?,
       // When a contact is deleted, we still want to keep the reference in case he joins back
       onDelete = ForeignKeyAction.SetNull
     )

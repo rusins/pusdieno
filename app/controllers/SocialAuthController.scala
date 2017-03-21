@@ -9,14 +9,14 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfileBuilder, SocialProvider, SocialProviderRegistry}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Controller}
-import services.UserService
-
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import services.daos.Users
+
 import scala.concurrent.Future
 
 class SocialAuthController @Inject()(val messagesApi: MessagesApi,
                                      silhouette: Silhouette[CookieEnv],
-                                     userService: UserService,
+                                     userService: Users,
                                      authInfoRepository: AuthInfoRepository,
                                      socialProviderRegistry: SocialProviderRegistry)
   extends Controller with I18nSupport with Logger {

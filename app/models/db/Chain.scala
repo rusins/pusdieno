@@ -5,6 +5,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
+import slick.lifted.ProvenShape
 
 import scala.concurrent.Future
 
@@ -18,5 +19,5 @@ class ChainTable(tag: Tag) extends Table[Chain](tag, "chains") {
 
   def menu: Rep[Option[String]] = column[Option[String]]("menu")
 
-  def * = (id, website, menu) <> (Chain.tupled, Chain.unapply)
+  def * : ProvenShape[Chain] = (id, website, menu) <> (Chain.tupled, Chain.unapply)
 }

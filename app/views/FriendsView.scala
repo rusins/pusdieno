@@ -2,10 +2,7 @@ package views
 
 import javax.inject.Inject
 
-import controllers.routes
-import models.WeekPlan
-
-import scalatags.Text.all._
+import models.User
 import models.db._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.{Lang, Messages}
@@ -13,15 +10,16 @@ import play.api.mvc.RequestHeader
 import play.twirl.api.Html
 import services.daos.Contacts
 import slick.driver.JdbcProfile
-import slick.lifted.TableQuery
 import slick.driver.PostgresDriver.api._
+import slick.lifted.TableQuery
 import views.styles.FriendsStyleSheet
 
-import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
-import scalacss.ScalatagsCss._
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scalacss.DevDefaults._
+import scalacss.ScalatagsCss._
 import scalatags.Text.TypedTag
+import scalatags.Text.all._
 
 class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfigProvider) {
 
@@ -95,7 +93,7 @@ class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfig
 
         val friends: Seq[(User, Boolean, Boolean, Boolean)] = Await.result(db.run(
           (for {
-            (c: ContactTable, f: UserTable) <- contacts.friendsOfUserAction(user.id)
+            (c: ContactTable, f: DBUserTable) <- contacts.friendsOfUserAction(user.id)
           } yield (f, c.favorite, eateryChoices.filter(_.user === f.id).exists, cafeChoices.filter(_.user === f.id).exists)).result
         ), 5 seconds)
 

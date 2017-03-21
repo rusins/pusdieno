@@ -1,111 +1,90 @@
 package services.daos
 
+import java.util.UUID
+
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.providers.OAuth2Info
 import javax.inject.Inject
 
 import com.mohiva.play.silhouette.persistence.daos.DelegableAuthInfoDAO
+import models.db._
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.db.slick.DatabaseConfigProvider
-
+import slick.dbio.Effect.{Read, Transactional, Write}
+import slick.driver
+import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.Future
-/*
+
 /**
   * The DAO to store the OAuth2 information.
   */
-class OAuth2InfoDAO @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
+class OAuth2InfoDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   extends DelegableAuthInfoDAO[OAuth2Info] {
 
-  protected def oAuth2InfoQuery(loginInfo: LoginInfo) = for {
-    dbLoginInfo <- loginInfoQuery(loginInfo)
-    dbOAuth2Info <- slickOAuth2Infos if dbOAuth2Info.loginInfoId === dbLoginInfo.id
-  } yield dbOAuth2Info
+  private val db = dbConfigProvider.get[JdbcProfile].db
+  private val logins = TableQuery[DBLoginInfoTable]
+  private val oAuth2Infos = TableQuery[DBOAuth2InfoTable]
+
+  def toOAuth2Info(i: DBOAuth2Info) = OAuth2Info(i.accessToken, i.tokenType, i.expiresIn, i.refreshToken)
+
+  private def loginQuery(loginInfo: LoginInfo): Query[DBLoginInfoTable, DBLoginInfo, Seq] =
+    logins.filter(l => l.providerID === loginInfo.providerID && l.providerKey === loginInfo.providerKey)
 
   // Use subquery workaround instead of join to get authinfo because slick only supports selecting
   // from a single table for update/delete queries (https://github.com/slick/slick/issues/684).
-  protected def oAuth2InfoSubQuery(loginInfo: LoginInfo) =
-  slickOAuth2Infos.filter(_.loginInfoId in loginInfoQuery(loginInfo).map(_.id))
+  private def oAuth2InfoSubQuery(loginInfo: LoginInfo) = oAuth2Infos.filter(_.id in loginQuery(loginInfo))
 
-  protected def addAction(loginInfo: LoginInfo, authInfo: OAuth2Info) =
-    loginInfoQuery(loginInfo).result.head.flatMap { dbLoginInfo =>
-      slickOAuth2Infos += DBOAuth2Info(
-        None,
-        authInfo.accessToken,
-        authInfo.tokenType,
-        authInfo.expiresIn,
-        authInfo.refreshToken,
-        dbLoginInfo.id.get)
-    }.transactionally
+  // Not sure why I need / have this too ¯\_(ツ)_/¯
+  private def oAuth2InfoQuery(loginInfo: LoginInfo): DBIOAction[Option[DBOAuth2Info], NoStream, Read] = for {
+    dbLoginO: Option[DBLoginInfo] <- loginQuery(loginInfo).result
+    dbLogin: DBLoginInfo <- dbLoginO
+    oAuth2InfoO: Option[DBOAuth2Info] <- oAuth2Infos.filter(_.loginInfoFK === dbLogin.id).result.headOption
+  } yield oAuth2InfoO
 
-  def updateAction(loginInfo: LoginInfo, authInfo: OAuth2Info) =
-    oAuth2InfoSubQuery(loginInfo).
-      map(dbOAuth2Info => (dbOAuth2Info.accessToken, dbOAuth2Info.tokenType, dbOAuth2Info.expiresIn, dbOAuth2Info.refreshToken)).
+  private def addAction(loginInfo: LoginInfo, authInfo: OAuth2Info) = for {
+    dbLoginO: Option[DBLoginInfo] <- loginQuery(loginInfo).result.headOption
+    dbLogin: DBLoginInfo <- dbLoginO
+    res <- oAuth2Infos += DBOAuth2Info(UUID.randomUUID(), dbLogin.id, authInfo.accessToken, authInfo.tokenType,
+      authInfo.expiresIn, authInfo.refreshToken)
+  } yield res.result.transactionally
+
+
+  private def updateAction(loginInfo: LoginInfo, authInfo: OAuth2Info) =
+    oAuth2InfoSubQuery(loginInfo).map(
+      dbAuth2Info => (dbAuth2Info.accessToken, dbAuth2Info.tokenType, dbAuth2Info.expiresIn, dbAuth2Info.refreshToken)).
       update((authInfo.accessToken, authInfo.tokenType, authInfo.expiresIn, authInfo.refreshToken))
 
-  /**
-    * Finds the auth info which is linked with the specified login info.
-    *
-    * @param loginInfo The linked login info.
-    * @return The retrieved auth info or None if no auth info could be retrieved for the given login info.
-    */
-  def find(loginInfo: LoginInfo): Future[Option[OAuth2Info]] = {
-    val result = db.run(oAuth2InfoQuery(loginInfo).result.headOption)
-    result.map { dbOAuth2InfoOption =>
-      dbOAuth2InfoOption.map { dbOAuth2Info =>
-        OAuth2Info(dbOAuth2Info.accessToken, dbOAuth2Info.tokenType, dbOAuth2Info.expiresIn, dbOAuth2Info.refreshToken)
-      }
-    }
-  }
+
+  override def find(loginInfo: LoginInfo): Future[Option[OAuth2Info]] =
+    db.run(oAuth2InfoQuery(loginInfo)).map(_.map(toOAuth2Info))
 
   /**
-    * Adds new auth info for the given login info.
-    *
-    * @param loginInfo The login info for which the auth info should be added.
-    * @param authInfo The auth info to add.
-    * @return The added auth info.
-    */
-  def add(loginInfo: LoginInfo, authInfo: OAuth2Info): Future[OAuth2Info] =
+    * ONLY SAVES
+    **/
+  override def add(loginInfo: LoginInfo, authInfo: OAuth2Info): Future[OAuth2Info] =
     db.run(addAction(loginInfo, authInfo)).map(_ => authInfo)
 
-  /**
-    * Updates the auth info for the given login info.
-    *
-    * @param loginInfo The login info for which the auth info should be updated.
-    * @param authInfo The auth info to update.
-    * @return The updated auth info.
-    */
-  def update(loginInfo: LoginInfo, authInfo: OAuth2Info): Future[OAuth2Info] =
+  override def update(loginInfo: LoginInfo, authInfo: OAuth2Info): Future[OAuth2Info] =
     db.run(updateAction(loginInfo, authInfo)).map(_ => authInfo)
 
   /**
-    * Saves the auth info for the given login info.
-    *
-    * This method either adds the auth info if it doesn't exists or it updates the auth info
-    * if it already exists.
-    *
-    * @param loginInfo The login info for which the auth info should be saved.
-    * @param authInfo The auth info to save.
-    * @return The saved auth info.
+    * SAVES IF DOESN'T EXIST, UPDATE OTHERWISE
     */
-  def save(loginInfo: LoginInfo, authInfo: OAuth2Info): Future[OAuth2Info] = {
+  override def save(loginInfo: LoginInfo, authInfo: OAuth2Info): Future[OAuth2Info] = {
+
     val query = for {
-      result <- loginInfoQuery(loginInfo).joinLeft(slickOAuth2Infos).on(_.id === _.loginInfoId)
+      result <- loginQuery(loginInfo).joinLeft(oAuth2Infos).on(_.id === _.loginInfoFK)
     } yield result
+
     val action = query.result.head.flatMap {
-      case (dbLoginInfo, Some(dbOAuth2Info)) => updateAction(loginInfo, authInfo)
-      case (dbLoginInfo, None)               => addAction(loginInfo, authInfo)
+      case (_, Some(_)) => updateAction(loginInfo, authInfo)
+      case (_, None) => addAction(loginInfo, authInfo)
     }.transactionally
+
     db.run(action).map(_ => authInfo)
   }
 
-  /**
-    * Removes the auth info for the given login info.
-    *
-    * @param loginInfo The login info for which the auth info should be removed.
-    * @return A future to wait for the process to be completed.
-    */
-  def remove(loginInfo: LoginInfo): Future[Unit] =
-    db.run(oAuth2InfoSubQuery(loginInfo).delete).map(_ => ())
-}*/
+  override def remove(loginInfo: LoginInfo): Future[Unit] = db.run(oAuth2InfoSubQuery(loginInfo).delete).map(_ => Unit)
+}

@@ -1,21 +1,15 @@
 package controllers
 
-import java.util.UUID
 import javax.inject.Inject
 
 import auth.CookieEnv
 import com.mohiva.play.silhouette.api.Silhouette
-import models.db.User
-import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.i18n.{I18nSupport, Lang, MessagesApi}
+import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
 import views.EateriesView
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import services.UserServiceOld
-
-import scala.concurrent.ExecutionContext
 
 case class EateryForm(eatery: String, status: String)
 
