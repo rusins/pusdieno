@@ -1,15 +1,9 @@
 package models.db
 
 import java.util.UUID
-import javax.inject.{Inject, Singleton}
 
-import play.api.db.slick.DatabaseConfigProvider
-import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
-import slick.lifted.{ForeignKeyQuery, ProvenShape, QueryBase, TableQuery}
-import slick.model.Column
-
-import scala.concurrent.Future
+import slick.lifted.{ForeignKeyQuery, ProvenShape, TableQuery}
 
 case class
 Contact(id: UUID = UUID.randomUUID(), ownerID: UUID, contactID: Option[UUID], contactPhone: Option[Int] = None,
@@ -33,14 +27,14 @@ class ContactTable(tag: Tag) extends Table[Contact](tag, "contacts") {
     (Contact.tupled, Contact.unapply)
 
   def belongsTo: ForeignKeyQuery[DBUserTable, DBUser] =
-    foreignKey("owner_fk", ownerID, TableQuery[DBUserTable])(
+    foreignKey("owner_id", ownerID, TableQuery[DBUserTable])(
       (userT: DBUserTable) => userT.id,
       // We want to delete a user's .contacts once the user had been deleted
       onDelete = ForeignKeyAction.Cascade
     )
 
   def pointsTo: ForeignKeyQuery[DBUserTable, DBUser] =
-    foreignKey("contact_fk", contactID, TableQuery[DBUserTable])(
+    foreignKey("contact_id", contactID, TableQuery[DBUserTable])(
       (userT: DBUserTable) => userT.id.?,
       // When a contact is deleted, we still want to keep the reference in case he joins back
       onDelete = ForeignKeyAction.SetNull

@@ -23,14 +23,14 @@ class Eateries @Inject()(dbConfigProvider: DatabaseConfigProvider) {
       opens <- e.openTimes
       closes <- e.closeTimes
     } yield (e, opens, closes)).result
-  ).map(_.map((toEatery _).tupled))
+  ).map(_.map((Eatery.fromDB _).tupled))
 
-  def add(eatery: Eatery): Future[Unit] = db.run(toDBEatery(eatery) match {
+  def add(eatery: Eatery): Future[Unit] = db.run(eatery.toDB match {
     case (dbEatery, opens, closes) =>
       DBIO.seq(
-        eateries += dbEatery,
-        times.insertOrUpdate(opens),
-        times.insertOrUpdate(closes)
+        times += opens,
+        times += closes,
+        eateries += dbEatery
       )
   })
 }
@@ -38,13 +38,4 @@ class Eateries @Inject()(dbConfigProvider: DatabaseConfigProvider) {
 object Eateries {
   private val eateries = TableQuery[DBEateryTable]
   private val times = TableQuery[DBWeekTimesTable]
-
-  private def toEatery(dbEatery: DBEatery, opens: DBWeekTimes, closes: DBWeekTimes) =
-    Eatery(dbEatery.id, dbEatery.chainID, dbEatery.address, (WeekTimes.fromDB(opens), WeekTimes.fromDB(closes)))
-
-  private def toDBEatery(eatery: Eatery): (DBEatery, DBWeekTimes, DBWeekTimes) = (
-    DBEatery(eatery.id, eatery.chainID, eatery.address, eatery.openHours._1.id, eatery.openHours._2.id),
-    eatery.openHours._1.toDB,
-    eatery.openHours._2.toDB
-  )
 }

@@ -23,65 +23,66 @@ import scalatags.Text.all._
 class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes, contacts: Contacts) {
 
   def index(section: String, userO: Option[User])(implicit messages: Messages, lang: Lang,
-                                         request: RequestHeader, ec: ExecutionContext): Future[Html] =
-    MainTemplate(messages("eateries"), "eateries", SeqFrag(Seq(
-      //script(src := "http://malsup.github.com/jquery.form.js"),
+                                                  request: RequestHeader, ec: ExecutionContext): Future[Html] = {
+    val headers = Seq(
       script(src := "/assets/javascripts/jquery.form.js"),
       script(src := "/assets/javascripts/eateries.js"),
       script(src := "/assets/javascripts/list.min.js"),
       script(src := "/assets/javascripts/list.fuzzysearch.min.js"),
       script(src := "/assets/javascripts/popup.js"),
       EateriesStyleSheet.render[scalatags.Text.TypedTag[String]],
-      CommonStyleSheet.render[scalatags.Text.TypedTag[String]]
-    )), SeqFrag(Seq(
-      div(cls := "container", style := "padding-top: 10px;")(
-        div(id := "eatery-list")(
-          div(cls := "panel  panel-default panel-body", style := "padding-top: 0px;")(
-            ol(cls := "nav nav-pills" /*,style := "display: table; margin-left: auto; margin-right: auto;"*/)(
-              li(style := "margin-top: 15px;", cls := {
-                if (section == "eateries") "active" else ""
-              })(
-                a(href := "/eateries")(messages("eateries"))
-              ),
-              li(style := "margin-top: 15px;", cls := {
-                if (section == "cafes") "active" else ""
-              })(
-                a(href := "/cafes")(
-                  messages("cafes")
-                )
-              ),
-              li(style := "margin-top: 15px; float: right;")(
-                input(cls := "fuzzy-search form-control", `type` := "text", placeholder := messages("search"))
-              )
-            )
-          ),
-          ol(cls := "list", style := "list-style-type: none; padding-left: 0px;")(
-            if (section == "eateries") {
-              val friendChoices = userO match {
-                case Some(user) => Await.result(choices.friendEateryChoiceMap(user), 5 seconds)
-                case None => Map[String,Seq[User]]()
-              }
+      CommonStyleSheet.render[scalatags.Text.TypedTag[String]])
 
-              Await.result(eateries.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
-                sortBy(chain => messages("eateries." + chain._1)).map(chain =>
-                displayEatery(chain, friendChoices.getOrElse(chain._1, Seq())))
-            }
-            else
-              Await.result(cafes.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
-                sortBy(chain => messages("cafes." + chain._1)).map(displayCafe)
+    val body = div(cls := "container", style := "padding-top: 10px;")(
+      div(id := "eatery-list")(
+        div(cls := "panel  panel-default panel-body", style := "padding-top: 0px;")(
+          ol(cls := "nav nav-pills" /*,style := "display: table; margin-left: auto; margin-right: auto;"*/)(
+            li(style := "margin-top: 15px;", cls := {
+              if (section == "eateries") "active" else ""
+            })(
+              a(href := "/eateries")(messages("eateries"))
+            ),
+            li(style := "margin-top: 15px;", cls := {
+              if (section == "cafes") "active" else ""
+            })(
+              a(href := "/cafes")(
+                messages("cafes")
+              )
+            ),
+            li(style := "margin-top: 15px; float: right;")(
+              input(cls := "fuzzy-search form-control", `type` := "text", placeholder := messages("search"))
+            )
           )
         ),
-        script(raw(
-          """
-            |var options = {
-            |  valueNames: [ 'name', 'address' ],
-            |  plugins: [ ListFuzzySearch() ]
-            |};
-            |
-            |var eateryList = new List('eatery-list', options);
-          """.stripMargin))
-      ))
-    ))
+        ol(cls := "list", style := "list-style-type: none; padding-left: 0px;")(
+          if (section == "eateries") {
+            val friendChoices = userO match {
+              case Some(user) => Await.result(choices.friendEateryChoiceMap(user), 5 seconds)
+              case None => Map[String, Seq[User]]()
+            }
+
+            Await.result(eateries.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
+              sortBy(chain => messages("eateries." + chain._1)).map(chain =>
+              displayEatery(chain, friendChoices.getOrElse(chain._1, Seq())))
+          }
+          else
+            Await.result(cafes.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
+              sortBy(chain => messages("cafes." + chain._1)).map(displayCafe)
+        )
+      ),
+      script(raw(
+        """
+          |var options = {
+          |  valueNames: [ 'name', 'address' ],
+          |  plugins: [ ListFuzzySearch() ]
+          |};
+          |
+          |var eateryList = new List('eatery-list', options);
+        """.stripMargin))
+    )
+
+    MainTemplate(messages("eateries"), "eateries", headers, body, showSignInButton = userO.isEmpty)
+  }
 
   implicit def StringToHtml(s: String): Html = Html(s)
 
@@ -150,4 +151,5 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
   }
 
 }
+
 // TODO: clickable phone number

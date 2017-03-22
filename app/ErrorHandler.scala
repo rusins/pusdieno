@@ -21,11 +21,11 @@ class ErrorHandler @Inject()(env: Environment,
 
   override def onProdServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
     implicit val requestHeader = request
-    ErrorView(Messages("error.server"), exception.getMessage).map(InternalServerError(_))
+    ErrorView(Messages("error.server"), exception.getMessage, "server_error").map(InternalServerError(_))
   }
 
   override def onForbidden(request: RequestHeader, message: String): Future[Result] = {
     implicit val requestHeader = request
-    ErrorView(Messages("error.forbidden_access"), message).map(Forbidden(_))
+    ErrorView(Messages("error.forbidden_access"), message, "unauthorized_error").map(Forbidden(_))
   }
 }

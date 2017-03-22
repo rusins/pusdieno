@@ -9,7 +9,7 @@ import scalatags.Text.all._
 
 object ErrorView {
 
-  def apply(errorTitle: String, errorMessage: String)(implicit request: RequestHeader,
+  def apply(errorTitle: String, errorMessage: String, image: String)(implicit request: RequestHeader,
                                                       messages: Messages,
                                                       lang: Lang,
                                                       ec: ExecutionContext): Future[Html] = {
@@ -17,10 +17,17 @@ object ErrorView {
     val headers = UnitFrag(Unit)
 
     val body = div(`class` := "content", paddingTop := 100)(
-      div(`class` := "alert alert-danger")(
-        strong(errorTitle),
-        br,
-        textarea(errorMessage)
+      div(`class` := "row")(
+        div(`class` := "col-md-6")(
+          div(`class` := "alert alert-danger center-block")(
+            strong(errorTitle),
+            br,
+            textarea(errorMessage)
+          )
+        ),
+        div(`class` := "col-md-6")(
+          img(src := s"/assets/images/$image.png", `class` := "img-responsive center-block")
+        )
       )
     )
 
@@ -34,11 +41,18 @@ object ErrorView {
     val headers = UnitFrag(Unit)
 
     val body = div(`class` := "content", paddingTop := 100)(
-      strong(paddingTop := 100)(messages("error.unimplemented")),
-      optionalMessage match {
-        case Some(message) => message
-        case None => UnitFrag(Unit)
-      }
+      div(`class` := "row")(
+        div(`class` := "col-md-6")(
+          strong(paddingTop := 100)(messages("error.unimplemented")),
+          optionalMessage match {
+            case Some(message) => message
+            case None => UnitFrag(Unit)
+          }
+        ),
+        div(`class` := "col-md-6")(
+          img(src := "/assets/images/server_error.png", `class` := "img-responsive center-block")
+        )
+      )
     )
 
     MainTemplate.apply("Page not found", "error", headers, body)

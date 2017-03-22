@@ -5,8 +5,11 @@ import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
 import play.twirl.api.Html
 import views.html.helper.CSRF
+import views.styles.CommonStyleSheet
 
 import scala.concurrent.{ExecutionContext, Future}
+import scalacss.ProdDefaults._
+import scalacss.ScalatagsCss._
 import scalatags.Text._
 import scalatags.Text.all._
 
@@ -19,7 +22,7 @@ object MainTemplate {
   implicit def BoolToIfBool(value: Boolean): IfBoolean = new IfBoolean(value)
 
 
-  def apply(pageTitle: String, section: String, headContent: Frag, bodyContent: Frag, showSignInButton: Boolean = false)(
+  def apply(pageTitle: String, section: String, headContent: Frag, bodyContent: Frag, showSignInButton: Boolean = true)(
     implicit request: RequestHeader, messages: Messages, lang: Lang, ec: ExecutionContext): Future[Html] = Future(
     Html(all.html(
     head(
@@ -31,6 +34,7 @@ object MainTemplate {
       script(src := "/assets/javascripts/jquery-3.1.1.min.js"),
       script(src := "/assets/javascripts/bootstrap.min.js"),
       link(rel := "stylesheet", media := "screen", href := "/assets/stylesheets/navbar-main.css"),
+      CommonStyleSheet.render[scalatags.Text.TypedTag[String]],
       headContent
     ),
     body(paddingTop := 60)(

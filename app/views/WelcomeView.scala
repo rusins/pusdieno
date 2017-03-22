@@ -5,8 +5,8 @@ import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
 import play.twirl.api.Html
 
-import scalatags.Text.all._
 import scala.concurrent.{ExecutionContext, Future}
+import scalatags.Text.all._
 
 object WelcomeView {
 
@@ -19,13 +19,13 @@ object WelcomeView {
         div(cls := "container")(
           div(cls := "jumbotron", color := "#FFFFFF", backgroundColor := "rgba(0, 0, 0, 0.7)")(
             h1(color := "#FFFFFF")("Pusdieno!"),
-            p(messages("welcome.text") + messages("welcome.extra")),
+            p(messages("welcome.text")),
             p(a(cls := "btn btn-success btn-lg", href := routes.SignInController.index().url)(messages("signin")))
           )
         )
       )
     ))
-    MainTemplate("Pusdieno", "welcome", theHead, theBody)
+    MainTemplate("Pusdieno", "welcome", theHead, theBody, showSignInButton = false)
   }
 
 }

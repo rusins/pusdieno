@@ -5,6 +5,7 @@ import javax.inject.{Inject, Singleton}
 import models.Eatery
 import models.db._
 import play.api.db.slick.DatabaseConfigProvider
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import services.daos.Eateries
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
@@ -15,10 +16,12 @@ import scala.concurrent.{Await, Future}
 @Singleton
 class DatabasePopulator @Inject()(dbConfigProvider: DatabaseConfigProvider, eateries: Eateries) {
 
+  println("Populating Database")
+
   private val db = dbConfigProvider.get[JdbcProfile].db
   private val chains = TableQuery[ChainTable]
 
-  private val closed = (WeekTimes.empty, WeekTimes.empty)
+  private def closed = (WeekTimes.empty, WeekTimes.empty)
 
   private val subway = Eatery(chainID = "subway", address = "Raiņa Bulvāris 7", openHours = closed)
   private val pankukas = Eatery(chainID = "pankukas", address = "9/11 memorial site, NY, USA", openHours = closed)
@@ -49,11 +52,15 @@ class DatabasePopulator @Inject()(dbConfigProvider: DatabaseConfigProvider, eate
     chains += Chain(id = "himalaji")
   )
 
-  Await.result(initialFuture, Duration.Inf)
-  eateries.add(subway)
-  eateries.add(pankukas)
-  eateries.add(kfc)
-  eateries.add(pelmeni)
-  eateries.add(mcdonalds)
-  eateries.add(himalaji)
+  Await.result(initialFuture
+    .flatMap(_ => eateries.add(subway))
+    .flatMap(_ => eateries.add(pankukas))
+    .flatMap(_ => eateries.add(kfc))
+    .flatMap(_ => eateries.add(pelmeni))
+    .flatMap(_ => eateries.add(mcdonalds))
+    .flatMap(_ => eateries.add(himalaji))
+    , Duration.Inf
+  )
+
+
 }

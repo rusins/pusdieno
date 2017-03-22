@@ -1,15 +1,9 @@
 package models.db
 
 import java.util.UUID
-import javax.inject.{Inject, Singleton}
 
-import play.api.db.slick.DatabaseConfigProvider
-import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
-
-import scala.concurrent.Future
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 case class Choice(id: UUID = UUID.randomUUID(), user: UUID, eatery: UUID)
 
@@ -23,13 +17,13 @@ class EateryChoiceTable(tag: Tag) extends Table[Choice](tag, "eatery_choices") {
 
   def * : ProvenShape[Choice] = (id, user, eatery) <> (Choice.tupled, Choice.unapply)
 
-  def belongsTo: ForeignKeyQuery[DBUserTable, DBUser] = foreignKey("usr_fk", user, TableQuery[DBUserTable])(
+  def belongsTo: ForeignKeyQuery[DBUserTable, DBUser] = foreignKey("usr", user, TableQuery[DBUserTable])(
     (userT: DBUserTable) => userT.id,
     // We want to delete a user's choices if he deletes his account
     onDelete = ForeignKeyAction.Cascade
   )
 
-  def pointsTo: ForeignKeyQuery[DBEateryTable, DBEatery] = foreignKey("eatery_fk", eatery, TableQuery[DBEateryTable])(
+  def pointsTo: ForeignKeyQuery[DBEateryTable, DBEatery] = foreignKey("eatery", eatery, TableQuery[DBEateryTable])(
     (eateryT: DBEateryTable) => eateryT.id,
     // We want to delete people going to that eatery if it gets deleted
     onDelete = ForeignKeyAction.Cascade

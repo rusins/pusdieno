@@ -5,13 +5,13 @@ import controllers.routes
 import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
 import play.twirl.api.Html
-import views.styles.{CommonStyleSheet, SignInStyleSheet}
+import views.styles.SignInStyleSheet
 
-import scalatags.Text.all._
 import scala.concurrent.{ExecutionContext, Future}
-import scalatags.Text
 import scalacss.DevDefaults._
 import scalacss.ScalatagsCss._
+import scalatags.Text
+import scalatags.Text.all._
 
 object SignInView {
 
@@ -19,8 +19,7 @@ object SignInView {
            (implicit request: RequestHeader, messages: Messages, lang: Lang, ec: ExecutionContext): Future[Html] = {
 
     val headers = Seq(
-      SignInStyleSheet.render[scalatags.Text.TypedTag[String]],
-      CommonStyleSheet.render[scalatags.Text.TypedTag[String]]
+      SignInStyleSheet.render[scalatags.Text.TypedTag[String]]
     )
 
     val errorSpot: Frag = request.flash.get("error") match {
