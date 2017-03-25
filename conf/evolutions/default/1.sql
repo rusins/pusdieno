@@ -37,6 +37,16 @@ create table "login_info" (
 "user_id" UUID NOT NULL REFERENCES "users" ON DELETE CASCADE
 );
 
+create table "oauth2info" (
+"id" UUID NOT NULL PRIMARY KEY,
+"login_info" UUID NOT NULL REFERENCES "login_info" ON DELETE CASCADE ON UPDATE CASCADE,
+"access_token" VARCHAR NOT NULL,
+"token_type" VARCHAR,
+"expires_in" INTEGER,
+"refresh_token" VARCHAR
+);
+
+
 create table "chains" (
 "id" VARCHAR NOT NULL PRIMARY KEY,
 "website" VARCHAR,
@@ -71,3 +81,14 @@ create table "cafe_choices" (
 "cafe" UUID NOT NULL REFERENCES "cafes" ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+# --- !Downs
+drop table "week_times";
+drop table "users";
+drop table "contacts";
+drop table "login_info";
+drop table "oauth2info";
+drop table "chains";
+drop table "eateries";
+drop table "cafes";
+drop table "eatery_choices";
+drop table "cafe_choices";

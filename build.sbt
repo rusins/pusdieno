@@ -41,5 +41,5 @@ libraryDependencies ++= Seq(
 
 fork in run := true
 
-sources in(Compile, doc) := Seq.empty // These 2 lines disable including API documentation in the production build´
+sources in(Compile, doc) := Seq.empty // These 2 lines "should" disable including API documentation in the production build´
 publishArtifact in(Compile, packageDoc) := false
