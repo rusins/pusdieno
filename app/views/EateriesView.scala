@@ -81,7 +81,7 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
         """.stripMargin))
     )
 
-    MainTemplate(messages("eateries"), "eateries", headers, body, showSignInButton = userO.isEmpty)
+    MainTemplate(messages("eateries"), "eateries", headers, body, userO)
   }
 
   implicit def StringToHtml(s: String): Html = Html(s)

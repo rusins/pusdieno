@@ -31,8 +31,9 @@ object ErrorView {
       )
     )
 
-    MainTemplate.apply("Error", "error", headers, body)
+    MainTemplate.apply("Error", "error", headers, body, None)
   }
+
 
   def unimplemented(optionalMessage: Option[String] = None)(implicit request: RequestHeader,
                                                             messages: Messages,
@@ -55,6 +56,6 @@ object ErrorView {
       )
     )
 
-    MainTemplate.apply("Page not found", "error", headers, body)
+    MainTemplate.apply("Page not found", "error", headers, body, None)
   }
 }

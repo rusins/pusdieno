@@ -122,6 +122,6 @@ class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfig
       }
     )
 
-    MainTemplate(messages("friends"), "friends", theHead, theBody)
+    MainTemplate(messages("friends"), "friends", theHead, theBody, Some(user))
   }
 }

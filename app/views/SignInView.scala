@@ -45,6 +45,6 @@ object SignInView {
       errorSpot
     )
 
-    MainTemplate(messages("signin"), "signin", headers, body)
+    MainTemplate(messages("signin"), "signin", headers, body, None)
   }
 }

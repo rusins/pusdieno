@@ -25,7 +25,7 @@ object WelcomeView {
         )
       )
     ))
-    MainTemplate("Pusdieno", "welcome", theHead, theBody, showSignInButton = false)
+    MainTemplate("Pusdieno", "welcome", theHead, theBody, None)
   }
 
 }
