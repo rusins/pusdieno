@@ -40,15 +40,12 @@ class Contacts @Inject()(dbConfigProvider: DatabaseConfigProvider) {
 object Contacts {
   private val contacts = TableQuery[ContactTable]
 
-  def friendsOfUserAction(userID: Rep[UUID]): Query[ContactTable, Contact, Seq] = for {
+  def friendsOfUserAction(userID: Rep[UUID]) = for {
     c <- contacts.filter(_.ownerID === userID)
-    f <- contacts.filter(friend => friend.ownerID === c.contactID && friend.contactID === c.ownerID)
+    f <- contacts.filter(friend => friend.ownerID === c.contactID && friend.contactID === userID)
   } yield f
 
-  private def friendsWithContactInfoQuery(userID: UUID):
-  Query[(ContactTable,
-    (DBUserTable, Rep[Option[DBWeekTimesTable]], Rep[Option[DBWeekTimesTable]], Rep[Option[DBWeekTimesTable]])),
-    (Contact, (DBUser, Option[DBWeekTimes], Option[DBWeekTimes], Option[DBWeekTimes])), Seq] = for {
+  private def friendsWithContactInfoQuery(userID: UUID) = for {
     contact <- friendsOfUserAction(userID)
     userInfo <- Users.getFromId(contact.ownerID)
   } yield (contact, userInfo)

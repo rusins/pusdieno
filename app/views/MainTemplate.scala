@@ -56,7 +56,7 @@ object MainTemplate {
               li(cls := (section == "eateries").?("active", ""))(a(href := "/eateries")(messages("eateries"))),
               li(cls := (section == "friends").?("active", ""))(a(href := "/friends")(messages("friends")))
             ),
-            SeqFrag(if (userO.isEmpty) Seq() else
+            SeqFrag(if (userO.nonEmpty) Seq() else
               Seq(form(cls := "navbar-form navbar-left", action := routes.SignInController.index().url)(
                 button(`type` := "submit", cls := "btn btn-success")(messages("signin"))
               ))
@@ -94,16 +94,6 @@ object MainTemplate {
                       span(cls := "caret")
                     ),
                     ul(cls := "dropdown-menu", backgroundColor := "#eb6864")(
-                      li(form(action := "/changeLanguage", method := "POST", cls := "form-inline")(
-                        raw(CSRF.formField.body),
-                        SeqFrag(for ((code, language) <- (Languages.supported - lang.code).toSeq) yield li(
-                          button(`type` := "submit", name := "languageCode", value := code,
-                            paddingTop := 6, paddingRight := 20, paddingLeft := 20, border := 0, color := "#FFFFFF")(
-                            img(width := 2.em, src := s"/assets/images/flags/$code.png", alt := code),
-                            " " + language
-                          )
-                        ))
-                      )),
                       li(a()(messages("contacts"))),
                       li(a()(messages("settings"))),
                       li(a()(messages("signout")))

@@ -39,10 +39,11 @@ class SocialAuthController @Inject()(val messagesApi: MessagesApi,
             user <- userService.save(profile)
             authInfo <- authInfoRepository.save(profile.loginInfo, authInfo)
             authenticator <- silhouette.env.authenticatorService.create(profile.loginInfo)
-            value <- silhouette.env.authenticatorService.init(authenticator)
-            result <- silhouette.env.authenticatorService.embed(value, Redirect(routes.OverviewController.index()))
+            cookie <- silhouette.env.authenticatorService.init(authenticator)
+            result <- silhouette.env.authenticatorService.embed(cookie, Redirect(routes.EateriesController.eaterySelection()))
           } yield {
             silhouette.env.eventBus.publish(LoginEvent(user, request))
+            println(user.name + " logged in!")
             result
           }
         }

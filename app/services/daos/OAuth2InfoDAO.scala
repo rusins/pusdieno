@@ -45,6 +45,8 @@ class OAuth2InfoDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   }.transactionally
 
 
+  // RAITI - error ir jo head, un logins tabulā nekad nepievieno ierakstus
+
   private def updateAction(loginInfo: LoginInfo, authInfo: OAuth2Info) =
     oAuth2InfoSubQuery(loginInfo).map(
       dbAuth2Info => (dbAuth2Info.accessToken, dbAuth2Info.tokenType, dbAuth2Info.expiresIn, dbAuth2Info.refreshToken)).
@@ -77,7 +79,7 @@ class OAuth2InfoDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       case (_, None) => addAction(loginInfo, authInfo)
     }.transactionally
 
-    db.run(action).map(_ => authInfo)
+    db.run(action.named("Saving user in OAuth2InfoDAO")).map(_ => authInfo)
   }
 
   override def remove(loginInfo: LoginInfo): Future[Unit] = db.run(oAuth2InfoSubQuery(loginInfo).delete).map(_ => Unit)

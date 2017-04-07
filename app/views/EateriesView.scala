@@ -57,7 +57,7 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
         ol(cls := "list", style := "list-style-type: none; padding-left: 0px;")(
           if (section == "eateries") {
             val friendChoices = userO match {
-              case Some(user) => Await.result(choices.friendEateryChoiceMap(user), 5 seconds)
+              case Some(user) => Await.result(choices.friendEateryChoiceMap(user.id), 5 seconds)
               case None => Map[String, Seq[User]]()
             }
 

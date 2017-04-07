@@ -9,8 +9,6 @@ import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
 import play.twirl.api.Html
 import services.daos.Contacts
-import slick.driver.JdbcProfile
-import slick.lifted.TableQuery
 import views.styles.FriendsStyleSheet
 
 import scala.concurrent.duration._
@@ -23,12 +21,6 @@ import scalatags.Text.all._
 class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfigProvider) {
 
   // TODO: Separate tabs into individual web pages in order to support more users with faster load times
-
-  private val db = dbConfigProvider.get[JdbcProfile].db
-
-  private val eateryChoices = TableQuery[EateryChoiceTable]
-
-  private val cafeChoices = TableQuery[CafeChoiceTable]
 
   def index(user: User)(implicit messages: Messages, lang: Lang, request: RequestHeader, ec: ExecutionContext): Future[Html] = {
     val theHead = SeqFrag(Seq(

@@ -5,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.mohiva.play.silhouette.api.services.IdentityService
 import com.mohiva.play.silhouette.api.{Logger, LoginInfo}
-import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfile, SocialProviderRegistry}
+import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import models.db._
 import models.{EatsAt, User}
 import play.api.db.slick.DatabaseConfigProvider
@@ -19,8 +19,7 @@ import scala.concurrent.Future
 import scala.util.Random
 
 @Singleton
-class Users @Inject()(dbConfigProvider: DatabaseConfigProvider, socialProviderRegistry: SocialProviderRegistry)
-  extends IdentityService[User] with Logger {
+class Users @Inject()(dbConfigProvider: DatabaseConfigProvider) extends IdentityService[User] with Logger {
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
@@ -34,15 +33,36 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider, socialProviderRe
   def save(profile: CommonSocialProfile): Future[User] = {
 
     // Not gonna bother with updating, just gonna save
+    // Also no idea how multi-auth login works ¯\_(ツ)_/¯
+    // TODO: This code probably doesn't work in the long-run
 
-    val user = User(name = profile.fullName.getOrElse(profile.firstName.getOrElse(
-      profile.lastName.getOrElse(Random.nextInt().toString))),
-      mobile = None,
-      email = profile.email,
-      eatsAt = EatsAt(None, None, None),
-      avatarURL = profile.avatarURL)
+    db.run(
+      (for {
+        l <- logins.filter(login => login.providerKey === profile.loginInfo.providerKey &&
+          login.providerID === profile.loginInfo.providerID)
+      } yield l).result.headOption
+    ).flatMap {
+      case Some(dbLoginInfo) => db.run(getFromId(dbLoginInfo.userID).result.head).map((User.fromDB _).tupled)
+      case None => {
 
-    save(user)
+        val user = User(name = profile.fullName.getOrElse(profile.firstName.getOrElse(
+          profile.lastName.getOrElse(Random.nextInt().toString))),
+          mobile = None,
+          email = profile.email,
+          eatsAt = EatsAt(None, None, None),
+          avatarURL = profile.avatarURL)
+
+        val dbLoginInfo = DBLoginInfo(UUID.randomUUID(), profile.loginInfo.providerID, profile.loginInfo.providerKey, user.id)
+
+        db.run(
+          (for {
+            _ <- users += user.toDB
+            _ <- logins += dbLoginInfo
+          } yield ()).transactionally
+        ).map(_ => user)
+      }
+    }
+
   }
 
   override def retrieve(loginInfo: LoginInfo): Future[Option[User]] = db.run(
@@ -60,9 +80,7 @@ object Users {
   private val logins = TableQuery[DBLoginInfoTable]
   private val weekTimes = TableQuery[DBWeekTimesTable]
 
-  def getFromId(id: Rep[UUID]):
-  Query[(DBUserTable, Rep[Option[DBWeekTimesTable]], Rep[Option[DBWeekTimesTable]], Rep[Option[DBWeekTimesTable]]),
-    (DBUser, Option[DBWeekTimes], Option[DBWeekTimes], Option[DBWeekTimes]), Seq] = for {
+  def getFromId(id: Rep[UUID]) = for {
     dbUser <- users.filter(_.id === id)
     breakfast <- users.joinLeft(weekTimes).on(_.breakfastFK === _.id).map { case (u, t) => t }
     lunch <- users.joinLeft(weekTimes).on(_.lunchFK === _.id).map { case (u, t) => t }

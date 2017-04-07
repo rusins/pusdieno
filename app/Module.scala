@@ -12,7 +12,7 @@ import com.mohiva.play.silhouette.impl.providers.oauth2.state.{CookieStateProvid
 import com.mohiva.play.silhouette.impl.providers.oauth2.{FacebookProvider, GoogleProvider}
 import com.mohiva.play.silhouette.impl.providers.{OAuth2Info, OAuth2Settings, OAuth2StateProvider, SocialProviderRegistry}
 import com.mohiva.play.silhouette.impl.util.{DefaultFingerprintGenerator, SecureRandomIDGenerator}
-import com.mohiva.play.silhouette.persistence.daos.{DelegableAuthInfoDAO, InMemoryAuthInfoDAO}
+import com.mohiva.play.silhouette.persistence.daos.DelegableAuthInfoDAO
 import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepository
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
@@ -20,8 +20,8 @@ import net.codingwell.scalaguice.ScalaModule
 import play.api.Configuration
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.WSClient
-import services._
-import services.daos.Users
+import services.DatabasePopulator
+import services.daos._
 
 /**
   * This class is a Guice module that tells Guice how to bind several
@@ -35,11 +35,10 @@ import services.daos.Users
   */
 class Module extends AbstractModule with ScalaModule {
 
-  override def configure() = {
-    bind[java.time.Clock].toInstance(java.time.Clock.systemDefaultZone())
+  override def configure(): Unit = {
     // Ask Guice to create an instance of ApplicationTimer when the
     // application starts.
-    bind(classOf[ApplicationTimer]).asEagerSingleton()
+    //bind(classOf[ApplicationTimer]).asEagerSingleton() // Needs java Clock!d
 
     bind(classOf[DatabasePopulator]).asEagerSingleton()
 
@@ -49,7 +48,7 @@ class Module extends AbstractModule with ScalaModule {
     bind[Clock].toInstance(Clock())
     bind[FingerprintGenerator].toInstance(new DefaultFingerprintGenerator(false))
     bind[IDGenerator].toInstance(new SecureRandomIDGenerator())
-    bind[DelegableAuthInfoDAO[OAuth2Info]].toInstance(new InMemoryAuthInfoDAO[OAuth2Info])
+    bind[DelegableAuthInfoDAO[OAuth2Info]].to[OAuth2InfoDAO]
   }
 
   @Provides
@@ -73,7 +72,7 @@ class Module extends AbstractModule with ScalaModule {
   }
 
   @Provides @Named("oauth2-state-cookie-signer")
-  def provideOAuth2StageCookieSigner(configuration: Configuration): CookieSigner = {
+  def provideOAuth2StateCookieSigner(configuration: Configuration): CookieSigner = {
     val config = configuration.underlying.as[JcaCookieSignerSettings]("silhouette.oauth2StateProvider.cookie.signer")
 
     new JcaCookieSigner(config)
