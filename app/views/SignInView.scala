@@ -16,7 +16,7 @@ import scalatags.Text.all._
 object SignInView {
 
   def apply(socialProviderRegistry: SocialProviderRegistry)
-           (implicit request: RequestHeader, messages: Messages, lang: Lang, ec: ExecutionContext): Future[Html] = {
+           (implicit request: RequestHeader, messages: Messages, lang: Lang): Html = {
 
     val headers = Seq(
       SignInStyleSheet.render[scalatags.Text.TypedTag[String]]
@@ -29,7 +29,7 @@ object SignInView {
       case None => UnitFrag(Unit)
     }
 
-    val body: Text.TypedTag[String] = div(`class` := "container", paddingTop := 100)(
+    val body: Frag = div(`class` := "container", paddingTop := 100)(
       div(`class` := "panel panel-default center-block", maxWidth := 480)(
         div(`class` := "panel-heading")(messages("signin")),
         div(`class` := "panel-body")(

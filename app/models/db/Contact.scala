@@ -6,12 +6,14 @@ import slick.driver.PostgresDriver.api._
 import slick.lifted.{ForeignKeyQuery, ProvenShape, TableQuery}
 
 case class
-Contact(id: UUID = UUID.randomUUID(), ownerID: UUID, contactID: Option[UUID], contactPhone: Option[Int] = None,
-                   contactEmail: Option[String] = None, favorite: Boolean = false)
+Contact(id: UUID = UUID.randomUUID(), name: String, ownerID: UUID, contactID: Option[UUID], phone: Option[Int] = None,
+                   email: Option[String] = None, favorite: Boolean = false)
 
 class ContactTable(tag: Tag) extends Table[Contact](tag, "contacts") {
 
   def id: Rep[UUID] = column[UUID]("id", O.PrimaryKey)
+
+  def name: Rep[String] = column[String]("name")
 
   def ownerID: Rep[UUID] = column[UUID]("owner_id")
 
@@ -23,7 +25,7 @@ class ContactTable(tag: Tag) extends Table[Contact](tag, "contacts") {
 
   def favorite: Rep[Boolean] = column[Boolean]("favorite")
 
-  def * : ProvenShape[Contact] = (id, ownerID, contactID, contactPhone, contactEmail, favorite) <>
+  def * : ProvenShape[Contact] = (id, name, ownerID, contactID, contactPhone, contactEmail, favorite) <>
     (Contact.tupled, Contact.unapply)
 
   def belongsTo: ForeignKeyQuery[DBUserTable, DBUser] =

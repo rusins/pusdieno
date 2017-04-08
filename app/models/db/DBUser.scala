@@ -7,7 +7,7 @@ import slick.lifted.{ForeignKeyQuery, ProvenShape}
 
 case class DBUser(id: UUID,
                   name: String,
-                  mobile: Option[Int],
+                  phone: Option[Int],
                   email: Option[String],
                   breakfastFK: Option[UUID],
                   lunchFK: Option[UUID],
@@ -19,7 +19,7 @@ class DBUserTable(tag: Tag) extends Table[DBUser](tag, "users") {
 
   def name: Rep[String] = column[String]("name")
 
-  def mobile: Rep[Option[Int]] = column[Option[Int]]("mobile")
+  def phone: Rep[Option[Int]] = column[Option[Int]]("mobile")
 
   def email: Rep[Option[String]] = column[Option[String]]("email")
 
@@ -32,7 +32,7 @@ class DBUserTable(tag: Tag) extends Table[DBUser](tag, "users") {
   def avatarURL: Rep[Option[String]] = column[Option[String]]("avatar_url")
   
   def * : ProvenShape[DBUser] =
-    (id, name, mobile, email, breakfastFK, lunchFK, dinnerFK, avatarURL) <>
+    (id, name, phone, email, breakfastFK, lunchFK, dinnerFK, avatarURL) <>
     (DBUser.tupled, DBUser.unapply)
 
   private val weekTimes = TableQuery[DBWeekTimesTable]

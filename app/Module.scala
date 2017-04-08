@@ -1,4 +1,4 @@
-import auth.CookieEnv
+import utils.CookieEnv
 import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
 import com.mohiva.play.silhouette.api.crypto.{CookieSigner, Crypter, CrypterAuthenticatorEncoder}

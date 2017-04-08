@@ -13,7 +13,7 @@ import views.html.b3.inline.fieldConstructor
 import views.styles.{CommonStyleSheet, EateriesStyleSheet}
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await,ExecutionContext, Future}
 import scalacss.DevDefaults._
 import scalacss.ScalatagsCss._
 import scalatags.Text
@@ -30,31 +30,28 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
       script(src := "/assets/javascripts/list.min.js"),
       script(src := "/assets/javascripts/list.fuzzysearch.min.js"),
       script(src := "/assets/javascripts/popup.js"),
-      EateriesStyleSheet.render[scalatags.Text.TypedTag[String]],
-      CommonStyleSheet.render[scalatags.Text.TypedTag[String]])
+      EateriesStyleSheet.render[scalatags.Text.TypedTag[String]])
 
-    val body = div(cls := "container", style := "padding-top: 10px;")(
+    def body: Frag = div(cls := "container", paddingTop := 10)(
       div(id := "eatery-list")(
-        div(cls := "panel  panel-default panel-body", style := "padding-top: 0px;")(
+        div(cls := "panel  panel-default panel-body", paddingTop := 0)(
           ol(cls := "nav nav-pills" /*,style := "display: table; margin-left: auto; margin-right: auto;"*/)(
-            li(style := "margin-top: 15px;", cls := {
+            li(marginTop := 15, cls := {
               if (section == "eateries") "active" else ""
             })(
-              a(href := "/eateries")(messages("eateries"))
+              a(href := routes.EateriesController.eaterySelection().url)(messages("eateries"))
             ),
-            li(style := "margin-top: 15px;", cls := {
+            li(marginTop := 15, cls := {
               if (section == "cafes") "active" else ""
             })(
-              a(href := "/cafes")(
-                messages("cafes")
-              )
+              a(href := routes.EateriesController.cafeSelection().url)(messages("cafes"))
             ),
-            li(style := "margin-top: 15px; float: right;")(
+            li(marginTop := 15, float.right)(
               input(cls := "fuzzy-search form-control", `type` := "text", placeholder := messages("search"))
             )
           )
         ),
-        ol(cls := "list", style := "list-style-type: none; padding-left: 0px;")(
+        ol(cls := "list", style := "list-style-type: none;", paddingLeft := 0)(
           if (section == "eateries") {
             val friendChoices = userO match {
               case Some(user) => Await.result(choices.friendEateryChoiceMap(user.id), 5 seconds)
@@ -81,7 +78,7 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
         """.stripMargin))
     )
 
-    MainTemplate(messages("eateries"), "eateries", headers, body, userO)
+    Future(MainTemplate(messages("eateries"), "eateries", headers, body, userO))
   }
 
   implicit def StringToHtml(s: String): Html = Html(s)

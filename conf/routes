@@ -24,7 +24,11 @@ POST    /eateries/eat               controllers.EateriesController.eat
 GET     /friends                    controllers.FriendsController.index
 GET     /signIn                     controllers.SignInController.index
 GET     /auth/:provider             controllers.SocialAuthController.authenticate(provider)
-GET     /contact                    controllers.ContactController.index
+GET     /contacts                   controllers.ContactController.index
+GET     /contacts/create            controllers.ContactController.create
+GET     /contacts/edit:id           controllers.ContactController.edit(id: java.util.UUID)
+POST    /contacts/save:id           controllers.ContactController.save(id: java.util.UUID)
+POST    /contacts/delete:id         controllers.ContactController.delete(id: java.util.UUID)
 
 GET     /favicon-16.png             controllers.Assets.at(path="/public", file="/images/favicon-16.png")
 GET     /favicon-64.png             controllers.Assets.at(path="/public", file="/images/favicon-64.png")

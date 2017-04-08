@@ -9,8 +9,8 @@ import views.ErrorView
 
 class HelpController @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport {
 
-  def index: Action[AnyContent] = Action.async { implicit request =>
-    ErrorView.unimplemented().map(Ok(_))
+  def index: Action[AnyContent] = Action { implicit request =>
+    Ok(ErrorView.unimplemented())
   }
 }
 

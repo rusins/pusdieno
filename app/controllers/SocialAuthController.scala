@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import auth.CookieEnv
+import utils.CookieEnv
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.{Logger, LoginEvent, Silhouette}

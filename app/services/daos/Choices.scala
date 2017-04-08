@@ -38,7 +38,7 @@ class Choices @Inject()(dbConfigProvider: DatabaseConfigProvider) {
 
   def friendEateryChoiceMap(userID: UUID): Future[Map[String, Seq[User]]] = db.run(
     (for {
-      f <- Contacts.friendsOfUserAction(userID)
+      f <- Contacts.friendsOfUserQuery(userID)
     } yield f).result).flatMap(seq =>
     Future(seq.flatMap(friend =>
       Await.result(db.run(

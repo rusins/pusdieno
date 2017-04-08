@@ -10,6 +10,7 @@ import play.api.{Configuration, Environment, OptionalSourceMapper, UsefulExcepti
 import views.ErrorView
 
 import scala.concurrent.Future
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 @Singleton
 class ErrorHandler @Inject()(env: Environment,
@@ -21,11 +22,11 @@ class ErrorHandler @Inject()(env: Environment,
 
   override def onProdServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
     implicit val requestHeader = request
-    ErrorView(Messages("error.server"), exception.getMessage, "server_error").map(InternalServerError(_))
+    Future.successful(InternalServerError(ErrorView(Messages("error.server"), exception.getMessage, "server_error")))
   }
 
   override def onForbidden(request: RequestHeader, message: String): Future[Result] = {
     implicit val requestHeader = request
-    ErrorView(Messages("error.forbidden_access"), message, "unauthorized_error").map(Forbidden(_))
+    Future.successful(Forbidden(ErrorView(Messages("error.forbidden_access"), message, "unauthorized_error")))
   }
 }

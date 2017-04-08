@@ -4,8 +4,8 @@ import controllers.routes
 import models.{Languages, User}
 import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
+import play.filters.csrf.CSRF
 import play.twirl.api.Html
-import views.html.helper.CSRF
 import views.styles.CommonStyleSheet
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -24,7 +24,7 @@ object MainTemplate {
 
 
   def apply(pageTitle: String, section: String, headContent: Frag, bodyContent: Frag, userO: Option[User])(
-    implicit request: RequestHeader, messages: Messages, lang: Lang, ec: ExecutionContext): Future[Html] = Future(
+    implicit request: RequestHeader, messages: Messages, lang: Lang): Html =
     Html(all.html(
       head(
         meta(charset := "utf-8"),
@@ -73,7 +73,8 @@ object MainTemplate {
                     ),
                     ul(cls := "dropdown-menu", backgroundColor := "#eb6864")(
                       form(action := "/changeLanguage", method := "POST", cls := "form-inline")(
-                        raw(CSRF.formField.body),
+                        //raw(CSRF.formField.body),
+                        input(`type` := "hidden", name := "csrfToken", value := CSRF.getToken(request).get.value),
                         SeqFrag(for ((code, language) <- (Languages.supported - lang.code).toSeq) yield li(
                           button(`type` := "submit", name := "languageCode", value := code,
                             paddingTop := 6, paddingRight := 20, paddingLeft := 20, border := 0, color := "#FFFFFF")(
@@ -88,8 +89,8 @@ object MainTemplate {
                     a(paddingTop := 19, height := 60, href := "#", cls := "dropdown-toggle",
                       data.toggle := "dropdown", aria.expanded := false)(
                       img(width := 30, src := user.avatarURL.getOrElse(routes.Assets.
-                          versioned("images/icons/ic_account_circle_black_36px.svg").url),
-                      cls := "img-circle"),
+                        versioned("images/icons/ic_account_circle_black_36px.svg").url),
+                        cls := "img-circle"),
                       " " + user.name,
                       span(cls := "caret")
                     ),
@@ -108,5 +109,4 @@ object MainTemplate {
         bodyContent
       )
     ).render)
-  )
 }

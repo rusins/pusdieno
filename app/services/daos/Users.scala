@@ -19,7 +19,7 @@ import scala.concurrent.Future
 import scala.util.Random
 
 @Singleton
-class Users @Inject()(dbConfigProvider: DatabaseConfigProvider) extends IdentityService[User] with Logger {
+class Users @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: Contacts) extends IdentityService[User] with Logger {
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
@@ -54,6 +54,8 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider) extends Identity
 
         val dbLoginInfo = DBLoginInfo(UUID.randomUUID(), profile.loginInfo.providerID, profile.loginInfo.providerKey, user.id)
 
+        contacts.linkNewUser(user.toDB)
+
         db.run(
           (for {
             _ <- users += user.toDB
@@ -62,7 +64,6 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider) extends Identity
         ).map(_ => user)
       }
     }
-
   }
 
   override def retrieve(loginInfo: LoginInfo): Future[Option[User]] = db.run(

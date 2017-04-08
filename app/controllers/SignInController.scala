@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import auth.CookieEnv
+import utils.CookieEnv
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
@@ -16,7 +16,7 @@ class SignInController @Inject()(silhouette: Silhouette[CookieEnv], socialProvid
                                  val messagesApi: MessagesApi)
   extends Controller with I18nSupport {
 
-  def index: Action[AnyContent] = silhouette.UnsecuredAction.async { implicit request =>
-    SignInView(socialProviderRegistry).map(Ok(_))
+  def index: Action[AnyContent] = silhouette.UnsecuredAction { implicit request =>
+    Ok(SignInView(socialProviderRegistry))
   }
 }

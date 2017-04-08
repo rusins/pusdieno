@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import auth.CookieEnv
+import utils.CookieEnv
 import com.mohiva.play.silhouette.api.Silhouette
 import play.api.data.Form
 import play.api.data.Forms._

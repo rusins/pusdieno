@@ -11,9 +11,10 @@ import scalatags.Text.all._
 object WelcomeView {
 
   def index()(implicit messages: Messages, lang: Lang,
-              request: RequestHeader, ec: ExecutionContext): Future[Html] = {
-    val theHead: Frag = UnitFrag(Unit)
-    val theBody: Frag = SeqFrag(Seq(
+              request: RequestHeader): Html = {
+    val headers: Frag = UnitFrag(Unit)
+
+    val body: Frag = SeqFrag(Seq(
       div(width := 100.pct, height := 100.pct, paddingTop := 100,
         backgroundImage := "url(\"/assets/images/cover_lowsize.jpg\")", backgroundSize := "cover")(
         div(cls := "container")(
@@ -25,7 +26,8 @@ object WelcomeView {
         )
       )
     ))
-    MainTemplate("Pusdieno", "welcome", theHead, theBody, None)
+
+    MainTemplate("Pusdieno", "welcome", headers, body, None)
   }
 
 }

@@ -23,7 +23,7 @@ class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfig
   // TODO: Separate tabs into individual web pages in order to support more users with faster load times
 
   def index(user: User)(implicit messages: Messages, lang: Lang, request: RequestHeader, ec: ExecutionContext): Future[Html] = {
-    val theHead = SeqFrag(Seq(
+    val headers = SeqFrag(Seq(
       script(src := "/assets/javascripts/popup.js"),
       FriendsStyleSheet.render[scalatags.Text.TypedTag[String]]
     ))
@@ -58,7 +58,7 @@ class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfig
       )
     }
 
-    val theBody = div(cls := "content", paddingTop := 10)(
+    def body(): Frag = div(cls := "content", paddingTop := 10)(
       ul(cls := "nav nav-tabs")(
         li(cls := "active")(a(href := "#favorites", data.toggle := "tab", aria.expanded := "true")(messages("friends.favorites"))),
         li(a(href := "#hungry", data.toggle := "tab", aria.expanded := "false")(messages("friends.hungry"))),
@@ -114,6 +114,6 @@ class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfig
       }
     )
 
-    MainTemplate(messages("friends"), "friends", theHead, theBody, Some(user))
+    Future(MainTemplate(messages("friends"), "friends", headers, body(), Some(user)))
   }
 }

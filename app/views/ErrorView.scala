@@ -9,14 +9,13 @@ import scalatags.Text.all._
 
 object ErrorView {
 
-  def apply(errorTitle: String, errorMessage: String, image: String)(implicit request: RequestHeader,
+  def apply(errorTitle: String, errorMessage: String, image: String = "server_error")(implicit request: RequestHeader,
                                                       messages: Messages,
-                                                      lang: Lang,
-                                                      ec: ExecutionContext): Future[Html] = {
+                                                      lang: Lang): Html = {
 
     val headers = UnitFrag(Unit)
 
-    val body = div(`class` := "content", paddingTop := 100)(
+    val body: Frag = div(`class` := "content", paddingTop := 100)(
       div(`class` := "row")(
         div(`class` := "col-md-6")(
           div(`class` := "alert alert-danger center-block")(
@@ -37,11 +36,10 @@ object ErrorView {
 
   def unimplemented(optionalMessage: Option[String] = None)(implicit request: RequestHeader,
                                                             messages: Messages,
-                                                            lang: Lang,
-                                                            ec: ExecutionContext): Future[Html] = {
+                                                            lang: Lang): Html = {
     val headers = UnitFrag(Unit)
 
-    val body = div(`class` := "content", paddingTop := 100)(
+    val body: Frag = div(`class` := "content", paddingTop := 100)(
       div(`class` := "row")(
         div(`class` := "col-md-6")(
           strong(paddingTop := 100)(messages("error.unimplemented")),

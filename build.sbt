@@ -16,6 +16,8 @@ scalacOptions ++= Seq(
   "-Ywarn-dead-code"
 )
 
+routesImport += "play.api.mvc.PathBindable.bindableUUID"
+
 resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
 
 libraryDependencies ++= Seq(
