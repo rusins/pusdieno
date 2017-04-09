@@ -52,13 +52,19 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
         ol(cls := "list", style := "list-style-type: none;", paddingLeft := 0)(
           if (section == "eateries") {
             val friendChoices = userO match {
-              case Some(user) => Await.result(choices.friendEateryChoiceMap(user.id), 5 seconds)
               case None => Map[String, Seq[User]]()
+              case Some(user) => Await.result(choices.friendEateryChoiceMap(user.id), 5 seconds)
+            }
+
+            val userChoices: Set[String] = userO match {
+              case None => Set()
+              case Some(user) => Await.result(choices.getChoices(user.id), 5 seconds).toSet
             }
 
             Await.result(eateries.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
               sortBy(chain => messages("eateries." + chain._1)).map(chain =>
-              displayEatery(chain, friendChoices.getOrElse(chain._1, Seq()), "no"))
+              displayEatery(chain, friendChoices.getOrElse(chain._1, Seq()), if (userChoices(chain._1)) {
+                if (userChoices.size == 1) "yes" else "maybe"} else "no"))
           }
           else
             Await.result(cafes.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
@@ -91,7 +97,7 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
 
   def displayEatery(chain: (String, Seq[Eatery]), friends: Seq[User], going: String)(implicit messages: Messages, request: RequestHeader): Frag = {
     val (chainID, eateries) = chain
-    div(cls := "jumbotron eatery flip", id := chainID, onclick :=
+    div(cls := "jumbotron eatery flip" + {if (going == "yes") " going" else ""}, id := chainID, onclick :=
       """
         |$("#" + this.id + " .hidden-panel").slideToggle("fast");
       """.stripMargin,
@@ -105,20 +111,21 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
             messages("eateries." + chainID)
           ),
           div(cls := "col-xs-12 col-sm-6 col-md-12 col-lg-6")(
-            friends.map(user =>
-              img(cls := "img-circle phone-popover", src := "/assets/images/" + user.id, width := 50, height := 50,
-                onerror := "javascript:this.src='assets/images/icons/ic_account_circle_black_36px.svg'",
-                data.toggle := "tooltip", data.placement := "top", title := user.name,
-                data("phone-number") := user.mobile.map(_.toString).getOrElse(""),
-                data("phone") := user.mobile.map(_.toString).getOrElse(messages("error.phone")),
+            friends.map(friend =>
+              img(cls := "img-circle phone-popover",
+                src := friend.avatarURL.getOrElse("/assets/images/icons/ic_account_circle_black_36px.svg"),
+                width := 50, height := 50,
+                data.toggle := "tooltip", data.placement := "top", title := friend.name,
+                data("phone-number") := friend.mobile.map(_.toString).getOrElse(""),
+                data("phone") := friend.mobile.map(_.toString).getOrElse(messages("error.phone")),
                 onclick := "event.stopPropagation();",
                 style := "margin-left: 2px; margin-right: 2px; margin-bottom: 2px; margin-top: 2px;")
             )
           )
         ),
         div(cls := "col-sm-12 col-md-6 vcenter")(
-          form(action := routes.EateriesController.eat().url, cls := "eatery-form", marginBottom := 0,
-            onclick := "event.stopPropagation();")(
+          form(action := routes.EateriesController.eat().url, method := "post", cls := "eatery-form",
+            marginBottom := 0, onclick := "event.stopPropagation();")(
             input(`type` := "hidden", name := "eatery", value := chainID), {
               val (green, blue, red) = going match {
                 case "yes" => ("active", "inactive", "inactive")

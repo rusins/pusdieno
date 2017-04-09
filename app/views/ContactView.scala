@@ -51,14 +51,16 @@ object ContactView {
             ),
             seq.map { case (contact, friend) =>
               tr(cls := friend.map(_ => "success").getOrElse(""))(
-                td(friend.map(f => img(cls := "img-circle", src := f.avatarURL.getOrElse("")).render)),
+                td(friend.map(f => img(cls := "img-circle", src := f.avatarURL.getOrElse(""))).getOrElse(UnitFrag(Unit))),
                 td(contact.name, br, friend.map(_.name)),
                 td(contact.email),
-                td(a(href := "tel:" + contact.phone)(contact.phone)),
-                td(
+                td(a(href := contact.phone.map("tel:" + _).getOrElse(""))(contact.phone)),
+                td(span(float.right)(
                   a(cls := "btn btn-info", href := routes.ContactController.edit(contact.id).url)(messages("contacts.edit")),
-                  a(cls := "btn btn-danger", href := routes.ContactController.delete(contact.id).url)(messages("contacts.delete"))
-                )
+                  form(action := routes.ContactController.delete(contact.id).url, method := "post", display.inline)(
+                    button(cls := "btn btn-danger", `type` := "submit", marginLeft := 5)(messages("contacts.delete"))
+                  )
+                ))
               )
             }
           )
@@ -98,35 +100,58 @@ object ContactView {
         ),
         div(cls := "well")(
           form(cls := "form-horizontal", method := "post", action := routes.ContactController.save(contactID).url)(
-            raw(views.html.helper.CSRF.formField.body),
+            //raw(views.html.helper.CSRF.formField.body),
             fieldset(
-              div(cls := "form-group")(
-                label(`for` := "inputName", cls := "col-md-2 control-label")(messages("contacts.name")),
-                div(cls := "col-md-10")(input(name := "name", cls := "form-control", id := "inputName",
-                  `type` := "text", value := contactForm.data.getOrElse("name", "")))
+              div(cls := "form-group row" + contactForm.error("name").fold("")(_ => " has-error"))(
+                label(`for` := "inputName", cls := "col-md-2 control-label")(messages("contacts.name"), sup(color.red)("*")),
+                div(cls := "col-md-10")(
+                  input(name := "name", cls := "form-control", id := "inputName", `type` := "text",
+                    value := contactForm.data.getOrElse("name", "")),
+                  contactForm.error("name") match {
+                    case None => UnitFrag(Unit)
+                    case Some(error) => div(p(cls := "text-primary")(messages(error.message)))
+                  },
+                  small(cls := "form-text text-muted")(messages("form.required"))
+                )
               ),
-              div(cls := "form-group")(
+              div(cls := "form-group row" + contactForm.error("email").fold("")(_ => " has-error"))(
                 label(`for` := "inputEmail", cls := "col-md-2 control-label")(messages("contacts.email")),
-                div(cls := "col-md-10")(input(name := "email", cls := "form-control", id := "inputEmail",
-                  `type` := "text", value := contactForm.data.getOrElse("email", "")))
+                div(cls := "col-md-10")(input(`type` := "email", name := "email", cls := "form-control", id := "inputEmail",
+                  `type` := "text", value := contactForm.data.getOrElse("email", "")),
+                  contactForm.error("email") match {
+                    case None => UnitFrag(Unit)
+                    case Some(error) => div(p(cls := "text-primary")(messages(error.message)))
+                  },
+                  small(cls := "form-text text-muted")(messages("form.optional"))
+                )
               ),
-              div(cls := "form-group")(
+              div(cls := "form-group row" + contactForm.error("phone").fold("")(_ => " has-error"))(
                 label(`for` := "inputPhone", cls := "col-md-2 control-label")(messages("contacts.phone")),
                 div(cls := "col-md-10")(input(name := "phone", cls := "form-control", id := "inputPhone",
-                  `type` := "text", value := contactForm.data.getOrElse("phone", "")))
+                  `type` := "text", value := contactForm.data.getOrElse("phone", "")),
+                  contactForm.error("phone") match {
+                    case None => UnitFrag(Unit)
+                    case Some(error) => div(p(cls := "text-primary")(messages(error.message)))
+                  },
+                  small(cls := "form-text text-muted")(messages("form.optional"))
+                )
               ),
-              div(cls := "form-group")(
+              div(cls := "form-group row")(
                 div(cls := "col-md-10 col-md-offset-2")(
                   a(href := routes.ContactController.index().url, cls := "btn btn-default")(messages("form.cancel")),
                   button(`type` := "submit", cls := "btn btn-primary", marginLeft := 5)(messages("form.submit"))
                 )
-              )
+              ),
+              contactForm.globalError match {
+                case None => UnitFrag(Unit)
+                case Some(error) => p(cls := "text-primary")(error.message)
+              }
             )
           )
         )
       )
     )
 
-    MainTemplate.apply(messages("contacts.add-contact"), "friends", headers, body, Some(user))
+    MainTemplate.apply(messages("contacts.create"), "friends", headers, body, Some(user))
   }
 }

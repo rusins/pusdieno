@@ -27,7 +27,7 @@ class Contacts @Inject()(dbConfigProvider: DatabaseConfigProvider) {
     })
 
   def contactsWithOptionalDBUserInfo(userID: UUID): Future[Seq[(Contact, Option[DBUser])]] =
-    db.run((friendsOfUserQuery(userID) joinLeft users on (_.contactID === _.id)).result)
+    db.run((contacts.filter(_.ownerID === userID) joinLeft users on (_.contactID === _.id)).result)
 
   def friendsWithStatusInfo(userID: UUID): Future[Seq[(Contact, User, Boolean, Boolean)]] =
     db.run(
@@ -90,7 +90,7 @@ object Contacts {
 
   private def friendsWithContactInfoQuery(userID: UUID) = for {
     contact <- friendsOfUserQuery(userID)
-    userInfo <- Users.getFromId(contact.ownerID)
+    userInfo <- Users.getFromID(contact.ownerID)
   } yield (contact, userInfo)
 
 }

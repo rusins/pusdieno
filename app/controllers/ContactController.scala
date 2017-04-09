@@ -71,7 +71,7 @@ class ContactController @Inject()(implicit val messagesApi: MessagesApi, silhoue
 
   def delete(contactID: UUID): Action[AnyContent] = silhouette.SecuredAction(canEdit(contactID)).async {
     implicit request =>
-      contacts.delete(contactID).map(_ => Ok(routes.ContactController.index().url))
+      contacts.delete(contactID).map(_ => Redirect(routes.ContactController.index().url))
   }
 
   def index: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>

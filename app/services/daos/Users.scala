@@ -23,7 +23,7 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: Contac
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
-  def retrieve(id: UUID): Future[Option[User]] = db.run(getFromId(id).result.headOption).map(
+  def retrieve(id: UUID): Future[Option[User]] = db.run(getFromID(id).result.headOption).map(
     _.map((User.fromDB _).tupled))
 
   def save(user: User): Future[User] =
@@ -32,6 +32,7 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: Contac
 
   def save(profile: CommonSocialProfile): Future[User] = {
 
+    println("Saving user...")
     // Not gonna bother with updating, just gonna save
     // Also no idea how multi-auth login works ¯\_(ツ)_/¯
     // TODO: This code probably doesn't work in the long-run
@@ -42,8 +43,10 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: Contac
           login.providerID === profile.loginInfo.providerID)
       } yield l).result.headOption
     ).flatMap {
-      case Some(dbLoginInfo) => db.run(getFromId(dbLoginInfo.userID).result.head).map((User.fromDB _).tupled)
+      case Some(dbLoginInfo) => db.run(getFromID(dbLoginInfo.userID).result.head).map((User.fromDB _).tupled)
       case None => {
+
+        println("New user!")
 
         val user = User(name = profile.fullName.getOrElse(profile.firstName.getOrElse(
           profile.lastName.getOrElse(Random.nextInt().toString))),
@@ -70,7 +73,7 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: Contac
     (for {
       id <- logins.filter(l => l.providerKey === loginInfo.providerKey &&
         l.providerID === loginInfo.providerID).map(_.userID)
-      userInfo <- getFromId(id)
+      userInfo <- getFromID(id)
     } yield userInfo).result.headOption).map(_.map((User.fromDB _).tupled))
 
 }
@@ -81,11 +84,17 @@ object Users {
   private val logins = TableQuery[DBLoginInfoTable]
   private val weekTimes = TableQuery[DBWeekTimesTable]
 
-  def getFromId(id: Rep[UUID]) = for {
+  def getFromID(id: Rep[UUID]) = for {
     dbUser <- users.filter(_.id === id)
     breakfast <- users.joinLeft(weekTimes).on(_.breakfastFK === _.id).map { case (u, t) => t }
     lunch <- users.joinLeft(weekTimes).on(_.lunchFK === _.id).map { case (u, t) => t }
     dinner <- users.joinLeft(weekTimes).on(_.dinnerFK === _.id).map { case (u, t) => t }
   } yield (dbUser, breakfast, lunch, dinner)
 
+  /*
+  def getFromID(id: Rep[UUID]) = for {
+    (((dbUser, bk), lu), di) <- users.filter(_.id === id).joinLeft(weekTimes).on(_.breakfastFK === _.id).
+      joinLeft(weekTimes).on(_._1.lunchFK === _.id).joinLeft(weekTimes).on(_._1._1.dinnerFK === _.id)
+  } yield (dbUser, bk, lu, di)
+  */
 }

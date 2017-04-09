@@ -24,5 +24,5 @@ import play.filters.headers.SecurityHeadersFilter
 @Singleton
 class Filters @Inject()(csrfFilter: CSRFFilter, securityHeadersFilter: SecurityHeadersFilter)(
   env: Environment,
-  exampleFilter: DefaultLanguageFilter) extends DefaultHttpFilters(csrfFilter)
+  exampleFilter: DefaultLanguageFilter) extends DefaultHttpFilters()
 
