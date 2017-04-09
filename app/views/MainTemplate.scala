@@ -72,7 +72,7 @@ object MainTemplate {
                     ),
                     ul(cls := "dropdown-menu", backgroundColor := "#eb6864")(
                       form(action := routes.LanguageController.changeLanguage().url, method := "POST", cls := "form-inline")(
-                        //raw(views.html.helper.CSRF.formField.body),
+                        raw(views.html.helper.CSRF.formField.body),
                         SeqFrag(for ((code, language) <- (Languages.supported - lang.code).toSeq) yield li(
                           button(`type` := "submit", name := "languageCode", value := code,
                             paddingTop := 6, paddingRight := 20, paddingLeft := 20, border := 0, color := "#FFFFFF")(

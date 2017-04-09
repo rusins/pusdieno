@@ -9,7 +9,6 @@ import play.api.data.Form
 import play.api.i18n.Messages
 import play.api.mvc.RequestHeader
 import play.twirl.api.Html
-import views.html.helper.CSRF
 
 import scalatags.Text.all._
 
@@ -99,7 +98,7 @@ object ContactView {
         ),
         div(cls := "well")(
           form(cls := "form-horizontal", method := "post", action := routes.ContactController.save(contactID).url)(
-            //raw(CSRF.formField.body),
+            raw(views.html.helper.CSRF.formField.body),
             fieldset(
               div(cls := "form-group")(
                 label(`for` := "inputName", cls := "col-md-2 control-label")(messages("contacts.name")),
