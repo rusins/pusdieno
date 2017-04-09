@@ -5,23 +5,34 @@ import javax.inject.Inject
 import utils.CookieEnv
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
-import com.mohiva.play.silhouette.api.{Logger, LoginEvent, Silhouette}
+import com.mohiva.play.silhouette.api.{Logger, LoginEvent, LogoutEvent, Silhouette}
 import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfileBuilder, SocialProvider, SocialProviderRegistry}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, Controller}
 import services.daos.Users
+import views.SignInView
 
 import scala.concurrent.Future
 
-class SocialAuthController @Inject()(val messagesApi: MessagesApi,
-                                     silhouette: Silhouette[CookieEnv],
-                                     userService: Users,
-                                     authInfoRepository: AuthInfoRepository,
-                                     socialProviderRegistry: SocialProviderRegistry,
-                                    ws: WSClient)
+class AuthController @Inject()(val messagesApi: MessagesApi,
+                               silhouette: Silhouette[CookieEnv],
+                               userService: Users,
+                               authInfoRepository: AuthInfoRepository,
+                               socialProviderRegistry: SocialProviderRegistry,
+                               ws: WSClient)
   extends Controller with I18nSupport with Logger {
+
+  def signIn: Action[AnyContent] = silhouette.UnsecuredAction { implicit request =>
+    Ok(SignInView(socialProviderRegistry))
+  }
+
+  def signOut: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
+    val result = Redirect(routes.DefaultController.index())
+    silhouette.env.eventBus.publish(LogoutEvent(request.identity, request))
+    silhouette.env.authenticatorService.discard(request.authenticator, result)
+  }
 
   /**
     * Authenticates a user against a social provider.
@@ -51,7 +62,7 @@ class SocialAuthController @Inject()(val messagesApi: MessagesApi,
     }).recover {
       case e: ProviderException =>
         logger.error("Unexpected provider error", e)
-        Redirect(routes.SignInController.index()).flashing("error" -> Messages("could.not.authenticate"))
+        Redirect(routes.AuthController.signIn()).flashing("error" -> Messages("could.not.authenticate"))
     }
   }
 }

@@ -22,8 +22,10 @@ GET     /eateries                   controllers.EateriesController.eaterySelecti
 GET     /cafes                      controllers.EateriesController.cafeSelection
 POST    /eateries/eat               controllers.EateriesController.eat
 GET     /friends                    controllers.FriendsController.index
-GET     /signIn                     controllers.SignInController.index
-GET     /auth/:provider             controllers.SocialAuthController.authenticate(provider)
+GET     /signIn                     controllers.AuthController.signIn
+GET     /signOut                    controllers.AuthController.signOut
+GET     /settings                   controllers.SettingsController.index
+GET     /auth/:provider             controllers.AuthController.authenticate(provider)
 GET     /contacts                   controllers.ContactController.index
 GET     /contacts/create            controllers.ContactController.create
 GET     /contacts/edit:id           controllers.ContactController.edit(id: java.util.UUID)

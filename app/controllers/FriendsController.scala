@@ -17,7 +17,7 @@ class FriendsController @Inject()(val messagesApi: MessagesApi, friends: Friends
   def index: Action[AnyContent] = silhouette.UserAwareAction.async {
     implicit request => request.identity match {
       case Some(user) => friends.index(user).map(Ok(_))
-      case None => Future.successful(Redirect(routes.SignInController.index()))
+      case None => Future.successful(Redirect(routes.AuthController.signIn()))
     }
   }
 }

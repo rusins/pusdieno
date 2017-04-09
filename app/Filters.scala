@@ -1,10 +1,12 @@
 import javax.inject._
+
 import play.api._
 import play.api.http.HttpFilters
 import play.api.mvc._
 import play.filters.csrf.CSRFFilter
 import filters.DefaultLanguageFilter
 import play.api.http.DefaultHttpFilters
+import play.filters.headers.SecurityHeadersFilter
 
 /**
  * This class configures filters that run on every request. This
@@ -20,6 +22,7 @@ import play.api.http.DefaultHttpFilters
  * each response.
  */
 @Singleton
-class Filters @Inject() (csrfFilter: CSRFFilter) (
+class Filters @Inject()(csrfFilter: CSRFFilter, securityHeadersFilter: SecurityHeadersFilter)(
   env: Environment,
-  exampleFilter: DefaultLanguageFilter) extends DefaultHttpFilters(csrfFilter)
+  exampleFilter: DefaultLanguageFilter) extends DefaultHttpFilters()
+

@@ -2,6 +2,7 @@ package views
 
 import javax.inject.Inject
 
+import controllers.routes
 import models.User
 import models.db._
 import play.api.db.slick.DatabaseConfigProvider
@@ -59,6 +60,8 @@ class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfig
     }
 
     def body(): Frag = div(cls := "content", paddingTop := 10)(
+      a(href := routes.ContactController.index().url, cls := "btn btn-default btn-lg btn-block")(
+        messages("friends.manage-contacts")),
       ul(cls := "nav nav-tabs")(
         li(cls := "active")(a(href := "#favorites", data.toggle := "tab", aria.expanded := "true")(messages("friends.favorites"))),
         li(a(href := "#hungry", data.toggle := "tab", aria.expanded := "false")(messages("friends.hungry"))),

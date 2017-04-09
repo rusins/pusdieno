@@ -8,12 +8,10 @@ import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
 import play.twirl.api.{Html, HtmlFormat}
 import services.daos.{Cafes, Choices, Contacts, Eateries}
-import views.html.b3._
-import views.html.b3.inline.fieldConstructor
 import views.styles.{CommonStyleSheet, EateriesStyleSheet}
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await,ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scalacss.DevDefaults._
 import scalacss.ScalatagsCss._
 import scalatags.Text
@@ -60,7 +58,7 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
 
             Await.result(eateries.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
               sortBy(chain => messages("eateries." + chain._1)).map(chain =>
-              displayEatery(chain, friendChoices.getOrElse(chain._1, Seq())))
+              displayEatery(chain, friendChoices.getOrElse(chain._1, Seq()), "no"))
           }
           else
             Await.result(cafes.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
@@ -91,7 +89,7 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
 
   // TODO: click on eatery to show information
 
-  def displayEatery(chain: (String, Seq[Eatery]), friends: Seq[User])(implicit messages: Messages, request: RequestHeader): Frag = {
+  def displayEatery(chain: (String, Seq[Eatery]), friends: Seq[User], going: String)(implicit messages: Messages, request: RequestHeader): Frag = {
     val (chainID, eateries) = chain
     div(cls := "jumbotron eatery flip", id := chainID, onclick :=
       """
@@ -118,27 +116,40 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
             )
           )
         ),
-        div(cls := "col-sm-12 col-md-6 vcenter")(raw(
-          formCSRF(routes.EateriesController.eat(), 'class -> "eatery-form", 'style -> "margin-bottom: 0px;",
-            'onclick -> "event.stopPropagation();")(
-            views.html.b3.hidden("eatery", chainID) + Html(
-              div(id := chainID, cls := "btn-group btn-group-justified")(raw(
-                submit('_class -> "btn-group", 'name -> "status", 'value -> "yes", 'class -> "btn btn-success yes inactive")(
-                  messages("eateries.going")
-                ) +
-                  submit('_class -> "btn-group", 'name -> "status", 'value -> "maybe", 'class -> "btn btn-info maybe inactive")(
-                    messages("eateries.undecided")
-                  ) +
-                  submit('_class -> "btn-group no", 'name -> "status", 'value -> "no", 'class -> "btn btn-primary no active")(
-                    messages("eateries.notGoing")
+        div(cls := "col-sm-12 col-md-6 vcenter")(
+          form(action := routes.EateriesController.eat().url, cls := "eatery-form", marginBottom := 0,
+            onclick := "event.stopPropagation();")(
+            input(`type` := "hidden", name := "eatery", value := chainID), {
+              val (green, blue, red) = going match {
+                case "yes" => ("active", "inactive", "inactive")
+                case "maybe" => ("inactive", "active", "inactive")
+                case "no" => ("inactive", "inactive", "active")
+                case _ => ("inactive", "inactive", "inactive")
+              }
+              div(id := chainID, cls := "btn-group btn-group-justified")(
+                div(cls := "form-group btn-group")(
+                  button(`type` := "submit", cls := "btn btn-success yes " + green, name := "status", value := "yes")(
+                    messages("eateries.going")
                   )
-              ))
-            )
+                ),
+                div(cls := "form-group btn-group")(
+                  button(`type` := "submit", cls := "btn btn-info maybe " + blue, name := "status", value := "maybe")(
+                    messages("eateries.undecided")
+                  )
+                ),
+                div(cls := "form-group btn-group")(
+                  button(`type` := "submit", cls := "btn btn-primary no " + red, name := "status", value := "no")(
+                    messages("eateries.not-going")
+                  )
+                )
+              )
+            }
           )
-        ))
-      ),
+        )
+      )
+      ,
       div(cls := "hidden-panel")(
-        h1("Wassup, dudes?")
+        h3(color.white)(chain._2.headOption.map(messages("eateries.address") + ": " + _.address))
       )
     )
   }

@@ -62,12 +62,8 @@ class ContactController @Inject()(implicit val messagesApi: MessagesApi, silhoue
       contactData => {
         val contact = Contact(id = contactID, name = contactData.name, ownerID = request.identity.id, contactID = None,
           phone = contactData.phone, email = contactData.email)
-        contacts.save(contact).map { affectedRows =>
-          if (affectedRows == 1)
-            Redirect(routes.ContactController.index().url)
-          else
-            BadRequest(ErrorView(errorTitle = "Saving contact",
-              errorMessage = "An error occured when saving contact information."))
+        contacts.save(contact).map { _ =>
+          Redirect(routes.ContactController.index().url)
         }
       }
     )

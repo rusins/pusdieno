@@ -1,10 +1,9 @@
 package views
 
-import controllers.routes
+import controllers.{Assets, routes}
 import models.{Languages, User}
 import play.api.i18n.{Lang, Messages}
 import play.api.mvc.RequestHeader
-import play.filters.csrf.CSRF
 import play.twirl.api.Html
 import views.styles.CommonStyleSheet
 
@@ -57,8 +56,8 @@ object MainTemplate {
               li(cls := (section == "friends").?("active", ""))(a(href := "/friends")(messages("friends")))
             ),
             SeqFrag(if (userO.nonEmpty) Seq() else
-              Seq(form(cls := "navbar-form navbar-left", action := routes.SignInController.index().url)(
-                button(`type` := "submit", cls := "btn btn-success")(messages("signin"))
+              Seq(form(cls := "navbar-form navbar-left", action := routes.AuthController.signIn().url)(
+                button(`type` := "submit", cls := "btn btn-success")(messages("sign-in"))
               ))
             ),
             ul(cls := "nav navbar-nav navbar-right")(
@@ -72,9 +71,8 @@ object MainTemplate {
                       span(cls := "caret")
                     ),
                     ul(cls := "dropdown-menu", backgroundColor := "#eb6864")(
-                      form(action := "/changeLanguage", method := "POST", cls := "form-inline")(
-                        //raw(CSRF.formField.body),
-                        input(`type` := "hidden", name := "csrfToken", value := CSRF.getToken(request).get.value),
+                      form(action := routes.LanguageController.changeLanguage().url, method := "POST", cls := "form-inline")(
+                        //raw(views.html.helper.CSRF.formField.body),
                         SeqFrag(for ((code, language) <- (Languages.supported - lang.code).toSeq) yield li(
                           button(`type` := "submit", name := "languageCode", value := code,
                             paddingTop := 6, paddingRight := 20, paddingLeft := 20, border := 0, color := "#FFFFFF")(
@@ -95,9 +93,9 @@ object MainTemplate {
                       span(cls := "caret")
                     ),
                     ul(cls := "dropdown-menu", backgroundColor := "#eb6864")(
-                      li(a()(messages("contacts"))),
-                      li(a()(messages("settings"))),
-                      li(a()(messages("signout")))
+                      li(a(href := routes.ContactController.index().url)(h5(color.white)(messages("contacts")))),
+                      li(a(href := routes.SettingsController.index().url)(h5(color.white)(messages("settings")))),
+                      li(a(href := routes.AuthController.signOut().url)(h5(color.white)(messages("sign-out"))))
                     )
                   ))
                 }

@@ -21,7 +21,7 @@ object WelcomeView {
           div(cls := "jumbotron", color := "#FFFFFF", backgroundColor := "rgba(0, 0, 0, 0.7)")(
             h1(color := "#FFFFFF")("Pusdieno!"),
             p(messages("welcome.text")),
-            p(a(cls := "btn btn-success btn-lg", href := routes.SignInController.index().url)(messages("signin")))
+            p(a(cls := "btn btn-success btn-lg", href := routes.AuthController.signIn().url)(messages("sign-in")))
           )
         )
       )

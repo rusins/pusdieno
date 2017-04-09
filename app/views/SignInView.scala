@@ -33,11 +33,11 @@ object SignInView {
       div(`class` := "panel panel-default center-block", maxWidth := 480)(
         div(`class` := "panel-heading")(messages("signin")),
         div(`class` := "panel-body")(
-          a(href := routes.SocialAuthController.authenticate("google").url)(
+          a(href := routes.AuthController.authenticate("google").url)(
             img(src := "/assets/images/google_sign_in.png", `class` := "img-responsive center-block")
           ),
           div(`class` := "text-center")(messages("or")),
-          a(href := routes.SocialAuthController.authenticate("facebook").url)(
+          a(href := routes.AuthController.authenticate("facebook").url)(
             img(src := "/assets/images/facebook_sign_in.png", `class` := "img-responsive center-block")
           )
         )

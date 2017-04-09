@@ -8,10 +8,10 @@ import play.api.mvc._
 import play.filters.csrf.{CSRF, CSRFAddToken}
 import views.ErrorView
 
-class OverviewController @Inject()(val messagesApi: MessagesApi, cSRFAddToken: CSRFAddToken) extends Controller with I18nSupport {
+class OverviewController @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport {
 
-  def index: Action[AnyContent] = cSRFAddToken(Action { implicit request =>
+  def index: Action[AnyContent] = Action { implicit request =>
     Ok(ErrorView.unimplemented())
-  })
+  }
 }
 

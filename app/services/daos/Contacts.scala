@@ -47,7 +47,8 @@ class Contacts @Inject()(dbConfigProvider: DatabaseConfigProvider) {
 
   def save(contact: Contact): Future[Int] = {
 
-    db.run(contacts += contact).flatMap { _ =>
+    db.run(contacts += contact).flatMap { affectedRows =>
+      println("Changed " + affectedRows + "rows in contacts table! " + contact.toString)
       contact.phone match {
         case None => Future.successful(None)
         case Some(phone) => db.run(users.filter(_.phone === phone).map(_.id).result.headOption)
@@ -59,7 +60,7 @@ class Contacts @Inject()(dbConfigProvider: DatabaseConfigProvider) {
       }
     } flatMap {
       case None => Future.successful(0)
-      case Some(id) => db.run(contacts.filter(_.id === contact.id).map(_.contactID).update(Some(id)))
+      case Some(id) => Future.successful(0)// db.run(contacts.filter(_.id === contact.id).map(_.contactID).update(Some(id)))
     }
   }
 
