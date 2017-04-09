@@ -8,8 +8,8 @@ import models.db._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import services.daos.Contacts._
-import slick.driver.JdbcProfile
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.JdbcProfile
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.Future
 
@@ -47,7 +47,7 @@ class Contacts @Inject()(dbConfigProvider: DatabaseConfigProvider) {
 
   def save(contact: Contact): Future[Int] = {
 
-    db.run(contacts += contact).flatMap { affectedRows =>
+    db.run(contacts.insertOrUpdate(contact)).flatMap { affectedRows =>
       println("Changed " + affectedRows + "rows in contacts table! " + contact.toString)
       contact.phone match {
         case None => Future.successful(None)
@@ -60,7 +60,7 @@ class Contacts @Inject()(dbConfigProvider: DatabaseConfigProvider) {
       }
     } flatMap {
       case None => Future.successful(0)
-      case Some(id) => Future.successful(0)// db.run(contacts.filter(_.id === contact.id).map(_.contactID).update(Some(id)))
+      case Some(id) => db.run(contacts.filter(_.id === contact.id).map(_.contactID).update(Some(id)))
     }
   }
 

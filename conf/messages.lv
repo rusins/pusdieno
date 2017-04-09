@@ -52,5 +52,5 @@ error.server=Serverim atgadījās kļūda! Lūdzam jums par to ziņot, sūtot ē
 error.forbiden_access=Jums nav atļauts piekļūt šiem datiem! Ja šī ir kļūda, lūdzam jums par to ziņot, sūtot ēpastu uz bugs@pusdieno.id.lv
 error.unimplemented=Šī lapa vēl nav izveidota! Drīz būs, cerams!
 error.contact-form.missing-info=Obligāti jānorāda vai nu kontakta telefona numurs vai ēpasta adrese!
-signin=Pieslēgties
+sign-in=Pieslēgties
 or=vai
