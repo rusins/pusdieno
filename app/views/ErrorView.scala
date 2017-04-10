@@ -6,6 +6,7 @@ import play.twirl.api.Html
 
 import scala.concurrent.{ExecutionContext, Future}
 import scalatags.Text.all._
+import play.api.mvc.Results._
 
 object ErrorView {
 
@@ -56,4 +57,7 @@ object ErrorView {
 
     MainTemplate.apply("Page not found", "error", headers, body, None)
   }
+
+  def unauthorized(message: String)(implicit messages: Messages, request: RequestHeader) =
+    Forbidden(ErrorView(messages("error.forbidden_access"), message, "unauthorized_error"))
 }

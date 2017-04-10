@@ -20,7 +20,8 @@ import scala.concurrent.Future
 
 case class ContactData(name: String, phone: Option[Int], email: Option[String])
 
-class ContactController @Inject()(implicit val messagesApi: MessagesApi, silhouette: Silhouette[CookieEnv], contacts: Contacts)
+class ContactController @Inject()(implicit val messagesApi: MessagesApi, silhouette: Silhouette[CookieEnv],
+                                  contacts: Contacts)
   extends Controller with I18nSupport {
 
   val contactForm = Form(
@@ -48,9 +49,12 @@ class ContactController @Inject()(implicit val messagesApi: MessagesApi, silhoue
   }
 
   def edit(contactID: UUID): Action[AnyContent] = silhouette.SecuredAction(canEdit(contactID)).async { implicit request =>
-    contacts.get(contactID).map(_.get).map { contact =>
-      val contactData = ContactData(contact.name, contact.phone, contact.email)
-      Ok(ContactView.editContact(request.identity, contactForm.fill(contactData), contactID))
+    contacts.get(contactID).map {
+      case None => ErrorView.unauthorized("Invalid UUID!")
+      case Some(contact) => {
+        val contactData = ContactData(contact.name, contact.phone, contact.email)
+        Ok(ContactView.editContact(request.identity, contactForm.fill(contactData), contactID))
+      }
     }
   }
 
