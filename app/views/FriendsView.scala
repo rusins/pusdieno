@@ -86,7 +86,7 @@ class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfig
       div(id := "myTabContent", cls := "tab-content") {
 
         val friends: Seq[(Contact, User, Boolean, Boolean)] =
-          Await.result(contacts.friendsWithStatusInfo(user.id), 5 seconds)
+          Await.result(contacts.friendsWithStatusInfo(user.id), 5 seconds).distinct
         val sortableFriends = friends.map {
           case (contact, friend, wantsFood, wantsCoffee) => (friend, contact.favorite, wantsFood, wantsCoffee)
         }

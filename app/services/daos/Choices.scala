@@ -83,7 +83,7 @@ object Choices {
   private val cafeChoices = TableQuery[CafeChoiceTable]
   private val eateries = TableQuery[DBEateryTable]
 
-  def wantsFood(userID: UUID): Rep[Boolean] = eateryChoices.filter(_.user === userID).exists
+  def wantsFood(userID: Rep[UUID]): Rep[Boolean] = eateryChoices.filter(_.user === userID).exists
 
-  def wantsCoffee(userID: UUID): Rep[Boolean] = cafeChoices.filter(_.user === userID).exists
+  def wantsCoffee(userID: Rep[UUID]): Rep[Boolean] = cafeChoices.filter(_.user === userID).exists
 }

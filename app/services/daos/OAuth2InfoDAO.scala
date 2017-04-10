@@ -45,8 +45,6 @@ class OAuth2InfoDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   }.transactionally
 
 
-  // RAITI - error ir jo head, un logins tabulā nekad nepievieno ierakstus
-
   private def updateAction(loginInfo: LoginInfo, authInfo: OAuth2Info) =
     oAuth2InfoSubQuery(loginInfo).map(
       dbAuth2Info => (dbAuth2Info.accessToken, dbAuth2Info.tokenType, dbAuth2Info.expiresIn, dbAuth2Info.refreshToken)).

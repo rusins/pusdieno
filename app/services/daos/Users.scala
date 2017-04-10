@@ -46,14 +46,14 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: Contac
       case Some(dbLoginInfo) => db.run(getFromID(dbLoginInfo.userID).result.head).map((User.fromDB _).tupled)
       case None => {
 
-        println("New user!")
-
         val user = User(name = profile.fullName.getOrElse(profile.firstName.getOrElse(
           profile.lastName.getOrElse(Random.nextInt().toString))),
           mobile = None,
           email = profile.email,
           eatsAt = EatsAt(None, None, None),
           avatarURL = profile.avatarURL)
+
+        println("New user! " + user.name)
 
         val dbLoginInfo = DBLoginInfo(UUID.randomUUID(), profile.loginInfo.providerID, profile.loginInfo.providerKey, user.id)
 

@@ -33,7 +33,7 @@ class Contacts @Inject()(dbConfigProvider: DatabaseConfigProvider) {
     db.run(
       (for {
         (contact, userInfo) <- friendsWithContactInfoQuery(userID)
-      } yield (contact, userInfo, Choices.wantsFood(userID), Choices.wantsCoffee(userID))).result
+      } yield (contact, userInfo, Choices.wantsFood(userInfo._1.id), Choices.wantsCoffee(userInfo._1.id))).result
     ).map(_.map {
       case (contact, userInfo, wantsFood, wantsCoffee) => (contact, (User.fromDB _).tupled(userInfo), wantsFood, wantsCoffee)
     })
