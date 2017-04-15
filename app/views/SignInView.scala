@@ -31,7 +31,7 @@ object SignInView {
 
     val body: Frag = div(`class` := "container", paddingTop := 100)(
       div(`class` := "panel panel-default center-block", maxWidth := 480)(
-        div(`class` := "panel-heading")(messages("signin")),
+        div(`class` := "panel-heading")(messages("sign-in")),
         div(`class` := "panel-body")(
           a(href := routes.AuthController.authenticate("google").url)(
             img(src := "/assets/images/google_sign_in.png", `class` := "img-responsive center-block")

@@ -57,14 +57,12 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: Contac
 
         val dbLoginInfo = DBLoginInfo(UUID.randomUUID(), profile.loginInfo.providerID, profile.loginInfo.providerKey, user.id)
 
-        contacts.linkNewUser(user.toDB)
-
         db.run(
           (for {
             _ <- users += user.toDB
             _ <- logins += dbLoginInfo
           } yield ()).transactionally
-        ).map(_ => user)
+        ).flatMap(_ => contacts.linkNewUser(user.toDB)).map(_ => user)
       }
     }
   }

@@ -74,7 +74,7 @@ object MainTemplate {
                       form(action := routes.LanguageController.changeLanguage().url, method := "POST", cls := "form-inline")(
                         //raw(views.html.helper.CSRF.formField.body),
                         SeqFrag(for ((code, language) <- (Languages.supported - lang.code).toSeq) yield li(
-                          button(`type` := "submit", name := "languageCode", value := code,
+                          button(`type` := "submit", name := "languageCode", value := code, backgroundColor := "#eb6864",
                             paddingTop := 6, paddingRight := 20, paddingLeft := 20, border := 0, color := "#FFFFFF")(
                             img(width := 2.em, src := s"/assets/images/flags/$code.png", alt := code),
                             " " + language
