@@ -12,7 +12,7 @@ object WelcomeView {
 
   def index()(implicit messages: Messages, lang: Lang,
               request: RequestHeader): Html = {
-    val headers: Frag = UnitFrag(Unit)
+    val headers: Frag = meta(name := "google-site-verification", content := "l_AKKzyNYlbZcqLqbjlcZp40qf41mQkKxRJeUz9ph48")
 
     val body: Frag = SeqFrag(Seq(
       div(width := 100.pct, height := 100.pct, paddingTop := 100,
