@@ -1,10 +1,32 @@
-name := """pusdieno"""
+name := "pusdieno"
 
-version := "1.0-SNAPSHOT"
+version := "0.1"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+val scalaV = "2.12.2"
 
-scalaVersion := "2.12.2"
+lazy val shared = (project in file("shared")).settings(
+  scalaVersion := scalaV
+)
+
+lazy val server = (project in file("server")).enablePlugins(PlayScala).dependsOn(shared).settings(
+  routesImport += "play.api.mvc.PathBindable.bindableUUID",
+  scalaVersion := scalaV,
+  libraryDependencies ++= Seq(
+    filters,
+    ws,
+    "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0" % Test
+  ) ++ slick ++ scalatags ++ scalacss ++ silhouette ++ guice ++ ficus,
+  // These 2 lines "should" disable including API documentation in the production build´
+  sources in(Compile, doc) := Seq.empty,
+  publishArtifact in(Compile, packageDoc) := false
+)
+
+lazy val android = (project in file("android")).enablePlugins(AndroidApp).dependsOn(shared).settings(
+  scalaVersion := scalaV,
+  platformTarget := "android-24",
+  minSdkVersion := "21"
+)
+
 
 scalacOptions ++= Seq(
   "-feature",
@@ -15,31 +37,29 @@ scalacOptions ++= Seq(
   "-Ywarn-dead-code"
 )
 
-routesImport += "play.api.mvc.PathBindable.bindableUUID"
-
 resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
 
-libraryDependencies ++= Seq(
-  filters,
-  ws,
+val slick = Seq(
   "com.typesafe.play" %% "play-slick" % "3.0.0",
   "com.typesafe.play" %% "play-slick-evolutions" % "3.0.0",
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0" % Test,
-  "org.postgresql" % "postgresql" % "9.4-1206-jdbc42",
-  "com.lihaoyi" %% "scalatags" % "0.6.5",
+  "org.postgresql" % "postgresql" % "9.4-1206-jdbc42"
+)
+
+val scalatags = Seq("com.lihaoyi" %% "scalatags" % "0.6.5")
+
+val scalacss = Seq(
   "com.github.japgolly.scalacss" %% "core" % "0.5.3",
-  "com.github.japgolly.scalacss" %% "ext-scalatags" % "0.5.3",
+  "com.github.japgolly.scalacss" %% "ext-scalatags" % "0.5.3"
+)
+
+val silhouette = Seq(
   "com.mohiva" %% "play-silhouette" % "4.0.0",
   "com.mohiva" %% "play-silhouette-password-bcrypt" % "4.0.0",
   "com.mohiva" %% "play-silhouette-crypto-jca" % "4.0.0",
   "com.mohiva" %% "play-silhouette-persistence" % "4.0.0",
-  "com.mohiva" %% "play-silhouette-testkit" % "4.0.0" % Test,
-  "net.codingwell" %% "scala-guice" % "4.1.0",
-  "com.iheart" %% "ficus" % "1.4.1" // typesafe importing values from config files
+  "com.mohiva" %% "play-silhouette-testkit" % "4.0.0" % Test
 )
 
-// fork in run := true // only forks run command in SBT
+val guice = Seq("net.codingwell" %% "scala-guice" % "4.1.0")
 
-// These 2 lines "should" disable including API documentation in the production build´
-sources in(Compile, doc) := Seq.empty
-publishArtifact in(Compile, packageDoc) := false
+val ficus = Seq("com.iheart" %% "ficus" % "1.4.1") // typesafe importing values from config files

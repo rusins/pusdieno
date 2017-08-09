@@ -1,6 +1,10 @@
 // The Play plugin
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.2")
 
+// Android plugin
+
+addSbtPlugin("org.scala-android" % "sbt-android" % "1.7.7")
+
 // web plugins
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-coffeescript" % "1.0.0")
