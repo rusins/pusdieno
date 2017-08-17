@@ -2,7 +2,11 @@ name := "pusdieno"
 
 version := "0.1"
 
-val scalaV = "2.12.2"
+val scalaV = "2.12.3"
+
+resolvers += Resolver.jcenterRepo
+resolvers += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+
 
 lazy val shared = (project in file("shared")).settings(
   scalaVersion := scalaV
@@ -23,10 +27,16 @@ lazy val server = (project in file("server")).enablePlugins(PlayScala).dependsOn
 
 lazy val android = (project in file("android")).enablePlugins(AndroidApp).dependsOn(shared).settings(
   scalaVersion := scalaV,
-  platformTarget := "android-24",
-  minSdkVersion := "21"
+  platformTarget := "android-26",
+  minSdkVersion := "21",
+  libraryDependencies ++= Seq(
+    "com.android.support" % "appcompat-v7" % "24.0.0",
+    "com.android.support.test" % "runner" % "0.5" % "androidTest",
+    "com.android.support.test.espresso" % "espresso-core" % "2.2.2" % "androidTest"
+  ),
+  versionCode := Some(1),
+  javacOptions in Compile ++= "-source" :: "1.8" :: "-target" :: "1.8" :: Nil
 )
-
 
 scalacOptions ++= Seq(
   "-feature",
@@ -36,8 +46,6 @@ scalacOptions ++= Seq(
   "-Yno-adapted-args",
   "-Ywarn-dead-code"
 )
-
-resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
 
 val slick = Seq(
   "com.typesafe.play" %% "play-slick" % "3.0.0",
@@ -53,11 +61,11 @@ val scalacss = Seq(
 )
 
 val silhouette = Seq(
-  "com.mohiva" %% "play-silhouette" % "4.0.0",
-  "com.mohiva" %% "play-silhouette-password-bcrypt" % "4.0.0",
-  "com.mohiva" %% "play-silhouette-crypto-jca" % "4.0.0",
-  "com.mohiva" %% "play-silhouette-persistence" % "4.0.0",
-  "com.mohiva" %% "play-silhouette-testkit" % "4.0.0" % Test
+  "com.mohiva" %% "play-silhouette" % "5.0.0",
+  "com.mohiva" %% "play-silhouette-password-bcrypt" % "5.0.0",
+  "com.mohiva" %% "play-silhouette-crypto-jca" % "5.0.0",
+  "com.mohiva" %% "play-silhouette-persistence" % "5.0.0",
+  "com.mohiva" %% "play-silhouette-testkit" % "5.0.0" % Test
 )
 
 val guice = Seq("net.codingwell" %% "scala-guice" % "4.1.0")
