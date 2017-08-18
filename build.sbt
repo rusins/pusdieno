@@ -7,9 +7,11 @@ val scalaV = "2.12.3"
 resolvers += Resolver.jcenterRepo
 resolvers += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
+lazy val root = project in file(".")
 
 lazy val shared = (project in file("shared")).settings(
-  scalaVersion := scalaV
+  scalaVersion := scalaV,
+  exportJars := true
 )
 
 lazy val server = (project in file("server")).enablePlugins(PlayScala).dependsOn(shared).settings(
@@ -18,19 +20,21 @@ lazy val server = (project in file("server")).enablePlugins(PlayScala).dependsOn
   libraryDependencies ++= Seq(
     filters,
     ws,
+    guice,
     "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0" % Test
-  ) ++ slick ++ scalatags ++ scalacss ++ silhouette ++ guice ++ ficus,
+  ) ++ slick ++ scalatags ++ scalacss ++ silhouette ++ ficus,
+  exportJars := true,
   // These 2 lines "should" disable including API documentation in the production build´
   sources in(Compile, doc) := Seq.empty,
   publishArtifact in(Compile, packageDoc) := false
 )
 
-lazy val android = (project in file("android")).enablePlugins(AndroidApp).dependsOn(shared).settings(
+lazy val android = (project in file("android")).enablePlugins(AndroidApp).dependsOn(server).settings(
   scalaVersion := scalaV,
-  platformTarget := "android-26",
+  platformTarget := "android-25",
   minSdkVersion := "21",
   libraryDependencies ++= Seq(
-    "com.android.support" % "appcompat-v7" % "24.0.0",
+    "com.android.support" % "appcompat-v7" % "25.0.0",
     "com.android.support.test" % "runner" % "0.5" % "androidTest",
     "com.android.support.test.espresso" % "espresso-core" % "2.2.2" % "androidTest"
   ),
@@ -68,6 +72,6 @@ val silhouette = Seq(
   "com.mohiva" %% "play-silhouette-testkit" % "5.0.0" % Test
 )
 
-val guice = Seq("net.codingwell" %% "scala-guice" % "4.1.0")
+// val guice = Seq("net.codingwell" %% "scala-guice" % "4.1.0")
 
 val ficus = Seq("com.iheart" %% "ficus" % "1.4.1") // typesafe importing values from config files
