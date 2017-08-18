@@ -1,13 +1,11 @@
 package views
 
-import controllers.{Assets, routes}
+import controllers.routes
 import models.{Languages, User}
-import play.api.i18n.{Lang, Messages}
-import play.api.mvc.RequestHeader
+import play.api.i18n.{Messages, MessagesProvider}
 import play.twirl.api.Html
 import views.styles.CommonStyleSheet
 
-import scala.concurrent.{ExecutionContext, Future}
 import scalacss.ProdDefaults._
 import scalacss.ScalatagsCss._
 import scalatags.Text._
@@ -15,7 +13,7 @@ import scalatags.Text.all._
 
 object MainTemplate {
 
-  class IfBoolean(value: Boolean) {
+  class IfBoolean(val value: Boolean) extends AnyVal {
     def ?[T](a: => T, b: => T): T = if (value) a else b
   }
 
@@ -23,7 +21,10 @@ object MainTemplate {
 
 
   def apply(pageTitle: String, section: String, headContent: Frag, bodyContent: Frag, userO: Option[User])(
-    implicit request: RequestHeader, messages: Messages, lang: Lang): Html =
+    implicit messagesProvider: MessagesProvider): Html = {
+
+    val lang = messagesProvider.messages.lang
+
     Html(all.html(
       head(
         meta(charset := "utf-8"),
@@ -42,7 +43,7 @@ object MainTemplate {
           div(cls := "navbar-header")(
             button(`type` := "button", cls := "navbar-toggle collapsed", data.toggle := "collapse",
               data.target := "#navbar", aria.expanded := "false", aria.controls := "navbar")(
-              span(cls := "sr-only")(messages("toggle.navigation")),
+              span(cls := "sr-only")(Messages("toggle.navigation")),
               span(cls := "icon-bar"),
               span(cls := "icon-bar"),
               span(cls := "icon-bar")
@@ -51,13 +52,13 @@ object MainTemplate {
           ),
           div(id := "navbar", cls := "navbar-collapse collapse")(
             ul(cls := "nav navbar-nav")(
-              li(cls := (section == "overview").?("active", ""))(a(href := "/overview")(messages("overview"))),
-              li(cls := (section == "eateries").?("active", ""))(a(href := "/eateries")(messages("eateries"))),
-              li(cls := (section == "friends").?("active", ""))(a(href := "/friends")(messages("friends")))
+              li(cls := (section == "overview").?("active", ""))(a(href := "/overview")(Messages("overview"))),
+              li(cls := (section == "eateries").?("active", ""))(a(href := "/eateries")(Messages("eateries"))),
+              li(cls := (section == "friends").?("active", ""))(a(href := "/friends")(Messages("friends")))
             ),
             SeqFrag(if (userO.nonEmpty) Seq() else
               Seq(form(cls := "navbar-form navbar-left", action := routes.AuthController.signIn().url)(
-                button(`type` := "submit", cls := "btn btn-success")(messages("sign-in"))
+                button(`type` := "submit", cls := "btn btn-success")(Messages("sign-in"))
               ))
             ),
             ul(cls := "nav navbar-nav navbar-right")(
@@ -67,7 +68,7 @@ object MainTemplate {
                     a(paddingTop := 19, height := 60, href := "#", cls := "dropdown-toggle",
                       data.toggle := "dropdown", aria.expanded := false)(
                       img(width := 30, src := "/assets/images/flags/" + lang.code + ".png"),
-                      " " + messages("language"),
+                      " " + Messages("language"),
                       span(cls := "caret")
                     ),
                     ul(cls := "dropdown-menu", backgroundColor := "#eb6864")(
@@ -93,9 +94,9 @@ object MainTemplate {
                       span(cls := "caret")
                     ),
                     ul(cls := "dropdown-menu", backgroundColor := "#eb6864")(
-                      li(a(href := routes.ContactController.index().url)(h5(color.white)(messages("contacts")))),
-                      li(a(href := routes.SettingsController.index().url)(h5(color.white)(messages("settings")))),
-                      li(a(href := routes.AuthController.signOut().url)(h5(color.white)(messages("sign-out"))))
+                      li(a(href := routes.ContactController.index().url)(h5(color.white)(Messages("contacts")))),
+                      li(a(href := routes.SettingsController.index().url)(h5(color.white)(Messages("settings")))),
+                      li(a(href := routes.AuthController.signOut().url)(h5(color.white)(Messages("sign-out"))))
                     )
                   ))
                 }
@@ -107,4 +108,5 @@ object MainTemplate {
         bodyContent
       )
     ).render)
+  }
 }

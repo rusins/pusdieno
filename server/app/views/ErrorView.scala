@@ -10,9 +10,8 @@ import play.api.mvc.Results._
 
 object ErrorView {
 
-  def apply(errorTitle: String, errorMessage: String, image: String = "server_error")(implicit request: RequestHeader,
-                                                      messages: Messages,
-                                                      lang: Lang): Html = {
+  def apply(errorTitle: String, errorMessage: String, image: String = "server_error")
+           (implicit messages: Messages): Html = {
 
     val headers = UnitFrag(Unit)
 
@@ -35,19 +34,14 @@ object ErrorView {
   }
 
 
-  def unimplemented(optionalMessage: Option[String] = None)(implicit request: RequestHeader,
-                                                            messages: Messages,
-                                                            lang: Lang): Html = {
+  def unimplemented(optionalMessage: String = "")(implicit messages: Messages): Html = {
     val headers = UnitFrag(Unit)
 
     val body: Frag = div(`class` := "content", paddingTop := 100)(
       div(`class` := "row")(
         div(`class` := "col-md-6")(
           strong(paddingTop := 100)(messages("error.unimplemented")),
-          optionalMessage match {
-            case Some(message) => message
-            case None => UnitFrag(Unit)
-          }
+          optionalMessage
         ),
         div(`class` := "col-md-6")(
           img(src := "/assets/images/server_error.png", `class` := "img-responsive center-block")
@@ -58,6 +52,6 @@ object ErrorView {
     MainTemplate.apply("Page not found", "error", headers, body, None)
   }
 
-  def unauthorized(message: String)(implicit messages: Messages, request: RequestHeader) =
+  def unauthorized(message: String)(implicit messages: Messages) =
     Forbidden(ErrorView(messages("error.forbidden_access"), message, "unauthorized_error"))
 }

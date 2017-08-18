@@ -6,7 +6,7 @@ import controllers.routes
 import models.User
 import models.db._
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.i18n.{Lang, Messages}
+import play.api.i18n.{Lang, Messages, MessagesProvider}
 import play.api.mvc.RequestHeader
 import play.twirl.api.Html
 import services.daos.Contacts
@@ -19,11 +19,13 @@ import scalacss.ScalatagsCss._
 import scalatags.Text.TypedTag
 import scalatags.Text.all._
 
+// TODO: Views should not access database directly, bad because of execution contexts + modularity
+
 class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfigProvider) {
 
   // TODO: Separate tabs into individual web pages in order to support more users with faster load times
 
-  def index(user: User)(implicit messages: Messages, lang: Lang, request: RequestHeader, ec: ExecutionContext): Future[Html] = {
+  def index(user: User)(implicit messagesProvider: MessagesProvider, ex: ExecutionContext): Future[Html] = {
     val headers = SeqFrag(Seq(
       script(src := "/assets/javascripts/popup.js"),
       FriendsStyleSheet.render[scalatags.Text.TypedTag[String]]
@@ -33,7 +35,7 @@ class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfig
       tr(cls := "hover-me")(
         td(
           button(data.trigger := "focus", data.toggle := "popover", data.placement := "top", style := "border:none;",
-            data.content := messages("friends.favAction"))(
+            data.content := Messages("friends.favAction"))(
             if (fav)
               img(src := "/assets/images/icons/ic_star_yellow_36px.svg", width := 36, height := 36)
             else
@@ -61,25 +63,25 @@ class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfig
 
     def body(): Frag = div(cls := "content", paddingTop := 10)(
       a(href := routes.ContactController.index().url, cls := "btn btn-default btn-lg btn-block")(
-        messages("friends.manage-contacts")),
+        Messages("friends.manage-contacts")),
       ul(cls := "nav nav-tabs")(
-        li(cls := "active")(a(href := "#favorites", data.toggle := "tab", aria.expanded := "true")(messages("friends.favorites"))),
-        li(a(href := "#hungry", data.toggle := "tab", aria.expanded := "false")(messages("friends.hungry"))),
-        li(a(href := "#cafe", data.toggle := "tab", aria.expanded := "false")(messages("friends.cafe"))),
-        li(cls := "disabled")(a(href := "#", data.toggle := "tab", aria.expanded := "false")(messages("friends.custom") + "#1")),
-        li(cls := "disabled")(a(href := "#", data.toggle := "tab", aria.expanded := "false")(messages("friends.custom") + "#2")),
-        li(cls := "disabled")(a(href := "#", data.toggle := "tab", aria.expanded := "false")(messages("friends.custom") + "#3")),
+        li(cls := "active")(a(href := "#favorites", data.toggle := "tab", aria.expanded := "true")(Messages("friends.favorites"))),
+        li(a(href := "#hungry", data.toggle := "tab", aria.expanded := "false")(Messages("friends.hungry"))),
+        li(a(href := "#cafe", data.toggle := "tab", aria.expanded := "false")(Messages("friends.cafe"))),
+        li(cls := "disabled")(a(href := "#", data.toggle := "tab", aria.expanded := "false")(Messages("friends.custom") + "#1")),
+        li(cls := "disabled")(a(href := "#", data.toggle := "tab", aria.expanded := "false")(Messages("friends.custom") + "#2")),
+        li(cls := "disabled")(a(href := "#", data.toggle := "tab", aria.expanded := "false")(Messages("friends.custom") + "#3")),
         li(cls := "dropdown")(
           a(cls := "dropdown-toggle", data.toggle := "dropdown", href := "#", aria.expanded := "false")(
-            messages("friends.other"),
+            Messages("friends.other"),
             scalatags.Text.all.span(cls := "caret")
           ),
           ul(cls := "dropdown-menu")(
-            li(cls := "disabled")(a(href := "#", data.toggle := "tab")(messages("friends.custom") + "#4")),
-            li(cls := "disabled")(a(href := "#", data.toggle := "tab")(messages("friends.custom") + "#5")),
-            li(cls := "disabled")(a(href := "#", data.toggle := "tab")(messages("friends.custom") + "#6")),
+            li(cls := "disabled")(a(href := "#", data.toggle := "tab")(Messages("friends.custom") + "#4")),
+            li(cls := "disabled")(a(href := "#", data.toggle := "tab")(Messages("friends.custom") + "#5")),
+            li(cls := "disabled")(a(href := "#", data.toggle := "tab")(Messages("friends.custom") + "#6")),
             li(cls := "divider"),
-            li(a(href := "#all", data.toggle := "tab")(messages("friends.all")))
+            li(a(href := "#all", data.toggle := "tab")(Messages("friends.all")))
           )
         )
       ),
@@ -117,6 +119,6 @@ class FriendsView @Inject()(contacts: Contacts, dbConfigProvider: DatabaseConfig
       }
     )
 
-    Future(MainTemplate(messages("friends"), "friends", headers, body(), Some(user)))
+    Future(MainTemplate(Messages("friends"), "friends", headers, body(), Some(user)))
   }
 }

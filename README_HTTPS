@@ -1,0 +1,19 @@
+To get SSL working:
+
+download PCKS7 cert (text) and save it as cert.p7b
+dowload the key and save that as text too (key.txt)
+
+then do:
+openssl pkcs7 -print_certs -in cert.p7b -out cert.cer // creates PEM certificate
+openssl pkcs12 -export -in cert.cer -inkey key-PKCS7.txt -out cert.p12 // creates PCKS12 keystore, which combines both the certificate and the private key
+
+(Password matters! Make it long, as this is the permanent one!)
+
+
+to convert to Java Key Store, do:
+
+keytool -importkeystore -srckeystore cert.p12 -srcstoretype PKCS12 -destkeystore KeyStore.jks
+
+(Enter the same password 3 times!!! The JKS password must match the key's password, otherwise play won't work by default!)
+
+done, KeyStore.jks is the final Java Key Store to be used with java apps

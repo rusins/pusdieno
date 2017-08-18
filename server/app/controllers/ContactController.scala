@@ -10,21 +10,21 @@ import models.User
 import models.db.Contact
 import play.api.data._
 import play.api.data.Forms._
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi, MessagesProvider}
 import play.api.mvc._
 import services.daos.Contacts
 import views.{ContactView, ErrorView}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class ContactData(name: String, phone: Option[Int], email: Option[String])
 
-class ContactController @Inject()(implicit val messagesApi: MessagesApi, silhouette: Silhouette[CookieEnv],
+class ContactController @Inject()(silhouette: Silhouette[CookieEnv],
                                   contacts: Contacts)
-  extends Controller with I18nSupport {
+                                 (implicit ex: ExecutionContext)
+  extends InjectedController with I18nSupport {
 
-  val contactForm = Form(
+  def contactForm()(implicit messagesProvider: MessagesProvider) = Form(
     mapping(
       "name" -> nonEmptyText,
       "phone" -> optional(number(min = 1000000, max = 99999999)),

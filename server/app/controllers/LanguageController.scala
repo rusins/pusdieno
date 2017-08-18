@@ -5,10 +5,10 @@ import javax.inject.Inject
 import models.Languages
 import play.api.data._
 import play.api.data.Forms._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Action, InjectedController}
 import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 
-class LanguageController @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport {
+class LanguageController @Inject() () extends InjectedController with I18nSupport {
 
   def changeLanguage() = Action { implicit request =>
     println("Changing language?")

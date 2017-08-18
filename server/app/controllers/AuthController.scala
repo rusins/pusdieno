@@ -8,24 +8,23 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.{Logger, LoginEvent, LogoutEvent, Silhouette}
 import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfileBuilder, SocialProvider, SocialProviderRegistry}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.ws.WSClient
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc._
 import services.daos.Users
 import views.SignInView
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class AuthController @Inject()(val messagesApi: MessagesApi,
-                               silhouette: Silhouette[CookieEnv],
+class AuthController @Inject()(silhouette: Silhouette[CookieEnv],
                                userService: Users,
                                authInfoRepository: AuthInfoRepository,
                                socialProviderRegistry: SocialProviderRegistry,
                                ws: WSClient)
-  extends Controller with I18nSupport with Logger {
+                              (implicit ex: ExecutionContext)
+  extends InjectedController with I18nSupport with Logger {
 
   def signIn: Action[AnyContent] = silhouette.UnsecuredAction { implicit request =>
-    Ok(SignInView(socialProviderRegistry))
+    Ok(SignInView(socialProviderRegistry, request.flash.get("error")))
   }
 
   def signOut: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
@@ -54,7 +53,6 @@ class AuthController @Inject()(val messagesApi: MessagesApi,
             result <- silhouette.env.authenticatorService.embed(cookie, Redirect(routes.EateriesController.eaterySelection()))
           } yield {
             silhouette.env.eventBus.publish(LoginEvent(user, request))
-            println(user.name + " logged in!")
             result
           }
         }

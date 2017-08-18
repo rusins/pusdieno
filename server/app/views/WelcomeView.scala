@@ -1,7 +1,7 @@
 package views
 
 import controllers.routes
-import play.api.i18n.{Lang, Messages}
+import play.api.i18n.{Lang, Messages, MessagesProvider}
 import play.api.mvc.RequestHeader
 import play.twirl.api.Html
 
@@ -10,8 +10,7 @@ import scalatags.Text.all._
 
 object WelcomeView {
 
-  def index()(implicit messages: Messages, lang: Lang,
-              request: RequestHeader): Html = {
+  def index()(implicit messagesProvider: MessagesProvider): Html = {
     val headers: Frag = meta(name := "google-site-verification", content := "l_AKKzyNYlbZcqLqbjlcZp40qf41mQkKxRJeUz9ph48")
 
     val body: Frag = SeqFrag(Seq(
@@ -20,8 +19,8 @@ object WelcomeView {
         div(cls := "container")(
           div(cls := "jumbotron", color := "#FFFFFF", backgroundColor := "rgba(0, 0, 0, 0.7)")(
             h1(color := "#FFFFFF")("Pusdieno!"),
-            p(messages("welcome.text")),
-            p(a(cls := "btn btn-success btn-lg", href := routes.AuthController.signIn().url)(messages("sign-in")))
+            p(Messages("welcome.text")),
+            p(a(cls := "btn btn-success btn-lg", href := routes.AuthController.signIn().url)(Messages("sign-in")))
           )
         )
       )

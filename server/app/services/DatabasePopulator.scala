@@ -13,6 +13,12 @@ import slick.driver.PostgresDriver.api._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
+/**
+  * This class is meant for quickly populating the database in case I wipe everything.
+  * ONLY USE FOR TESTING PURPOSES!!!
+  * @param dbConfigProvider
+  * @param eateries
+  */
 @Singleton
 class DatabasePopulator @Inject()(dbConfigProvider: DatabaseConfigProvider, eateries: Eateries) {
 

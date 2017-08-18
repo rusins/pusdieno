@@ -7,19 +7,18 @@ import com.mohiva.play.silhouette.api.Silhouette
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
 import services.daos.Choices
 import views.EateriesView
-
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Failure
 
 case class EateryForm(eatery: String, status: String)
 
-class EateriesController @Inject()(val messagesApi: MessagesApi, silhouette: Silhouette[CookieEnv],
+class EateriesController @Inject()(silhouette: Silhouette[CookieEnv],
                                    eateries: EateriesView, choices: Choices)
-  extends Controller with I18nSupport {
+                                  (implicit ex: ExecutionContext)
+  extends InjectedController with I18nSupport {
 
   def eaterySelection: Action[AnyContent] = silhouette.UserAwareAction.async {
     implicit request =>
@@ -31,7 +30,7 @@ class EateriesController @Inject()(val messagesApi: MessagesApi, silhouette: Sil
       eateries.index("cafes", request.identity).map(Ok(_))
   }
 
-  def eat() = silhouette.SecuredAction.async { implicit request =>
+  def eat(): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
     val template = Form(mapping("eatery" -> nonEmptyText, "status" -> nonEmptyText)(EateryForm.apply)(EateryForm.unapply))
     template.bindFromRequest.fold(
       erroneousForm => {

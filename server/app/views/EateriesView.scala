@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import controllers.routes
 import models.{Cafe, Eatery, User}
-import play.api.i18n.{Lang, Messages}
+import play.api.i18n.{Lang, Messages, MessagesProvider}
 import play.api.mvc.RequestHeader
 import play.twirl.api.{Html, HtmlFormat}
 import services.daos.{Cafes, Choices, Contacts, Eateries}
@@ -20,8 +20,8 @@ import scalatags.Text.all._
 
 class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes, contacts: Contacts) {
 
-  def index(section: String, userO: Option[User])(implicit messages: Messages, lang: Lang,
-                                                  request: RequestHeader, ec: ExecutionContext): Future[Html] = {
+  def index(section: String, userO: Option[User])
+           (implicit messagesProvider: MessagesProvider, ex: ExecutionContext): Future[Html] = {
     val headers = Seq(
       script(src := "/assets/javascripts/jquery.form.js"),
       script(src := "/assets/javascripts/eateries.js"),
@@ -37,15 +37,15 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
             li(marginTop := 15, cls := {
               if (section == "eateries") "active" else ""
             })(
-              a(href := routes.EateriesController.eaterySelection().url)(messages("eateries"))
+              a(href := routes.EateriesController.eaterySelection().url)(Messages("eateries"))
             ),
             li(marginTop := 15, cls := {
               if (section == "cafes") "active" else ""
             })(
-              a(href := routes.EateriesController.cafeSelection().url)(messages("cafes"))
+              a(href := routes.EateriesController.cafeSelection().url)(Messages("cafes"))
             ),
             li(marginTop := 15, float.right)(
-              input(cls := "fuzzy-search form-control", `type` := "text", placeholder := messages("search"))
+              input(cls := "fuzzy-search form-control", `type` := "text", placeholder := Messages("search"))
             )
           )
         ),
@@ -62,13 +62,13 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
             }
 
             Await.result(eateries.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
-              sortBy(chain => messages("eateries." + chain._1)).map(chain =>
+              sortBy(chain => Messages("eateries." + chain._1)).map(chain =>
               displayEatery(chain, friendChoices.getOrElse(chain._1, Seq()), if (userChoices(chain._1)) {
                 if (userChoices.size == 1) "yes" else "maybe"} else "no"))
           }
           else
             Await.result(cafes.retrieveAll(), 5 seconds).groupBy(_.chainID).toSeq.
-              sortBy(chain => messages("cafes." + chain._1)).map(displayCafe)
+              sortBy(chain => Messages("cafes." + chain._1)).map(displayCafe)
         )
       ),
       script(raw(
@@ -82,7 +82,7 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
         """.stripMargin))
     )
 
-    Future(MainTemplate(messages("eateries"), "eateries", headers, body, userO))
+    Future(MainTemplate(Messages("eateries"), "eateries", headers, body, userO))
   }
 
   implicit def StringToHtml(s: String): Html = Html(s)
@@ -95,8 +95,11 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
 
   // TODO: click on eatery to show information
 
-  def displayEatery(chain: (String, Seq[Eatery]), friends: Seq[User], going: String)(implicit messages: Messages, request: RequestHeader): Frag = {
+  def displayEatery(chain: (String, Seq[Eatery]), friends: Seq[User], going: String)
+                   (implicit messagesProvider: MessagesProvider): Frag = {
+
     val (chainID, eateries) = chain
+
     div(cls := "jumbotron eatery flip" + {if (going == "yes") " going" else ""}, id := chainID, onclick :=
       """
         |$("#" + this.id + " .hidden-panel").slideToggle("fast");
@@ -108,7 +111,7 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
         div(cls := "col-sm-12 col-md-6 vcenter row")(
           h2(cls := "name col-xs-12 col-sm-6 col-md-12 col-lg-6", style := "margin-top: 0px; color: white;" +
             "text-shadow: 0 0 5px black; float:left;")(
-            messages("eateries." + chainID)
+            Messages("eateries." + chainID)
           ),
           div(cls := "col-xs-12 col-sm-6 col-md-12 col-lg-6")(
             friends.map(friend =>
@@ -117,7 +120,7 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
                 width := 50, height := 50,
                 data.toggle := "tooltip", data.placement := "top", title := friend.name,
                 data("phone-number") := friend.mobile.map(_.toString).getOrElse(""),
-                data("phone") := friend.mobile.map(_.toString).getOrElse(messages("error.phone")),
+                data("phone") := friend.mobile.map(_.toString).getOrElse(Messages("error.phone")),
                 onclick := "event.stopPropagation();",
                 style := "margin-left: 2px; margin-right: 2px; margin-bottom: 2px; margin-top: 2px;")
             )
@@ -136,17 +139,17 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
               div(id := chainID, cls := "btn-group btn-group-justified")(
                 div(cls := "form-group btn-group")(
                   button(`type` := "submit", cls := "btn btn-success yes " + green, name := "status", value := "yes")(
-                    messages("eateries.going")
+                    Messages("eateries.going")
                   )
                 ),
                 div(cls := "form-group btn-group")(
                   button(`type` := "submit", cls := "btn btn-info maybe " + blue, name := "status", value := "maybe")(
-                    messages("eateries.undecided")
+                    Messages("eateries.undecided")
                   )
                 ),
                 div(cls := "form-group btn-group")(
                   button(`type` := "submit", cls := "btn btn-primary no " + red, name := "status", value := "no")(
-                    messages("eateries.not-going")
+                    Messages("eateries.not-going")
                   )
                 )
               )
@@ -156,7 +159,7 @@ class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes,
       )
       ,
       div(cls := "hidden-panel")(
-        h3(color.white)(chain._2.headOption.map(messages("eateries.address") + ": " + _.address))
+        h3(color.white)(chain._2.headOption.map(Messages("eateries.address") + ": " + _.address))
       )
     )
   }
