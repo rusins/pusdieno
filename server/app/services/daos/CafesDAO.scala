@@ -11,8 +11,10 @@ import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.Future
 
+// TODO: Abstract with trait for DI
+
 @Singleton
-class Cafes @Inject()(dbConfigProvider: DatabaseConfigProvider) {
+class CafesDAO @Inject()(dbConfigProvider: DatabaseConfigProvider) {
 
   private val cafes = TableQuery[DBCafeTable]
 

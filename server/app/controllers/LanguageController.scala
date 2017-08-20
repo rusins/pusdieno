@@ -11,7 +11,6 @@ import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 class LanguageController @Inject() () extends InjectedController with I18nSupport {
 
   def changeLanguage() = Action { implicit request =>
-    println("Changing language?")
     // Get URL of page the language was changed from, default to root
     val referer = request.headers.get(REFERER).getOrElse("/")
     // Define a single field form

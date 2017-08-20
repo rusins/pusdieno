@@ -12,6 +12,8 @@ import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.Future
 
+// TODO: Abstract with trait for DI
+
 @Singleton
 class Eateries @Inject()(dbConfigProvider: DatabaseConfigProvider) {
 

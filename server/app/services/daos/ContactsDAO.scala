@@ -7,14 +7,16 @@ import models.User
 import models.db._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import services.daos.Contacts._
+import services.daos.ContactsDAO._
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.Future
 
+// TODO: Abstract with trait for DI
+
 @Singleton
-class Contacts @Inject()(dbConfigProvider: DatabaseConfigProvider) {
+class ContactsDAO @Inject()(dbConfigProvider: DatabaseConfigProvider) {
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
@@ -33,7 +35,7 @@ class Contacts @Inject()(dbConfigProvider: DatabaseConfigProvider) {
     db.run(
       (for {
         (contact, userInfo) <- friendsWithContactInfoQuery(userID)
-      } yield (contact, userInfo, Choices.wantsFood(userInfo._1.id), Choices.wantsCoffee(userInfo._1.id))).result
+      } yield (contact, userInfo, ChoicesDAO.wantsFood(userInfo._1.id), ChoicesDAO.wantsCoffee(userInfo._1.id))).result
     ).map(_.map {
       case (contact, userInfo, wantsFood, wantsCoffee) => (contact, (User.fromDB _).tupled(userInfo), wantsFood, wantsCoffee)
     })
@@ -79,7 +81,7 @@ class Contacts @Inject()(dbConfigProvider: DatabaseConfigProvider) {
 
 }
 
-object Contacts {
+object ContactsDAO {
   private val contacts = TableQuery[ContactTable]
   private val users = TableQuery[DBUserTable]
 
@@ -90,7 +92,7 @@ object Contacts {
 
   private def friendsWithContactInfoQuery(userID: UUID) = for {
     contact <- friendsOfUserQuery(userID)
-    userInfo <- Users.getFromID(contact.ownerID)
+    userInfo <- UserDAO.getFromID(contact.ownerID)
   } yield (contact, userInfo)
 
 }

@@ -4,24 +4,25 @@ import com.google.inject.name.Named
 import com.google.inject.{AbstractModule, Provides}
 import com.mohiva.play.silhouette.api.crypto.{Crypter, CrypterAuthenticatorEncoder, Signer}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
-import com.mohiva.play.silhouette.api.services.AuthenticatorService
+import com.mohiva.play.silhouette.api.services.{AuthenticatorService, IdentityService}
 import com.mohiva.play.silhouette.api.util._
 import com.mohiva.play.silhouette.api.{Environment, EventBus, Silhouette, SilhouetteProvider}
 import com.mohiva.play.silhouette.crypto.{JcaCrypter, JcaCrypterSettings, JcaSigner, JcaSignerSettings}
 import com.mohiva.play.silhouette.impl.authenticators.{CookieAuthenticator, CookieAuthenticatorService, CookieAuthenticatorSettings}
-import com.mohiva.play.silhouette.impl.providers.oauth2.{FacebookProvider, GoogleProvider}
 import com.mohiva.play.silhouette.impl.providers._
+import com.mohiva.play.silhouette.impl.providers.oauth2.{FacebookProvider, GoogleProvider}
 import com.mohiva.play.silhouette.impl.providers.state.{CsrfStateItemHandler, CsrfStateSettings}
 import com.mohiva.play.silhouette.impl.util.{DefaultFingerprintGenerator, SecureRandomIDGenerator}
 import com.mohiva.play.silhouette.persistence.daos.DelegableAuthInfoDAO
 import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepository
+import models.User
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.codingwell.scalaguice.ScalaModule
 import play.api.Configuration
 import play.api.libs.ws.WSClient
 import play.api.mvc.CookieHeaderEncoding
-import services.daos._
+import services.UserService
 import utils.CookieEnv
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,14 +41,14 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
 
   override def configure(): Unit = {
     bind[Silhouette[CookieEnv]].to[SilhouetteProvider[CookieEnv]]
+    bind[IdentityService[User]].to[UserService]
     bind[Clock].toInstance(Clock())
     bind[FingerprintGenerator].toInstance(new DefaultFingerprintGenerator(false))
     bind[IDGenerator].toInstance(new SecureRandomIDGenerator())
-    bind[DelegableAuthInfoDAO[OAuth2Info]].to[OAuth2InfoDAO]
   }
 
   @Provides
-  def provideEnvironment(userService: Users,
+  def provideEnvironment(userService: UserService,
                          authenticatorService: AuthenticatorService[CookieAuthenticator],
                          eventBus: EventBus): Environment[CookieEnv] = {
 

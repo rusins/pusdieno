@@ -12,7 +12,7 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, Messages, MessagesApi, MessagesProvider}
 import play.api.mvc._
-import services.daos.Contacts
+import services.daos.ContactsDAO
 import views.{ContactView, ErrorView}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -20,7 +20,7 @@ import scala.concurrent.{ExecutionContext, Future}
 case class ContactData(name: String, phone: Option[Int], email: Option[String])
 
 class ContactController @Inject()(silhouette: Silhouette[CookieEnv],
-                                  contacts: Contacts)
+                                  contacts: ContactsDAO)
                                  (implicit ex: ExecutionContext)
   extends InjectedController with I18nSupport {
 

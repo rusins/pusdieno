@@ -7,7 +7,7 @@ import models.{Cafe, Eatery, User}
 import play.api.i18n.{Lang, Messages, MessagesProvider}
 import play.api.mvc.RequestHeader
 import play.twirl.api.{Html, HtmlFormat}
-import services.daos.{Cafes, Choices, Contacts, Eateries}
+import services.daos.{CafesDAO, ChoicesDAO, ContactsDAO, Eateries}
 import views.styles.{CommonStyleSheet, EateriesStyleSheet}
 
 import scala.concurrent.duration._
@@ -18,7 +18,7 @@ import scalatags.Text
 import scalatags.Text.TypedTag
 import scalatags.Text.all._
 
-class EateriesView @Inject()(choices: Choices, eateries: Eateries, cafes: Cafes, contacts: Contacts) {
+class EateriesView @Inject()(choices: ChoicesDAO, eateries: Eateries, cafes: CafesDAO, contacts: ContactsDAO) {
 
   def index(section: String, userO: Option[User])
            (implicit messagesProvider: MessagesProvider, ex: ExecutionContext): Future[Html] = {

@@ -5,18 +5,21 @@ import javax.inject.Inject
 import utils.CookieEnv
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
+import com.mohiva.play.silhouette.api.services.IdentityService
 import com.mohiva.play.silhouette.api.{Logger, LoginEvent, LogoutEvent, Silhouette}
 import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfileBuilder, SocialProvider, SocialProviderRegistry}
+import models.User
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.ws.WSClient
 import play.api.mvc._
-import services.daos.Users
+import services.UserService
+import services.daos.UserDAO
 import views.SignInView
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthController @Inject()(silhouette: Silhouette[CookieEnv],
-                               userService: Users,
+                               userService: UserService,
                                authInfoRepository: AuthInfoRepository,
                                socialProviderRegistry: SocialProviderRegistry,
                                ws: WSClient)

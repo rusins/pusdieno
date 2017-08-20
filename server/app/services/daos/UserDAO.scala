@@ -10,7 +10,8 @@ import models.db._
 import models.{EatsAt, User}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import services.daos.Users._
+import services.UserService
+import services.daos.UserDAO._
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 import slick.lifted.TableQuery
@@ -19,7 +20,7 @@ import scala.concurrent.Future
 import scala.util.Random
 
 @Singleton
-class Users @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: Contacts) extends IdentityService[User] with Logger {
+class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: ContactsDAO) extends UserService with Logger {
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
@@ -76,7 +77,7 @@ class Users @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: Contac
 
 }
 
-object Users {
+object UserDAO {
 
   private val users = TableQuery[DBUserTable]
   private val logins = TableQuery[DBLoginInfoTable]
