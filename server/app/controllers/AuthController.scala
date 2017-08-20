@@ -2,18 +2,15 @@ package controllers
 
 import javax.inject.Inject
 
-import utils.CookieEnv
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
-import com.mohiva.play.silhouette.api.services.IdentityService
-import com.mohiva.play.silhouette.api.{Logger, LoginEvent, LogoutEvent, Silhouette}
+import com.mohiva.play.silhouette.api.{LoginEvent, LogoutEvent, Silhouette}
 import com.mohiva.play.silhouette.impl.providers.{CommonSocialProfileBuilder, SocialProvider, SocialProviderRegistry}
-import models.User
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.ws.WSClient
 import play.api.mvc._
 import services.UserService
-import services.daos.UserDAO
+import utils.{CookieEnv, LoggingSupport}
 import views.SignInView
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -24,7 +21,7 @@ class AuthController @Inject()(silhouette: Silhouette[CookieEnv],
                                socialProviderRegistry: SocialProviderRegistry,
                                ws: WSClient)
                               (implicit ex: ExecutionContext)
-  extends InjectedController with I18nSupport with Logger {
+  extends InjectedController with I18nSupport with LoggingSupport {
 
   def signIn: Action[AnyContent] = silhouette.UnsecuredAction { implicit request =>
     Ok(SignInView(socialProviderRegistry, request.flash.get("error")))
