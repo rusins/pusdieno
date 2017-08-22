@@ -1,14 +1,16 @@
 package services
 
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
-import models.Eatery
+import models.{Eatery, User}
 import models.db._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import services.daos.Eateries
+import services.daos.EateryDAO
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
+import utils.LoggingSupport
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -16,16 +18,11 @@ import scala.concurrent.{Await, Future}
 /**
   * This class is meant for quickly populating the database in case I wipe everything.
   * ONLY USE FOR TESTING PURPOSES!!!
-  * @param dbConfigProvider
-  * @param eateries
   */
 @Singleton
-class DatabasePopulator @Inject()(dbConfigProvider: DatabaseConfigProvider, eateries: Eateries) {
+class DatabasePopulator @Inject()(eateries: EateryService) extends LoggingSupport {
 
-  println("Populating Database")
-
-  private val db = dbConfigProvider.get[JdbcProfile].db
-  private val chains = TableQuery[ChainTable]
+  logger.info("Populating Database")
 
   private def closed = (WeekTimes.empty, WeekTimes.empty)
 

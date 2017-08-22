@@ -22,8 +22,8 @@ class DefaultController @Inject()(silhouette: Silhouette[CookieEnv])
   def index: Action[AnyContent] = silhouette.UserAwareAction.async {
     implicit request =>
       request.identity match {
-        case Some(_) => Future.successful(Redirect("/overview"))
-        case None => Future.successful(Redirect("/welcome"))
+        case Some(_) => Future.successful(Redirect(routes.OverviewController.index()))
+        case None => Future.successful(Redirect(routes.DefaultController.welcome()))
       }
   }
 }

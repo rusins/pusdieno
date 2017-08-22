@@ -20,7 +20,7 @@ import scala.concurrent.Future
 import scala.util.Random
 
 @Singleton
-class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: ContactsDAO) extends UserService with Logger {
+class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: ContactDAO) extends UserService with Logger {
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 

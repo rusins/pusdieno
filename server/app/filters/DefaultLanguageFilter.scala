@@ -2,32 +2,32 @@ package filters
 
 import akka.stream.Materializer
 import javax.inject._
+
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.mvc._
+import utils.LoggingSupport
+
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
- * This is a simple filter. It's
- * added to the application's list of filters by the
- * [[Filters]] class.
- *
- * @param mat This object is needed to handle streaming of requests
- * and responses.
- * @param exec This class is needed to execute code asynchronously.
- * It is used below by the `map` method.
- */
+  * Checks if the language cookie is set, if not, sets it to Latvian
+  * @param ex
+  */
 @Singleton
-class DefaultLanguageFilter @Inject()(
-    implicit override val mat: Materializer,
-    exec: ExecutionContext) extends Filter {
+class DefaultLanguageFilter @Inject()(messagesApi: MessagesApi)(implicit ex: ExecutionContext) extends EssentialFilter
+  with LoggingSupport {
 
-  override def apply(nextFilter: RequestHeader => Future[Result])
-           (requestHeader: RequestHeader): Future[Result] = {
-    // Run the next filter in the chain. This will call other filters
-    // and eventually call the action. Take the result and modify it
-    // by adding a new header
-    nextFilter(requestHeader).map { result =>
-      result
+  override def apply(next: EssentialAction) = EssentialAction { request =>
+    println("WTF")
+    next(request).map { result =>
+      if (request.cookies.get(messagesApi.langCookieName).isEmpty) {
+        logger.info("Setting request without language cookie to Latvian")
+        messagesApi.setLang(result, Lang("lv"))
+      }
+      else {
+        logger.info("Request already had language cookie")
+        result
+      }
     }
   }
-
 }

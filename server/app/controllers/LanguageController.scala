@@ -2,12 +2,11 @@ package controllers
 
 import javax.inject.Inject
 
-import models.Languages
 import play.api.data._
 import play.api.data.Forms._
 import play.api.mvc.{Action, InjectedController}
 import play.api.i18n.{I18nSupport, Lang, MessagesApi}
-import utils.LoggingSupport
+import utils.{Languages, LoggingSupport}
 
 class LanguageController @Inject()() extends InjectedController with I18nSupport with LoggingSupport {
 

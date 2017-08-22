@@ -9,7 +9,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.{Lang, Messages, MessagesProvider}
 import play.api.mvc.RequestHeader
 import play.twirl.api.Html
-import services.daos.ContactsDAO
+import services.daos.ContactDAO
 import views.styles.FriendsStyleSheet
 
 import scala.concurrent.duration._
@@ -21,7 +21,7 @@ import scalatags.Text.all._
 
 // TODO: Views should not access database directly, bad because of execution contexts + modularity
 
-class FriendsView @Inject()(contacts: ContactsDAO, dbConfigProvider: DatabaseConfigProvider) {
+class FriendsView @Inject()(contacts: ContactDAO, dbConfigProvider: DatabaseConfigProvider) {
 
   // TODO: Separate tabs into individual web pages in order to support more users with faster load times
 

@@ -2,10 +2,9 @@ package models.db
 
 import java.util.UUID
 
-import slick.driver.PostgresDriver.api._
+import models.Choice
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
-
-case class Choice(id: UUID = UUID.randomUUID(), user: UUID, eatery: UUID)
 
 class EateryChoiceTable(tag: Tag) extends Table[Choice](tag, "eatery_choices") {
 
@@ -23,8 +22,8 @@ class EateryChoiceTable(tag: Tag) extends Table[Choice](tag, "eatery_choices") {
     onDelete = ForeignKeyAction.Cascade
   )
 
-  def pointsTo: ForeignKeyQuery[DBEateryTable, DBEatery] = foreignKey("eatery", eatery, TableQuery[DBEateryTable])(
-    (eateryT: DBEateryTable) => eateryT.id,
+  def pointsTo: ForeignKeyQuery[DbEateryTable, DbEatery] = foreignKey("eatery", eatery, TableQuery[DbEateryTable])(
+    (eateryT: DbEateryTable) => eateryT.id,
     // We want to delete people going to that eatery if it gets deleted
     onDelete = ForeignKeyAction.Cascade
   )
@@ -46,8 +45,8 @@ class CafeChoiceTable(tag: Tag) extends Table[Choice](tag, "cafe_choices") {
     onDelete = ForeignKeyAction.Cascade
   )
 
-  def pointsTo: ForeignKeyQuery[DBCafeTable, DBCafe] = foreignKey("id", cafe, TableQuery[DBCafeTable])(
-    (cafe: DBCafeTable) => cafe.id,
+  def pointsTo: ForeignKeyQuery[DbCafeTable, DbCafe] = foreignKey("id", cafe, TableQuery[DbCafeTable])(
+    (cafe: DbCafeTable) => cafe.id,
     // We want to delete people going to that eatery if it gets deleted
     onDelete = ForeignKeyAction.Cascade
   )

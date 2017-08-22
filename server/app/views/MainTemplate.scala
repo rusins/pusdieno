@@ -1,11 +1,13 @@
 package views
 
 import controllers.routes
-import models.{Languages, User}
+import models.User
 import play.api.i18n.{Messages, MessagesProvider}
 import play.twirl.api.Html
+import utils.Languages
 import views.styles.CommonStyleSheet
 
+import scala.language.implicitConversions
 import scalacss.ProdDefaults._
 import scalacss.ScalatagsCss._
 import scalatags.Text._

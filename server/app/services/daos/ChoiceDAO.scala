@@ -8,7 +8,7 @@ import models.db._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import services.UserService
-import services.daos.ChoicesDAO._
+import services.daos.ChoiceDAO._
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 
@@ -18,8 +18,8 @@ import scala.concurrent.{Await, Future}
 // TODO: Abstract with trait for DI
 
 @Singleton
-class ChoicesDAO @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                           userService: UserService) {
+class ChoiceDAO @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                          userService: UserService) {
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
@@ -42,13 +42,13 @@ class ChoicesDAO @Inject()(dbConfigProvider: DatabaseConfigProvider,
 
   def friendEateryChoiceMap(userID: UUID): Future[Map[String, Seq[User]]] = db.run(
     (for {
-      f <- ContactsDAO.friendsOfUserQuery(userID)
+      f <- ContactDAO.friendsOfUserQuery(userID)
     } yield f).result).flatMap(seq =>
     Future(seq.flatMap(friend =>
       Await.result(db.run(
         (for {
           choice <- eateryChoices.filter(_.user === friend.ownerID)
-          eatery <- TableQuery[DBEateryTable].filter(_.id === choice.eatery)
+          eatery <- TableQuery[DbEateryTable].filter(_.id === choice.eatery)
           userInfo <- UserDAO.getFromID(friend.ownerID)
         } yield (eatery.chainID, userInfo)).result
       ), 1 second)
@@ -82,10 +82,10 @@ class ChoicesDAO @Inject()(dbConfigProvider: DatabaseConfigProvider,
 
 }
 
-object ChoicesDAO {
+object ChoiceDAO {
   private val eateryChoices = TableQuery[EateryChoiceTable]
   private val cafeChoices = TableQuery[CafeChoiceTable]
-  private val eateries = TableQuery[DBEateryTable]
+  private val eateries = TableQuery[DbEateryTable]
 
   def wantsFood(userID: Rep[UUID]): Rep[Boolean] = eateryChoices.filter(_.user === userID).exists
 
