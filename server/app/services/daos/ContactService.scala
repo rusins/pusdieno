@@ -1,35 +1,19 @@
 package services.daos
 
 import java.util.UUID
-import javax.inject.{Inject, Singleton}
 
 import models.{Contact, User}
-import models.db._
-import play.api.db.slick.DatabaseConfigProvider
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import services.daos.ContactDAO._
-import slick.jdbc.JdbcProfile
-import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.Future
 
-// TODO: Abstract with trait for DI
+trait ContactService {
 
-@Singleton
-class ContactDAO @Inject()(dbConfigProvider: DatabaseConfigProvider) extends ContactService {
+  def contactsOfUser(userID: UUID): Future[Seq[Contact]]
 
-  private val db = dbConfigProvider.get[JdbcProfile].db
+  def friendsWithContactInfo(userID: UUID): Future[Seq[(Contact, User)]]
 
-  private val contacts = TableQuery[ContactTable]
-  private val users = TableQuery[DBUserTable]
-
-  def contactsOfUser(userID: UUID): Future[Seq[Contact]] = db.run(contacts.filter(_.ownerID === userID).result)
-
-  def friendsWithContactInfo(userID: UUID): Future[Seq[(Contact, User)]] =
-    db.run(friendsWithContactInfoQuery(userID).result).map(_.map {
-      case (contact, userInfo) =>
-        (contact, (User.fromDB _).tupled(userInfo))
-    })
+  def contactsWithOptionalDBUserInfo(userID: UUID): Future[Seq[(Contact, Option[DBUser])]] =
+    db.run((contacts.filter(_.ownerID === userID) joinLeft users on (_.contactID === _.id)).result)
 
   def friendsWithStatusInfo(userID: UUID): Future[Seq[(Contact, User, Boolean, Boolean)]] =
     db.run(
@@ -68,12 +52,6 @@ class ContactDAO @Inject()(dbConfigProvider: DatabaseConfigProvider) extends Con
 
   def delete(contactID: UUID): Future[Int] = db.run(contacts.filter(_.id === contactID).delete)
 
-  // After this line follow methods used by other DAOs
-
-}
-
-object ContactDAO {
-
 
 
   def friendsOfUserQuery(userID: Rep[UUID]): Query[ContactTable, Contact, Seq] = for {
@@ -95,5 +73,4 @@ object ContactDAO {
       case Some(email) => db.run(contacts.filter(_.contactEmail === email).map(_.contactID).update(Some(dbUser.id)))
     }
   }
-
 }

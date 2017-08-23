@@ -2,12 +2,9 @@ package models.db
 
 import java.util.UUID
 
-import slick.driver.PostgresDriver.api._
+import models.Contact
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ForeignKeyQuery, ProvenShape, TableQuery}
-
-case class
-Contact(id: UUID = UUID.randomUUID(), name: String, ownerID: UUID, contactID: Option[UUID], phone: Option[Int] = None,
-                   email: Option[String] = None, favorite: Boolean = false)
 
 class ContactTable(tag: Tag) extends Table[Contact](tag, "contacts") {
 

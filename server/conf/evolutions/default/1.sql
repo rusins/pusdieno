@@ -23,6 +23,7 @@ create table "users" (
 
 create table "contacts" (
 "id" UUID NOT NULL PRIMARY KEY,
+"name" TEXT,
 "owner_id" UUID NOT NULL REFERENCES "users" ON DELETE CASCADE,
 "contact_id" UUID REFERENCES "users",
 "contact_phone" INTEGER,
@@ -53,7 +54,7 @@ create table "chains" (
 "menu" VARCHAR
 );
 
-create table "eateries" (
+create table "establishments" (
 "id" UUID NOT NULL PRIMARY KEY,
 "chain" VARCHAR NOT NULL REFERENCES "chains" ON DELETE CASCADE,
 "address" VARCHAR NOT NULL,
@@ -61,24 +62,10 @@ create table "eateries" (
 "close_times" UUID NOT NULL REFERENCES "week_times"
 );
 
-create table "cafes" (
-"id" UUID NOT NULL PRIMARY KEY,
-"chain" VARCHAR NOT NULL REFERENCES "chains" ON DELETE CASCADE,
-"address" VARCHAR NOT NULL,
-"open_times" UUID NOT NULL REFERENCES "week_times",
-"close_times" UUID NOT NULL REFERENCES "week_times"
-);
-
-create table "eatery_choices" (
+create table "choices" (
 "id" UUID NOT NULL PRIMARY KEY,
 "usr" UUID NOT NULL REFERENCES "users" ON DELETE CASCADE,
-"eatery" UUID NOT NULL REFERENCES "eateries" ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-create table "cafe_choices" (
-"id" UUID NOT NULL PRIMARY KEY,
-"usr" UUID NOT NULL REFERENCES "users",
-"cafe" UUID NOT NULL REFERENCES "cafes" ON DELETE CASCADE ON UPDATE CASCADE
+"establishment" UUID NOT NULL REFERENCES "establishments" ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 # --- !Downs
@@ -88,7 +75,5 @@ drop table "contacts";
 drop table "login_info";
 drop table "oauth2info";
 drop table "chains";
-drop table "eateries";
-drop table "cafes";
-drop table "eatery_choices";
-drop table "cafe_choices";
+drop table "establishments";
+drop table "choices";

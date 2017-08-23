@@ -3,13 +3,13 @@ package services
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
-import models.{Eatery, User}
+import models.{Chain, Restaurant, User}
 import models.db._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import services.daos.EateryDAO
+import services.daos.RestaurantDAO
 import slick.driver.JdbcProfile
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 import utils.LoggingSupport
 
 import scala.concurrent.duration.Duration
@@ -20,18 +20,18 @@ import scala.concurrent.{Await, Future}
   * ONLY USE FOR TESTING PURPOSES!!!
   */
 @Singleton
-class DatabasePopulator @Inject()(eateries: EateryService) extends LoggingSupport {
+class DatabasePopulator @Inject()(restaurants: RestaurantService, chains: ChainService) extends LoggingSupport {
 
   logger.info("Populating Database")
 
   private def closed = (WeekTimes.empty, WeekTimes.empty)
 
-  private val subway = Eatery(chainID = "subway", address = "Raiņa Bulvāris 7", openHours = closed)
-  private val pankukas = Eatery(chainID = "pankukas", address = "9/11 memorial site, NY, USA", openHours = closed)
-  private val kfc = Eatery(chainID = "kfc", address = "Ķekava", openHours = closed)
-  private val pelmeni = Eatery(chainID = "pelmeni", address = "Vecrīgā, Kalķu 7, Rīga", openHours = closed)
-  private val mcdonalds = Eatery(chainID = "mcdonalds", address = "Raiņa Bulvāris 8", openHours = closed)
-  private val himalaji = Eatery(chainID = "himalaji", address = "Blaumaņa iela", openHours = closed)
+  private val subway = Restaurant(chainID = "subway", address = "Raiņa Bulvāris 7", openHours = closed)
+  private val pankukas = Restaurant(chainID = "pankukas", address = "9/11 memorial site, NY, USA", openHours = closed)
+  private val kfc = Restaurant(chainID = "kfc", address = "Ķekava", openHours = closed)
+  private val pelmeni = Restaurant(chainID = "pelmeni", address = "Vecrīgā, Kalķu 7, Rīga", openHours = closed)
+  private val mcdonalds = Restaurant(chainID = "mcdonalds", address = "Raiņa Bulvāris 8", openHours = closed)
+  private val himalaji = Restaurant(chainID = "himalaji", address = "Blaumaņa iela", openHours = closed)
 
   /*
   private val public = User(UUID.fromString("00000000-0000-0000-0000-000000000000"), "Public", Some(25576439), Some("pusdieno@krikis.org"), WeekPlan.empty)
@@ -45,25 +45,22 @@ class DatabasePopulator @Inject()(eateries: EateryService) extends LoggingSuppor
   private val margaret = User(id = UUID.fromString("00000000-0000-0000-0000-000000000008"), name = "Margaret Thatcher", eatsAt = WeekPlan.empty)
 */
 
-  private val initialFuture: Future[Unit] = db run DBIO.seq(
-    chains.delete,
-    chains += Chain(id = "subway"),
-    chains += Chain(id = "pankukas"),
-    chains += Chain(id = "kfc"),
-    chains += Chain(id = "pelmeni"),
-    chains += Chain(id = "mcdonalds"),
-    chains += Chain(id = "himalaji")
-  )
+  private val initialFuture: Future[Unit] = chains.clearAll()
+    .flatMap(_ => chains.add(Chain(id = "subway")))
+    .flatMap(_ => chains.add(Chain(id = "pankukas")))
+    .flatMap(_ => chains.add(Chain(id = "kfc")))
+    .flatMap(_ => chains.add(Chain(id = "pelmeni")))
+    .flatMap(_ => chains.add(Chain(id = "mcdonalds")))
+    .flatMap(_ => chains.add(Chain(id = "himalaji")))
 
   Await.result(initialFuture
-    .flatMap(_ => eateries.add(subway))
-    .flatMap(_ => eateries.add(pankukas))
-    .flatMap(_ => eateries.add(kfc))
-    .flatMap(_ => eateries.add(pelmeni))
-    .flatMap(_ => eateries.add(mcdonalds))
-    .flatMap(_ => eateries.add(himalaji))
+    .flatMap(_ => restaurants.add(subway))
+    .flatMap(_ => restaurants.add(pankukas))
+    .flatMap(_ => restaurants.add(kfc))
+    .flatMap(_ => restaurants.add(pelmeni))
+    .flatMap(_ => restaurants.add(mcdonalds))
+    .flatMap(_ => restaurants.add(himalaji))
     , Duration.Inf
   )
-
-
+  
 }

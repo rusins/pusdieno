@@ -83,7 +83,7 @@ class ChoiceDAO @Inject()(dbConfigProvider: DatabaseConfigProvider,
 }
 
 object ChoiceDAO {
-  private val eateryChoices = TableQuery[EateryChoiceTable]
+  private val eateryChoices = TableQuery[ChoiceTable]
   private val cafeChoices = TableQuery[CafeChoiceTable]
   private val eateries = TableQuery[DbEateryTable]
 

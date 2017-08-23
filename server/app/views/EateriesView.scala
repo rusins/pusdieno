@@ -3,12 +3,12 @@ package views
 import javax.inject.Inject
 
 import controllers.routes
-import models.{Cafe, Eatery, User}
+import models.{Cafe, Restaurant, User}
 import play.api.i18n.{Lang, Messages, MessagesProvider}
 import play.api.mvc.RequestHeader
 import play.twirl.api.{Html, HtmlFormat}
-import services.EateryService
-import services.daos.{CafeDAO, ChoiceDAO, ContactDAO, EateryDAO}
+import services.RestaurantService
+import services.daos.{CafeDAO, ChoiceDAO, ContactDAO, RestaurantDAO}
 import views.styles.{CommonStyleSheet, EateriesStyleSheet}
 
 import scala.concurrent.duration._
@@ -19,7 +19,7 @@ import scalatags.Text
 import scalatags.Text.TypedTag
 import scalatags.Text.all._
 
-class EateriesView @Inject()(choices: ChoiceDAO, eateries: EateryService, cafes: CafeDAO, contacts: ContactDAO) {
+class EateriesView @Inject()(choices: ChoiceDAO, eateries: RestaurantService, cafes: CafeDAO, contacts: ContactDAO) {
 
   def index(section: String, userO: Option[User])
            (implicit messagesProvider: MessagesProvider, ex: ExecutionContext): Future[Html] = {
@@ -96,7 +96,7 @@ class EateriesView @Inject()(choices: ChoiceDAO, eateries: EateryService, cafes:
 
   // TODO: click on eatery to show information
 
-  def displayEatery(chain: (String, Seq[Eatery]), friends: Seq[User], going: String)
+  def displayEatery(chain: (String, Seq[Restaurant]), friends: Seq[User], going: String)
                    (implicit messagesProvider: MessagesProvider): Frag = {
 
     val (chainID, eateries) = chain

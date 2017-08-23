@@ -7,7 +7,7 @@ import utils.CookieEnv
 import com.mohiva.play.silhouette.api.{Authorization, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.CookieAuthenticator
 import models.User
-import models.db.Contact
+import models.Contact
 import play.api.data._
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, Messages, MessagesApi, MessagesProvider}
@@ -20,7 +20,7 @@ import scala.concurrent.{ExecutionContext, Future}
 case class ContactData(name: String, phone: Option[Int], email: Option[String])
 
 class ContactController @Inject()(silhouette: Silhouette[CookieEnv],
-                                  contacts: ContactDAO)
+                                  contacts: ContactService)
                                  (implicit ex: ExecutionContext)
   extends InjectedController with I18nSupport {
 

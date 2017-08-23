@@ -2,7 +2,7 @@ package services.daos
 
 import javax.inject.{Inject, Singleton}
 
-import models.{Cafe, Eatery}
+import models.{Cafe, Restaurant}
 import models.db.{DbCafeTable, DBWeekTimesTable}
 import play.api.db.slick.DatabaseConfigProvider
 import services.CafeService

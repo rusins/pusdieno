@@ -2,38 +2,38 @@ package services.daos
 
 import javax.inject.{Inject, Singleton}
 
-import models.Eatery
+import models.Restaurant
 import models.db._
 import play.api.db.slick.DatabaseConfigProvider
-import services.EateryService
+import services.RestaurantService
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EateryDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)
-                         (implicit ex: ExecutionContext) extends EateryService {
+class RestaurantDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)
+                             (implicit ex: ExecutionContext) extends RestaurantService {
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
-  private val eateries = TableQuery[DbEateryTable]
+  private val restaurants = TableQuery[DbRestaurantTable]
   private val times = TableQuery[DBWeekTimesTable]
 
-  override def retrieveAll(): Future[Seq[Eatery]] = db.run(
+  override def retrieveAll(): Future[Seq[Restaurant]] = db.run(
     (for {
-      e <- eateries
+      e <- restaurants
       opens <- e.openTimes
       closes <- e.closeTimes
     } yield (e, opens, closes)).result
-  ).map(_.map((Eatery.fromDbEatery _).tupled))
+  ).map(_.map((Restaurant.fromDbRestaurant _).tupled))
 
-  override def add(eatery: Eatery): Future[Unit] = db.run(eatery.toDbEatery match {
+  override def add(eatery: Restaurant): Future[Unit] = db.run(eatery.toDbRestaurant match {
     case (dbEatery, opens, closes) =>
       DBIO.seq(
         times += opens,
         times += closes,
-        eateries += dbEatery
+        restaurants += dbEatery
       )
   })
 }

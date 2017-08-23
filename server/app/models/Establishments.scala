@@ -30,7 +30,7 @@ object Restaurant {
 }
 
 case class Cafe(id: UUID = UUID.randomUUID(), chainID: String, address: String, openHours: (WeekTimes, WeekTimes))
-  extends Eatery(id, chainID, address, openHours) {
+  extends Eatery {
   def toDbCafe: (DbCafe, DBWeekTimes, DBWeekTimes) = (
     DbCafe(id, chainID, address, openHours._1.id, openHours._2.id),
     openHours._1.toDB,
