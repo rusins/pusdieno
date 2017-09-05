@@ -3,8 +3,7 @@ package views
 import java.util.UUID
 
 import controllers.{ContactData, routes}
-import models.User
-import models.db.{Contact, DBUser}
+import models.{Contact, User}
 import play.api.data.Form
 import play.api.i18n.{Messages, MessagesProvider}
 import play.api.mvc.RequestHeader
@@ -14,7 +13,7 @@ import scalatags.Text.all._
 
 object ContactView {
 
-  def index(user: User, seq: Seq[(Contact, Option[DBUser])])(implicit messagesProvider: MessagesProvider): Html = {
+  def index(user: User, seq: Seq[(Contact, Option[User])])(implicit messagesProvider: MessagesProvider): Html = {
     val headers = Seq(
       script(src := "/assets/javascripts/list.min.js"),
       script(src := "/assets/javascripts/list.fuzzysearch.min.js")

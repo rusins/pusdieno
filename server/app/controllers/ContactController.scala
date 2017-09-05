@@ -12,7 +12,7 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, Messages, MessagesApi, MessagesProvider}
 import play.api.mvc._
-import services.daos.ContactDAO
+import services.daos.{ContactDAO, ContactService}
 import views.{ContactView, ErrorView}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -79,7 +79,7 @@ class ContactController @Inject()(silhouette: Silhouette[CookieEnv],
   }
 
   def index: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
-    contacts.contactsWithOptionalDBUserInfo(request.identity.id).map(seq =>
+    contacts.contactsWithFriendsOfUser(request.identity.id).map(seq =>
       Ok(ContactView.index(request.identity, seq))
     )
   }

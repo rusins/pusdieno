@@ -11,18 +11,21 @@ import models.{EatsAt, User}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import services.UserService
-import services.daos.UserDAO._
-import slick.driver.JdbcProfile
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.JdbcProfile
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
 
 import scala.concurrent.Future
 import scala.util.Random
 
 @Singleton
-class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: ContactDAO) extends UserService with Logger {
+final class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: ContactService) extends UserService with Logger {
 
   private val db = dbConfigProvider.get[JdbcProfile].db
+
+  private val users = TableQuery[DBUserTable]
+  private val logins = TableQuery[DBLoginInfoTable]
+  private val weekTimes = TableQuery[DBWeekTimesTable]
 
   def retrieve(id: UUID): Future[Option[User]] = db.run(getFromID(id).result.headOption).map(
     _.map((User.fromDB _).tupled))
@@ -75,15 +78,7 @@ class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: Cont
       userInfo <- getFromID(id)
     } yield userInfo).result.headOption).map(_.map((User.fromDB _).tupled))
 
-}
-
-object UserDAO {
-
-  private val users = TableQuery[DBUserTable]
-  private val logins = TableQuery[DBLoginInfoTable]
-  private val weekTimes = TableQuery[DBWeekTimesTable]
-
-  def getFromID(id: Rep[UUID]) = for {
+  private[daos] def getFromID(id: Rep[UUID]) = for {
     dbUser <- users.filter(_.id === id)
     breakfast <- users.joinLeft(weekTimes).on(_.breakfastFK === _.id).map { case (u, t) => t }
     lunch <- users.joinLeft(weekTimes).on(_.lunchFK === _.id).map { case (u, t) => t }
@@ -91,9 +86,11 @@ object UserDAO {
   } yield (dbUser, breakfast, lunch, dinner)
 
   /*
+  old code that should work but fucking didn't because of Slick :(
   def getFromID(id: Rep[UUID]) = for {
     (((dbUser, bk), lu), di) <- users.filter(_.id === id).joinLeft(weekTimes).on(_.breakfastFK === _.id).
       joinLeft(weekTimes).on(_._1.lunchFK === _.id).joinLeft(weekTimes).on(_._1._1.dinnerFK === _.id)
   } yield (dbUser, bk, lu, di)
   */
+
 }

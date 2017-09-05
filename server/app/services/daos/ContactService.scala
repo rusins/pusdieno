@@ -2,75 +2,54 @@ package services.daos
 
 import java.util.UUID
 
+import models.db.DBUser
+import models.helpers.Lusts
 import models.{Contact, User}
 
 import scala.concurrent.Future
 
+/**
+  * Warning! I suggest never implementing a method that would allow accessing the contacts of a user alongside the
+  * actual User profiles associated with that contact, unless it's a friend! Such a method could be accidentally used
+  * and cause a 1-sided friendship exploit, where you could see the other person's sensitive info before them friending
+  * you back. Tl;DR: When accessing user data through this service, make sure the user is a friend!
+  */
 trait ContactService {
 
   def contactsOfUser(userID: UUID): Future[Seq[Contact]]
 
-  def friendsWithContactInfo(userID: UUID): Future[Seq[(Contact, User)]]
+  /**
+    *
+    * @param userID The ID of the user who's contacts are queried.
+    * @return Map of contacts, that may or not may have a User associated with them, depending on whether or not the
+    *         users are friends.
+    */
+  def contactsWithFriendsOfUser(userID: UUID): Future[Map[Contact, Option[User]]]
 
-  def contactsWithOptionalDBUserInfo(userID: UUID): Future[Seq[(Contact, Option[DBUser])]] =
-    db.run((contacts.filter(_.ownerID === userID) joinLeft users on (_.contactID === _.id)).result)
+  def friendsWithContactInfo(userID: UUID): Future[Map[User, Contact]]
 
-  def friendsWithStatusInfo(userID: UUID): Future[Seq[(Contact, User, Boolean, Boolean)]] =
-    db.run(
-      (for {
-        (contact, userInfo) <- friendsWithContactInfoQuery(userID)
-      } yield (contact, userInfo, ChoiceDAO.wantsFood(userInfo._1.id), ChoiceDAO.wantsCoffee(userInfo._1.id))).result
-    ).map(_.map {
-      case (contact, userInfo, wantsFood, wantsCoffee) => (contact, (User.fromDB _).tupled(userInfo), wantsFood, wantsCoffee)
-    })
+  def friendsWithStatusInfo(userID: UUID): Future[Map[User, Lusts]]
 
-  def belongsTo(contactID: UUID): Future[Option[UUID]] =
-    db.run(contacts.filter(c => c.id === contactID).map(_.ownerID).result.headOption)
+  def belongsTo(contactID: UUID): Future[Option[UUID]]
 
-  def get(contactID: UUID): Future[Option[Contact]] = db.run(contacts.filter(_.id === contactID).result.headOption)
+  def get(contactID: UUID): Future[Option[Contact]]
 
-  //def save(contact: Contact): Future[Int] = db.run(contacts += contact)
+  /**
+    *
+    * @param contact The contact to save
+    * @return Whether or not the contact got matched to an existing user
+    **/
+  def save(contact: Contact): Future[Boolean]
 
-  def save(contact: Contact): Future[Int] = {
+  def delete(contactID: UUID): Future[Unit]
 
-    db.run(contacts.insertOrUpdate(contact)).flatMap { affectedRows =>
-      println("Changed " + affectedRows + "rows in contacts table! " + contact.toString)
-      contact.phone match {
-        case None => Future.successful(None)
-        case Some(phone) => db.run(users.filter(_.phone === phone).map(_.id).result.headOption)
-      }
-    } flatMap { idO =>
-      contact.email match {
-        case None => Future(idO)
-        case Some(email) => db.run(users.filter(_.email === email).map(_.id).result.headOption)
-      }
-    } flatMap {
-      case None => Future.successful(0)
-      case Some(id) => db.run(contacts.filter(_.id === contact.id).map(_.contactID).update(Some(id)))
-    }
-  }
-
-  def delete(contactID: UUID): Future[Int] = db.run(contacts.filter(_.id === contactID).delete)
-
-
-
-  def friendsOfUserQuery(userID: Rep[UUID]): Query[ContactTable, Contact, Seq] = for {
-    c <- contacts.filter(_.ownerID === userID)
-    f <- contacts.filter(friend => friend.ownerID === c.contactID && friend.contactID === userID)
-  } yield f
-
-  private def friendsWithContactInfoQuery(userID: UUID) = for {
-    contact <- friendsOfUserQuery(userID)
-    userInfo <- UserDAO.getFromID(contact.ownerID)
-  } yield (contact, userInfo)
-
-  def linkNewUser(dbUser: DBUser): Future[Int] = (dbUser.phone match {
-    case None => Future.successful(0)
-    case Some(phone) => db.run(contacts.filter(_.contactPhone === phone).map(_.contactID).update(Some(dbUser.id)))
-  }).flatMap { _ =>
-    dbUser.email match {
-      case None => Future.successful(0)
-      case Some(email) => db.run(contacts.filter(_.contactEmail === email).map(_.contactID).update(Some(dbUser.id)))
-    }
-  }
+  /**
+    * When a new user joins the site, his info gets matched against existing contacts and linked up.
+    *
+    * @param userID The user's ID
+    * @param phone  The user's phone number
+    * @param email  The user's email
+    * @return The number of contacts that were matched
+    */
+  def befriendNewUser(userID: UUID, phone: Option[Int], email: Option[String]): Future[Int]
 }

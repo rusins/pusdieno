@@ -15,7 +15,8 @@ class DbAccessModule extends AbstractModule with ScalaModule{
     bind[UserService].to[UserDAO]
     bind[RestaurantService].to[RestaurantDAO]
     bind[CafeService].to[Cafe]
-    bind[ContactService].to[ContactDAO]
+    bind[ContactService].to[ContactDAO] // WARNING!!! ContactDAO depends on UserDAO, meaning you can't separate their respective implementations
+
   }
 
 }
