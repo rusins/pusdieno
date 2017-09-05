@@ -4,12 +4,11 @@ import javax.inject.Inject
 
 import controllers.routes
 import models.{Cafe, Restaurant, User}
-import play.api.i18n.{Lang, Messages, MessagesProvider}
-import play.api.mvc.RequestHeader
+import play.api.i18n.{Messages, MessagesProvider}
 import play.twirl.api.{Html, HtmlFormat}
-import services.RestaurantService
-import services.daos.{CafeDAO, ChoiceDAO, ContactDAO, RestaurantDAO}
-import views.styles.{CommonStyleSheet, EateriesStyleSheet}
+import services.daos._
+import services.{ChoiceService, RestaurantService}
+import views.styles.EateriesStyleSheet
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -19,7 +18,7 @@ import scalatags.Text
 import scalatags.Text.TypedTag
 import scalatags.Text.all._
 
-class EateriesView @Inject()(choices: ChoiceDAO, eateries: RestaurantService, cafes: CafeDAO, contacts: ContactDAO) {
+class EateriesView @Inject()(choices: ChoiceService, eateries: RestaurantService, cafes: CafeDAO, contacts: ContactService) {
 
   def index(section: String, userO: Option[User])
            (implicit messagesProvider: MessagesProvider, ex: ExecutionContext): Future[Html] = {
@@ -120,8 +119,8 @@ class EateriesView @Inject()(choices: ChoiceDAO, eateries: RestaurantService, ca
                 src := friend.avatarURL.getOrElse("/assets/images/icons/ic_account_circle_black_36px.svg"),
                 width := 50, height := 50,
                 data.toggle := "tooltip", data.placement := "top", title := friend.name,
-                data("phone-number") := friend.mobile.map(_.toString).getOrElse(""),
-                data("phone") := friend.mobile.map(_.toString).getOrElse(Messages("error.phone")),
+                data("phone-number") := friend.phone.map(_.toString).getOrElse(""),
+                data("phone") := friend.phone.map(_.toString).getOrElse(Messages("error.phone")),
                 onclick := "event.stopPropagation();",
                 style := "margin-left: 2px; margin-right: 2px; margin-bottom: 2px; margin-top: 2px;")
             )

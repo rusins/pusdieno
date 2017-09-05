@@ -29,7 +29,7 @@ class CafeDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ex: E
     } yield (cafe, opens, closes)).result
   ).map(_.map((Cafe.fromDbCafe _).tupled))
 
-  override def add(cafe: Cafe): Future[Unit] = db.run(cafe.toDbEatery match {
+  override def add(cafe: Cafe): Future[Unit] = db.run(cafe.toDbCafe match {
     case (dbCafe, opens, closes) =>
       DBIO.seq(
         times += opens,

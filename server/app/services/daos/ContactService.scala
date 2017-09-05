@@ -18,6 +18,8 @@ trait ContactService {
 
   def contactsOfUser(userID: UUID): Future[Seq[Contact]]
 
+  def friendsOfUser(userID: UUID): Future[Seq[User]]
+
   /**
     *
     * @param userID The ID of the user who's contacts are queried.

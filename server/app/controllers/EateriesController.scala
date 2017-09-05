@@ -8,15 +8,17 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
+import services.ChoiceService
 import services.daos.ChoiceDAO
 import views.EateriesView
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Failure
 
 case class EateryForm(eatery: String, status: String)
 
 class EateriesController @Inject()(silhouette: Silhouette[CookieEnv],
-                                   eateries: EateriesView, choices: ChoiceDAO)
+                                   eateries: EateriesView, choices: ChoiceService)
                                   (implicit ex: ExecutionContext)
   extends InjectedController with I18nSupport {
 

@@ -7,6 +7,7 @@ import models.{Contact, User}
 import models.db._
 import models.helpers.Lusts
 import play.api.db.slick.DatabaseConfigProvider
+import services.ChoiceService
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 import utils.LoggingSupport
@@ -16,14 +17,14 @@ import scala.concurrent.{ExecutionContext, Future}
 // TODO: Figure out how to not be dependent on User table
 
 @Singleton
-final class ContactDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, userDAO: UserDAO,
+final class ContactDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, userDAO: UserDAO, choiceDAO: ChoiceDAO,
                                  ex: ExecutionContext) extends ContactService with LoggingSupport {
 
   // BEGIN helper queries
 
   private def contactQuery(userID: Rep[UUID]) = contacts.filter(_.ownerID === userID)
 
-  private def friendQuery(userID: Rep[UUID]): Query[ContactTable, Contact, Seq] = for {
+  protected[daos] def friendQuery(userID: Rep[UUID]): Query[ContactTable, Contact, Seq] = for {
     c <- contactQuery(userID)
     f <- contacts.filter(friend => friend.ownerID === c.contactID && friend.contactID === userID)
   } yield f
@@ -42,6 +43,13 @@ final class ContactDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, userD
   private val users = TableQuery[DBUserTable]
 
   override def contactsOfUser(userID: UUID): Future[Seq[Contact]] = db.run(contactQuery(userID).result)
+
+  override def friendsOfUser(userID: UUID): Future[Seq[User]] = db.run(
+    (for {
+      friend <- friendQuery(userID)
+      userInfo <- userDAO.getFromID(friend.ownerID)
+    } yield userInfo).result
+  ).map(_.map((User.fromDB _).tupled))
 
   /*
   Note: this function can probably be opimized by having SQL figure out how to take all users, and then the user info
@@ -68,7 +76,7 @@ final class ContactDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, userD
     db.run(
       (for {
         (userInfo, _) <- friendsWithContactInfoQuery(userID)
-      } yield (userInfo, ChoiceDAO.wantsFood(userInfo._1.id), ChoiceDAO.wantsCoffee(userInfo._1.id))).result
+      } yield (userInfo, choiceDAO.wantsFoodQuery(userInfo._1.id), choiceDAO.wantsCoffeeQuery(userInfo._1.id))).result
     ).map(_.map {
       case (userInfo, wantsFood, wantsCoffee) => ((User.fromDB _).tupled(userInfo), Lusts(wantsFood, wantsCoffee, wantsAlcohol = false))
     }).map(_.toMap)

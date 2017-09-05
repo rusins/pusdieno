@@ -56,7 +56,7 @@ class FriendsView @Inject()(contacts: ContactDAO, dbConfigProvider: DatabaseConf
           }, src := "/assets/images/icons/ic_local_cafe_black_36px.svg",
             width := 36, height := 36)
         ),
-        td(friend.name, br, friend.mobile),
+        td(friend.name, br, friend.phone),
         td(hr(width := 100, float.left))
       )
     }

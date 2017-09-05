@@ -21,6 +21,13 @@ import scala.util.Random
 @Singleton
 final class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: ContactService) extends UserService with Logger {
 
+  protected[daos] def getFromID(id: Rep[UUID]) = for {
+    dbUser <- users.filter(_.id === id)
+    breakfast <- users.joinLeft(weekTimes).on(_.breakfastFK === _.id).map { case (u, t) => t }
+    lunch <- users.joinLeft(weekTimes).on(_.lunchFK === _.id).map { case (u, t) => t }
+    dinner <- users.joinLeft(weekTimes).on(_.dinnerFK === _.id).map { case (u, t) => t }
+  } yield (dbUser, breakfast, lunch, dinner)
+
   private val db = dbConfigProvider.get[JdbcProfile].db
 
   private val users = TableQuery[DBUserTable]
@@ -52,7 +59,7 @@ final class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts
 
         val user = User(name = profile.fullName.getOrElse(profile.firstName.getOrElse(
           profile.lastName.getOrElse(Random.nextInt().toString))),
-          mobile = None,
+          phone = None,
           email = profile.email,
           eatsAt = EatsAt(None, None, None),
           avatarURL = profile.avatarURL)
@@ -66,7 +73,7 @@ final class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts
             _ <- users += user.toDB
             _ <- logins += dbLoginInfo
           } yield ()).transactionally
-        ).flatMap(_ => contacts.linkNewUser(user.toDB)).map(_ => user)
+        ).flatMap(_ => contacts.befriendNewUser(user.id, user.phone, user.email)).map(_ => user)
       }
     }
   }
@@ -77,13 +84,6 @@ final class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts
         l.providerID === loginInfo.providerID).map(_.userID)
       userInfo <- getFromID(id)
     } yield userInfo).result.headOption).map(_.map((User.fromDB _).tupled))
-
-  private[daos] def getFromID(id: Rep[UUID]) = for {
-    dbUser <- users.filter(_.id === id)
-    breakfast <- users.joinLeft(weekTimes).on(_.breakfastFK === _.id).map { case (u, t) => t }
-    lunch <- users.joinLeft(weekTimes).on(_.lunchFK === _.id).map { case (u, t) => t }
-    dinner <- users.joinLeft(weekTimes).on(_.dinnerFK === _.id).map { case (u, t) => t }
-  } yield (dbUser, breakfast, lunch, dinner)
 
   /*
   old code that should work but fucking didn't because of Slick :(

@@ -79,8 +79,8 @@ class ContactController @Inject()(silhouette: Silhouette[CookieEnv],
   }
 
   def index: Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
-    contacts.contactsWithFriendsOfUser(request.identity.id).map(seq =>
-      Ok(ContactView.index(request.identity, seq))
+    contacts.contactsWithFriendsOfUser(request.identity.id).map(contacts =>
+      Ok(ContactView.index(request.identity, contacts.toSeq))
     )
   }
 }
