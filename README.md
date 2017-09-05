@@ -1,9 +1,9 @@
-#Pusdieno
+# Pusdieno
 
 A social network for finding where to eat in Riga center.
 
 Web-site:
-http://pusdieno.lv
+https://pusdieno.lv
 
 Android app:
 In development.
