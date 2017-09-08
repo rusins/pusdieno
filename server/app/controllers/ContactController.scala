@@ -12,7 +12,8 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, Messages, MessagesApi, MessagesProvider}
 import play.api.mvc._
-import services.daos.{ContactDAO, ContactService}
+import services.ContactService
+import services.daos.ContactDAO
 import views.{ContactView, ErrorView}
 
 import scala.concurrent.{ExecutionContext, Future}

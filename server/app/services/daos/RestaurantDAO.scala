@@ -13,12 +13,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RestaurantDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)
-                             (implicit ex: ExecutionContext) extends RestaurantService {
+                             (implicit ex: ExecutionContext) extends RestaurantService with TimeTable {
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
-  private val restaurants = TableQuery[DbRestaurantTable]
-  private val times = TableQuery[DBWeekTimesTable]
+  protected[daos] val restaurants = TableQuery[DbRestaurantTable]
 
   override def retrieveAll(): Future[Seq[Restaurant]] = db.run(
     (for {

@@ -7,7 +7,7 @@ import models.{Cafe, Restaurant, User}
 import play.api.i18n.{Messages, MessagesProvider}
 import play.twirl.api.{Html, HtmlFormat}
 import services.daos._
-import services.{ChoiceService, RestaurantService}
+import services.{ChoiceService, ContactService, RestaurantService}
 import views.styles.EateriesStyleSheet
 
 import scala.concurrent.duration._

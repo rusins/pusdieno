@@ -1,8 +1,7 @@
-package services.daos
+package services
 
 import java.util.UUID
 
-import models.db.DBUser
 import models.helpers.Lusts
 import models.{Contact, User}
 

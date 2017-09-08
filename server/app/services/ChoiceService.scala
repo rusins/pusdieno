@@ -1,13 +1,31 @@
 package services
 
+import java.util.UUID
+
+import models.helpers.Lusts
+
+import scala.concurrent.Future
+
 trait ChoiceService {
 
-  def makeChoice()
+  def makeChoice(userID: UUID, eateryID: UUID): Future[Unit]
 
-  def deleteChoice()
+  def deleteChoice(userID: UUID, eateryID: UUID): Future[Unit]
 
-  def clearChoices()
+  def clearRestaurantChoices(userID: UUID): Future[Unit]
 
-  def wantsF
+  def clearCafeChoices(userID: UUID): Future[Unit]
+
+  def wantsFood(userID: UUID): Future[Boolean]
+
+  def wantsCoffee(userID: UUID): Future[Boolean]
+
+  def wantsAlcohol(userID: UUID): Future[Boolean]
+
+  def getLusts(userID: UUID): Future[Lusts] = for {
+    food <- wantsFood(userID)
+    coffee <- wantsCoffee(userID)
+    alcohol <- wantsAlcohol(userID)
+  } yield Lusts(food, coffee, alcohol)
 
 }

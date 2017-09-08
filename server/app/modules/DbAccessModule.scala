@@ -5,7 +5,7 @@ import com.mohiva.play.silhouette.impl.providers.OAuth2Info
 import com.mohiva.play.silhouette.persistence.daos.DelegableAuthInfoDAO
 import models.Cafe
 import net.codingwell.scalaguice.ScalaModule
-import services.{CafeService, ChoiceService, RestaurantService, UserService}
+import services._
 import services.daos._
 
 class DbAccessModule extends AbstractModule with ScalaModule{

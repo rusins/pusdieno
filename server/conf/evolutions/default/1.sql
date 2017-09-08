@@ -54,12 +54,31 @@ create table "chains" (
 "menu" VARCHAR
 );
 
+create table "restaurants" (
+"id" UUID NOT NULL PRIMARY KEY,
+"vegan_only" BOOL ??????????????????????????????????????,
+"serve_coffee" BOOL??
+);
+
+create table "cafes" (
+"id" UUID NOT NULL PRIMARY KEY,
+"wifi" ??????????????
+);
+
+create table "bars" (
+"id" UUID NOT NULL PRIMARY KEY,
+"serves_to_minors" ??????????????
+);
+
 create table "establishments" (
 "id" UUID NOT NULL PRIMARY KEY,
 "chain" VARCHAR NOT NULL REFERENCES "chains" ON DELETE CASCADE,
 "address" VARCHAR NOT NULL,
 "open_times" UUID NOT NULL REFERENCES "week_times",
-"close_times" UUID NOT NULL REFERENCES "week_times"
+"close_times" UUID NOT NULL REFERENCES "week_times",
+"restaurant_info" UUID REFERENCES "restaurants",
+"cafe_info" UUID REFERENCES "cafes",
+"bar_info" UUID references "bars"
 );
 
 create table "choices" (

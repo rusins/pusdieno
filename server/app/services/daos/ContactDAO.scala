@@ -7,7 +7,7 @@ import models.{Contact, User}
 import models.db._
 import models.helpers.Lusts
 import play.api.db.slick.DatabaseConfigProvider
-import services.ChoiceService
+import services.{ChoiceService, ContactService}
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 import utils.LoggingSupport
@@ -39,8 +39,8 @@ final class ContactDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, userD
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
-  private val contacts = TableQuery[ContactTable]
-  private val users = TableQuery[DBUserTable]
+  protected[daos] val contacts = TableQuery[ContactTable]
+  protected[daos] val users = userDAO.users
 
   override def contactsOfUser(userID: UUID): Future[Seq[Contact]] = db.run(contactQuery(userID).result)
 

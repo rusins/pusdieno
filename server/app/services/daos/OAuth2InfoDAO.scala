@@ -8,21 +8,20 @@ import com.mohiva.play.silhouette.impl.providers.OAuth2Info
 import com.mohiva.play.silhouette.persistence.daos.DelegableAuthInfoDAO
 import models.db._
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.libs.concurrent.Execution.Implicits._
-import slick.driver.JdbcProfile
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.JdbcProfile
+import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * The DAO to store the OAuth2 information.
   */
-class OAuth2InfoDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
+class OAuth2InfoDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider, ex: ExecutionContext)
   extends DelegableAuthInfoDAO[OAuth2Info] {
 
-  private val db = dbConfigProvider.get[JdbcProfile].db
-  private val logins = TableQuery[DBLoginInfoTable]
-  private val oAuth2Infos = TableQuery[DBOAuth2InfoTable]
+  protected[daos] val db = dbConfigProvider.get[JdbcProfile].db
+  protected[daos] val logins = TableQuery[DBLoginInfoTable]
+  protected[daos] val oAuth2Infos = TableQuery[DBOAuth2InfoTable]
 
   def toOAuth2Info(i: DBOAuth2Info) = OAuth2Info(i.accessToken, i.tokenType, i.expiresIn, i.refreshToken)
 

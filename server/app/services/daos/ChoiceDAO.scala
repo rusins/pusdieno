@@ -18,8 +18,6 @@ class ChoiceDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contactDAO: 
                           ex: ExecutionContext) extends ChoiceService {
 
   private val choices = TableQuery[ChoiceTable]
-  private val restaurants = TableQuery[DbRestaurantTable]
-  private val cafes = TableQuery[DbCafeTable]
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
@@ -64,7 +62,7 @@ class ChoiceDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contactDAO: 
 
   def deleteChoice(userID: UUID, chain: String): Future[AnyVal] = findEateryID(chain).flatMap {
     case None => Future.failed(new RuntimeException("Unknown chain ID!"))
-    case Some(eateryID) => db.run(eateryChoices.filter(c => c.user === userID && c.eatery === eateryID).delete)
+    case Some(eateryID) => db.run(eateries.filter(c => c.user === userID && c.eatery === eateryID).delete)
   }
 
   def clearChoices(userID: UUID): Future[Int] = db.run(eateryChoices.filter(_.user === userID).delete)
@@ -75,7 +73,10 @@ class ChoiceDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contactDAO: 
       eatery <- choice.pointsTo
     } yield eatery.chainID).result)
 
-  protected[daos] def wantsFoodQuery(userID: Rep[UUID]): Rep[Boolean] = ???
+  protected[daos] def wantsFoodQuery(userID: Rep[UUID]): Rep[Boolean] = for {
+    choice <- choices.filter(_.user === userID).filter(_.)
+
+  }
 
   protected[daos] def wantsCoffeeQuery(userID: Rep[UUID]): Rep[Boolean] = ???
 

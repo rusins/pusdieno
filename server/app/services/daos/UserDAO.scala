@@ -10,7 +10,7 @@ import models.db._
 import models.{EatsAt, User}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import services.UserService
+import services.{ContactService, UserService}
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
@@ -19,7 +19,9 @@ import scala.concurrent.Future
 import scala.util.Random
 
 @Singleton
-final class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: ContactService) extends UserService with Logger {
+final class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts: ContactService,
+                              oAuth2InfoDAO: OAuth2InfoDAO) extends UserService
+  with Logger with TimeTable {
 
   protected[daos] def getFromID(id: Rep[UUID]) = for {
     dbUser <- users.filter(_.id === id)
@@ -30,9 +32,8 @@ final class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contacts
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
-  private val users = TableQuery[DBUserTable]
-  private val logins = TableQuery[DBLoginInfoTable]
-  private val weekTimes = TableQuery[DBWeekTimesTable]
+  protected[daos] val users = TableQuery[DBUserTable]
+  private val logins = oAuth2InfoDAO.logins
 
   def retrieve(id: UUID): Future[Option[User]] = db.run(getFromID(id).result.headOption).map(
     _.map((User.fromDB _).tupled))

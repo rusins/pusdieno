@@ -14,12 +14,11 @@ import scala.concurrent.{ExecutionContext, Future}
 // TODO: Abstract with trait for DI
 
 @Singleton
-class CafeDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ex: ExecutionContext) extends CafeService {
+class CafeDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ex: ExecutionContext) extends CafeService with TimeTable {
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
-  private val cafes = TableQuery[DbCafeTable]
-  private val times = TableQuery[DBWeekTimesTable]
+  protected[daos] val cafes = TableQuery[DbCafeTable]
 
   override def retrieveAll(): Future[Seq[Cafe]] = db.run(
     (for {
