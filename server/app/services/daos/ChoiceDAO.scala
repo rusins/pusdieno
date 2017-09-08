@@ -15,7 +15,7 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 
 @Singleton
 class ChoiceDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contactDAO: ContactDAO, userService: UserService,
-                          ex: ExecutionContext) extends ChoiceService {
+                          establishmentDAO: EstablishmentDAO, ex: ExecutionContext) extends ChoiceService {
 
   private val choices = TableQuery[ChoiceTable]
 

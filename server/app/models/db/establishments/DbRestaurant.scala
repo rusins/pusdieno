@@ -10,9 +10,9 @@ import slick.lifted.ProvenShape
   *
   * @param id         the UUID of the restaurant info, should be the same as its establishment's ID!
   * @param veganOnly  is false if the restaurant serves non-vegan food.
-  * @param haveCoffee is true if the restaurant serves some form of coffee
+  * @param hasCoffee is true if the restaurant serves some form of coffee
   */
-case class DbRestaurant(id: UUID, veganOnly: Boolean, haveCoffee: Boolean)
+case class DbRestaurant(id: UUID, veganOnly: Boolean, hasCoffee: Boolean)
 
 class DbRestaurantTable(tag: Tag) extends Table[DbRestaurant](tag, "restaurants") {
 
@@ -20,7 +20,7 @@ class DbRestaurantTable(tag: Tag) extends Table[DbRestaurant](tag, "restaurants"
 
   def vegan: Rep[Boolean] = column[Boolean]("vegan_only")
 
-  def haveCoffee: Rep[Boolean] = column[Boolean]("serve_coffee")
+  def hasCoffee: Rep[Boolean] = column[Boolean]("serve_coffee")
 
-  override def * : ProvenShape[DbRestaurant] = (id, vegan, haveCoffee) <> (DbRestaurant.tupled, DbRestaurant.unapply)
+  override def * : ProvenShape[DbRestaurant] = (id, vegan, hasCoffee) <> (DbRestaurant.tupled, DbRestaurant.unapply)
 }

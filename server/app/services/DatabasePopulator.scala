@@ -7,7 +7,7 @@ import models.{Chain, Restaurant, User}
 import models.db._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import services.daos.RestaurantDAO
+import services.daos.EstablishmentDAO
 import slick.driver.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 import utils.LoggingSupport
@@ -20,7 +20,7 @@ import scala.concurrent.{Await, Future}
   * ONLY USE FOR TESTING PURPOSES!!!
   */
 @Singleton
-class DatabasePopulator @Inject()(restaurants: RestaurantService, chains: ChainService) extends LoggingSupport {
+class DatabasePopulator @Inject()(restaurants: EstablishmentService, chains: ChainService) extends LoggingSupport {
 
   logger.info("Populating Database")
 

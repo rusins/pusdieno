@@ -13,7 +13,7 @@ class DbAccessModule extends AbstractModule with ScalaModule{
   override def configure(): Unit = {
     bind[DelegableAuthInfoDAO[OAuth2Info]].to[OAuth2InfoDAO]
     bind[UserService].to[UserDAO]
-    bind[RestaurantService].to[RestaurantDAO]
+    bind[EstablishmentService].to[EstablishmentDAO]
     bind[CafeService].to[CafeDAO]
     bind[ChoiceService].to[ChoiceDAO]
     bind[ContactService].to[ContactDAO] // WARNING!!! ContactDAO depends on UserDAO and ChoiceDAO, meaning you can't separate their respective implementations
