@@ -2,13 +2,29 @@ package models.db
 
 import java.util.UUID
 
-import models.Chain
+import models._
 import models.db.establishments._
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
 
-case class DbEstablishment(id: UUID, chainID: String, address: String, openTimesFk: UUID, closeTimesFK: UUID,
-                           restaurantFk: Option[UUID], cafeFk: Option[UUID], barFk: Option[UUID])
+case class DbEstablishment(id: UUID, chainID: String, address: String, wifi: Option[Boolean],
+                           eateryInfo: Option[UUID], cafeInfo: Option[UUID], barInfo: Option[UUID]) {
+
+  def toModel(eatery: Option[(DbEatery, (WeekTimes, WeekTimes))], cafe: Option[(DbCafe, (WeekTimes, WeekTimes))],
+              bar: Option[(DbBar, (WeekTimes, WeekTimes))]): Establishment =
+    Establishment(id, chainID, address, wifi,
+      eatery.map {
+        case (dbEatery, (openingHours, closingHours)) => dbEatery.toModel(openingHours, closingHours)
+      }, cafe.map {
+        case (dbCafe, (openingHours, closingHours)) => dbCafe.toModel(openingHours, closingHours)
+      }, bar.map {
+        case (dbBar, (openingHours, closingHours)) => dbBar.toModel(openingHours, closingHours)
+      })
+
+  def toModel(eatery: Option[EateryInfo], cafe: Option[CafeInfo], bar: Option[BarInfo]): Establishment =
+    Establishment(id, chainID, address, wifi, eatery, cafe, bar)
+}
+
 
 class DbEstablishmentTable(tag: Tag) extends Table[DbEstablishment](tag, "eateries") {
 
@@ -18,51 +34,34 @@ class DbEstablishmentTable(tag: Tag) extends Table[DbEstablishment](tag, "eateri
 
   def address: Rep[String] = column[String]("address")
 
-  def openTimesFk: Rep[UUID] = column[UUID]("open_times")
+  def wifi: Rep[Option[Boolean]] = column[Boolean]("wifi")
 
-  def closeTimesFk: Rep[UUID] = column[UUID]("close_times")
+  def eateryInfo: Rep[Option[UUID]] = column[UUID]("restaurant_info")
 
-  def restaurantFk: Rep[Option[UUID]] = column[UUID]("restaurant_info")
+  def cafeInfo: Rep[Option[UUID]] = column[UUID]("cafe_info")
 
-  def cafeFk: Rep[Option[UUID]] = column[UUID]("cafe_info")
+  def barInfo: Rep[Option[UUID]] = column[UUID]("bar_info")
 
-  def barFk: Rep[Option[UUID]] = column[UUID]("bar_info")
-
-  override def * : ProvenShape[DbEstablishment] = (id, chainID, address, openTimesFk, closeTimesFk, restaurantFk, cafeFk, barFk) <>
+  override def * : ProvenShape[DbEstablishment] = (id, chainID, address, wifi, eateryInfo, cafeInfo, barInfo) <>
     (DbEstablishment.tupled, DbEstablishment.unapply)
 
   def chain: ForeignKeyQuery[ChainTable, Chain] = foreignKey("chain", chainID, TableQuery[ChainTable])(
     (chainT: ChainTable) => chainT.id
   )
 
-  private val weekTimes = TableQuery[DBWeekTimesTable]
-  private val restaurants = TableQuery[DbRestaurantTable]
+  private val eateries = TableQuery[DbEateryTable]
   private val cafes = TableQuery[DbCafeTable]
   private val bars = TableQuery[DbBarTable]
 
-  def openTimes: ForeignKeyQuery[DBWeekTimesTable, DBWeekTimes] = foreignKey("open_times", openTimesFk, weekTimes)(
-    (weekTT: DBWeekTimesTable) => weekTT.id,
-    // We want to delete the times when an eatery gets deleted
-    onDelete = ForeignKeyAction.Cascade,
-    onUpdate = ForeignKeyAction.Cascade
+  def eateryInfoQuery: ForeignKeyQuery[DbEateryTable, DbEatery] = foreignKey("restaurant_info", eateryInfo, eateries)(
+    (restaurantTable: DbEateryTable) => restaurantTable.id
   )
 
-  def closeTimes: ForeignKeyQuery[DBWeekTimesTable, DBWeekTimes] = foreignKey("close_times", closeTimesFk, weekTimes)(
-    (weekTT: DBWeekTimesTable) => weekTT.id,
-    // We want to delete the times when an eatery gets deleted
-    onDelete = ForeignKeyAction.Cascade,
-    onUpdate = ForeignKeyAction.Cascade
-  )
-
-  def restaurantInfo: ForeignKeyQuery[DbRestaurantTable, DbRestaurant] = foreignKey("restaurant_info", restaurantFk, restaurants)(
-    (restaurantTable: DbRestaurantTable) => restaurantTable.id
-  )
-  
-  def cafeInfo: ForeignKeyQuery[DbCafeTable, DbCafe] = foreignKey("cafe_info", cafeFk, cafes)(
+  def cafeInfoQuery: ForeignKeyQuery[DbCafeTable, DbCafe] = foreignKey("cafe_info", cafeInfo, cafes)(
     (cafeTable: DbCafeTable) => cafeTable.id
   )
 
-  def barInfo: ForeignKeyQuery[DbBarTable, DbBar] = foreignKey("bar_info", barFk, bars)(
+  def barInfoQuery: ForeignKeyQuery[DbBarTable, DbBar] = foreignKey("bar_info", barInfo, bars)(
     (barTable: DbBarTable) => barTable.id
   )
 

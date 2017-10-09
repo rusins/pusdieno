@@ -31,8 +31,8 @@ class CafeDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ex: E
   override def add(cafe: Cafe): Future[Unit] = db.run(cafe.toDbCafe match {
     case (dbCafe, opens, closes) =>
       DBIO.seq(
-        times += opens,
-        times += closes,
+        weekTimes += opens,
+        weekTimes += closes,
         cafes += dbCafe
       )
   })

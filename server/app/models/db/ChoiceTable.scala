@@ -12,18 +12,18 @@ class ChoiceTable(tag: Tag) extends Table[Choice](tag, "choices") {
 
   def user: Rep[UUID] = column[UUID]("usr")
 
-  def eatery: Rep[UUID] = column[UUID]("eatery")
+  def establishment: Rep[UUID] = column[UUID]("establishment")
 
-  def * : ProvenShape[Choice] = (id, user, eatery) <> (Choice.tupled, Choice.unapply)
+  def * : ProvenShape[Choice] = (id, user, establishment) <> (Choice.tupled, Choice.unapply)
 
-  def belongsTo: ForeignKeyQuery[DBUserTable, DBUser] = foreignKey("usr", user, TableQuery[DBUserTable])(
+  def userQuery: ForeignKeyQuery[DBUserTable, DBUser] = foreignKey("usr", user, TableQuery[DBUserTable])(
     (userT: DBUserTable) => userT.id,
     // We want to delete a user's choices if he deletes his account
     onDelete = ForeignKeyAction.Cascade
   )
 
-  def pointsTo: ForeignKeyQuery[DbRestaurantTable, DbRestaurant] = foreignKey("eatery", eatery, TableQuery[DbRestaurantTable])(
-    (restaurantT: DbRestaurantTable) => restaurantT.id,
+  def establishmentQuery: ForeignKeyQuery[DbEstablishmentTable, DbEstablishment] = foreignKey("establishment", establishment, TableQuery[DbEstablishmentTable])(
+    (establishmentTable: DbEstablishmentTable) => establishmentTable.id,
     // We want to delete people going to that eatery if it gets deleted
     onDelete = ForeignKeyAction.Cascade
   )

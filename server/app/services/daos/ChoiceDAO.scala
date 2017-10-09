@@ -14,71 +14,32 @@ import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 @Singleton
-class ChoiceDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, contactDAO: ContactDAO, userService: UserService,
-                          establishmentDAO: EstablishmentDAO, ex: ExecutionContext) extends ChoiceService {
+class ChoiceDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, establishmentDAO: EstablishmentDAO, ex: ExecutionContext) extends ChoiceService {
 
   private val choices = TableQuery[ChoiceTable]
 
   private val db = dbConfigProvider.get[JdbcProfile].db
 
-  /*
+  protected[daos] def wantsFoodQuery(userID: Rep[UUID]): Rep[Boolean] =
+    choices.filter(_.user === userID).flatMap(_.establishmentQuery).flatMap(_.eateryInfoQuery).exists
 
-  Slick bug: it isn't smart enough to figure this out
+  protected[daos] def wantsCoffeeQuery(userID: Rep[UUID]): Rep[Boolean] =
+    choices.filter(_.user === userID).flatMap(_.establishmentQuery).flatMap(_.cafeInfoQuery).exists
 
-  def friendEateryChoiceMap(user: User): Future[Map[String, Seq[User]]] = db.run(
-    (for {
-      friend <- Contacts.friendsOfUserAction(user.id)
-      choice <- eateryChoices.filter(_.user === friend.ownerID)
-      eatery <- choice.pointsTo
-      userInfo <- Users.getFromId(friend.ownerID)
-    } yield (eatery.chainID, userInfo)).result.transactionally).map(_.map {
-    case (chain, userInfo) => (chain, (User.fromDB _).tupled(userInfo))
-  }).map(
-    (seq: Seq[(String, User)]) => seq.groupBy(_._1).mapValues(_.map(_._2))
-  )
-   */
+  protected[daos] def wantsAlcoholQuery(userID: Rep[UUID]): Rep[Boolean] =
+    choices.filter(_.user === userID).flatMap(_.establishmentQuery).flatMap(_.barInfoQuery).exists
 
-  def friendEateryChoiceMap(userID: UUID): Future[Map[String, Seq[User]]] = db.run(
-    .flatMap(seq =>
-    Future(seq.flatMap(friend =>
-      Await.result(db.run(
-        (for {
-          choice <- eateryChoices.filter(_.user === friend.ownerID)
-          eatery <- eateries.filter(_.id === choice.eatery)
-          userInfo <- UserDAO.getFromID(friend.ownerID)
-        } yield (eatery.chainID, userInfo)).result
-      ), 1 second)
-    ).map {
-      case (chain, userInfo) => (chain, (User.fromDB _).tupled(userInfo))
-    })
-  ).map {
-    (seq: Seq[(String, User)]) => seq.distinct.groupBy(_._1).mapValues(_.map(_._2))
-  }
+  override def makeChoice(userID: UUID, eateryID: UUID) = ???
 
-  def makeChoice(userID: UUID, chain: String): Future[AnyVal] = findEateryID(chain).flatMap {
-    case None => Future.failed(new RuntimeException("Unknown chain ID!"))
-    case Some(eateryID) => db.run(eateryChoices += Choice(user = userID, eatery = eateryID))
-  }
+  override def deleteChoice(userID: UUID, eateryID: UUID) = ???
 
-  def deleteChoice(userID: UUID, chain: String): Future[AnyVal] = findEateryID(chain).flatMap {
-    case None => Future.failed(new RuntimeException("Unknown chain ID!"))
-    case Some(eateryID) => db.run(eateries.filter(c => c.user === userID && c.eatery === eateryID).delete)
-  }
+  override def clearRestaurantChoices(userID: UUID) = ???
 
-  def clearChoices(userID: UUID): Future[Int] = db.run(eateryChoices.filter(_.user === userID).delete)
+  override def clearCafeChoices(userID: UUID) = ???
 
-  def getChoices(userID: UUID): Future[Seq[String]] = db.run((
-    for {
-      choice <- eateryChoices.filter(_.user === userID)
-      eatery <- choice.pointsTo
-    } yield eatery.chainID).result)
+  override def wantsFood(userID: UUID): Future[Boolean] = db.run(wantsCoffeeQuery(userID).result)
 
-  protected[daos] def wantsFoodQuery(userID: Rep[UUID]): Rep[Boolean] = for {
-    choice <- choices.filter(_.user === userID).filter(_.)
+  override def wantsCoffee(userID: UUID): Future[Boolean] = db.run(wantsCoffeeQuery(userID).result)
 
-  }
-
-  protected[daos] def wantsCoffeeQuery(userID: Rep[UUID]): Rep[Boolean] = ???
-
-    def getLusts(userID: UUID): Future[Lusts]
+  override def wantsAlcohol(userID: UUID): Future[Boolean] = db.run(wantsAlcoholQuery(userID).result)
 }

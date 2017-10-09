@@ -3,7 +3,7 @@ addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.2")
 
 // Android plugin
 
-addSbtPlugin("org.scala-android" % "sbt-android" % "1.7.9")
+addSbtPlugin("org.scala-android" % "sbt-android" % "1.7.10")
 
 // web plugins
 

@@ -8,19 +8,26 @@ import slick.driver.PostgresDriver.api._
 import slick.lifted.ProvenShape
 
 case class WeekTimes(id: UUID = UUID.randomUUID(),
-                     monday: OT, tuesday: OT, wednesday: OT, thursday: OT, friday: OT, saturday: OT, sunday: OT) {
-  def toDB: DBWeekTimes = DBWeekTimes(id, monday, tuesday, wednesday, thursday, friday, saturday, sunday)
-}
+                     monday: OT, tuesday: OT, wednesday: OT, thursday: OT, friday: OT, saturday: OT, sunday: OT)
 
 object WeekTimes {
+
   type OT = Option[Time]
 
   def empty: WeekTimes = WeekTimes(UUID.randomUUID(), None, None, None, None, None, None, None)
-
-  def fromDB(d: DBWeekTimes): WeekTimes = WeekTimes(d.id, d.mo, d.tu, d.we, d.th, d.fr, d.sa, d.su)
 }
 
-case class DBWeekTimes(id: UUID, mo: OT, tu: OT, we: OT, th: OT, fr: OT, sa: OT, su: OT)
+case class DBWeekTimes(id: UUID, mo: OT, tu: OT, we: OT, th: OT, fr: OT, sa: OT, su: OT) {
+
+  def toModel: WeekTimes = WeekTimes(id, mo, tu, we, th, fr, sa, su)
+}
+
+object DBWeekTimes {
+
+  def fromModel(weekTimes: WeekTimes): DBWeekTimes = DBWeekTimes(weekTimes.id,
+    weekTimes.monday, weekTimes.tuesday, weekTimes.wednesday, weekTimes.thursday, weekTimes.friday,
+    weekTimes.saturday, weekTimes.sunday)
+}
 
 class DBWeekTimesTable(tag: Tag) extends Table[DBWeekTimes](tag, "week_times") {
 

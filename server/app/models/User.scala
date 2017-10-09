@@ -21,6 +21,6 @@ case class User(id: UUID = UUID.randomUUID(),
 object User {
   def fromDB(dbUser: DBUser, breakfast: Option[DBWeekTimes], lunch: Option[DBWeekTimes], dinner: Option[DBWeekTimes]): User =
     User(dbUser.id, dbUser.name, dbUser.phone, dbUser.email,
-      EatsAt(breakfast.map(WeekTimes.fromDB), lunch.map(WeekTimes.fromDB), dinner.map(WeekTimes.fromDB)),
+      EatsAt(breakfast.map(_.toModel), lunch.map(_.toModel), dinner.map(_.toModel)),
       dbUser.avatarURL)
 }

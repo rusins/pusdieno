@@ -1,7 +1,5 @@
 name := "pusdieno"
 
-version := "0.1"
-
 val scalaV = "2.12.3"
 
 resolvers += Resolver.jcenterRepo
@@ -14,6 +12,8 @@ lazy val shared = (project in file("shared")).settings(
 )
 
 lazy val server = (project in file("server")).enablePlugins(PlayScala).dependsOn(shared).settings(
+  name := "pusdieno",
+  version := "1.1",
   routesImport += "play.api.mvc.PathBindable.bindableUUID",
   scalaVersion := scalaV,
   libraryDependencies ++= Seq(
