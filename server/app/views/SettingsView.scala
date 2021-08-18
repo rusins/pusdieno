@@ -1,5 +1,0 @@
-package views
-
-class SettingsView {
-
-}
